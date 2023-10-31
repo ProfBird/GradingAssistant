@@ -10,7 +10,7 @@
             ],
             "program": "${workspaceFolder}/TestAnyLab.mjs",
             "args": [
-                "Lab1Requirements.csv"
+                "D:/Repos/CIS195-CourseMaterials/LabAutoGrading/CIS195Lab2Requirements.csv"
             ]
         },
         {

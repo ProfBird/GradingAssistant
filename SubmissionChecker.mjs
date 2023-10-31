@@ -15,7 +15,7 @@ let countHTMLFiles = 0; // Number of html files found in the lab files
 /*****************************************************************/
 async function checkSubmission(
     labDirPath, // full path to the lab folder or lab part subfolder.
-    filePath,   // Empty string if the lab parts are in multiple subfolders
+    filePath,   // Empty string if there are multiple .html files to check, otherwise the full path to the file to check
     requiredElements = [],
     requiredSelectors = [],
     requiredProperties = [],
@@ -74,23 +74,24 @@ async function checkSubmission(
         message = `Checking the ${relativePath} file`;
         // console.log(message);
         report += message + `\n`;
-        report += await checkFile(relativePath);
+        report += await checkFile(fileContents, relativePath);
 
     } // end looping through files in labDirPath
 } else {
-    // Check the file specified by filePath
+    // Check the specific file specified by filePath
     const fileContents = fs.readFileSync(filePath, "utf8");
-    report = await checkFile(fileContents, filePath, report);
+    report += await checkFile(fileContents, filePath);
 }
     // TODO: Make separate checks for each part of the lab
 
     /*********** inner function *********/
     /* Do checks on an individual file  */
     /************************************/
-    async function checkFile(fileContents, fileName, report)
+    async function checkFile(fileContents, fileName)
     {
+        let report = ""; // All messages for the operations in this function
         // if the file is an .html or .htm file, validate it, get elements and rules it contains.
-        if (/\.html?$/.test(filePath))
+        if (/\.html?$/.test(fileName))
         {
             countHTMLFiles++;
             // Validate HTML
@@ -172,8 +173,11 @@ async function checkSubmission(
 
             // Render the html page and check for required output
             // TODO: Load required output from csv file
+            // TODO: debug renderAndCheck function
+            /*
             const requiredOutput = [];
             report += await renderAndCheck(fileContents, path.basename(filePath), requiredOutput);
+            */
         }
         else // File is a css file
         {

@@ -15,7 +15,7 @@ import { checkSubmission } from "./SubmissionChecker.mjs";
 // StudentName_file/Part1/<website files and folders>
 //                  Part2/<website files and folders>
 
-/* constants used for checking the files for this lab */
+/* global (ugh) constants and variables used for checking the files for this lab */
 let submissionsPath = ""; // Path to the folder containing the student submissions
 let numberOfParts = 1; // Number of parts in this lab assignment, set later in loadRequirements
 let areAllInOneDir = true; // true if all parts are in one folder
@@ -39,13 +39,16 @@ const additionalRequirements = []
 const param = process.argv[2];
 let overwrite = false;
 console.log(`param = ${param}`);
-if (param === "--help" || param === undefined) {
+if (param === "--help" || param === undefined)
+{
     console.log("Usage: node TestAnyLab.mjs requirementsFileName.csv [options]");
     console.log("options:");
     console.log("--help\t\tDisplay this help message");
     console.log("--overwrite\tOverwrite existing report files");
-} else {
-    if (process.argv[3] === "--overwrite") {
+} else
+{
+    if (process.argv[3] === "--overwrite")
+    {
         overwrite = true;  // overwrite _report.txt files
         console.log("Overwriting report files");
     }
@@ -54,12 +57,14 @@ if (param === "--help" || param === undefined) {
     // studentDir will have a name like TyTitan_file
     for (const studentDir of fs
         .readdirSync(submissionsPath)
-        .filter((dir) => !dir.startsWith(".") && dir.endsWith("_file"))) {
+        .filter((dir) => !dir.startsWith(".") && dir.endsWith("_file")))
+    {
         // skip if studentDir contains a file ending in _report.txt
         if (fs.readdirSync(path.join(submissionsPath, studentDir))
             .find((file) => file.endsWith("_report.txt"))
             && !overwrite
-        ) {
+        )
+        {
             console.log(
                 `Skipping ${studentDir} directory because it contains a report file`
             );
@@ -67,13 +72,13 @@ if (param === "--help" || param === undefined) {
         }
         let message = `Checking the ${studentDir} directory`;
         let report = message + "\n"; // Report of the checks of the files for this student
-        report += await getSubFolders( 
-            2,
+        report += await getSubFolders(
+            // all arguments except report and studentDir were set in loadRequirements
+            numberOfParts,
             areAllInOneDir,
             submissionsPath,
             studentDir,
-            requiredElements2,
-            report);
+            requiredElements2);
         report += "\n";
 
         // Open the report file for writing and get its file descriptor
@@ -83,17 +88,18 @@ if (param === "--help" || param === undefined) {
         fs.writeFileSync(fd, report);
         // Close the file using its file descriptor
         fs.closeSync(fd);
-        
+
         console.log(report);
-    } // if param was not --help
-} // End of for loop through student directories
+    }  // End of for loop through student directories
+}  // if param was not --help
 // end of main program
 
 
 /*************************************/
 /* Load requirements from a csv file */
 /*************************************/
-function loadRequirements(requirementsFileName) {
+function loadRequirements(requirementsFileName)
+{
     const settings = [];
     /* settings array elements will hold these settings values:
     0: MacOsSubmissionPath
@@ -101,43 +107,55 @@ function loadRequirements(requirementsFileName) {
     2: LabName
     3: Are all parts in one folder? (true or false)
 */
-    try {
+    try
+    {
         const data = fs.readFileSync(requirementsFileName);
         csv()  // the .on functions sets up lisetners
-            .on("data", (row) => {
-                if (row.requiredElements1) {
+            .on("data", (row) =>
+            {
+                if (row.requiredElements1)
+                {
                     requiredElements1.push(row.requiredElements1);
                 }
-                if (row.requiredElements2) {
+                if (row.requiredElements2)
+                {
                     requiredElements2.push(row.requiredElements2);
                 }
-                if (row.requiredCssSelectors) {
+                if (row.requiredCssSelectors)
+                {
                     requiredCssSelectors.push(row.requiredCssSelectors);
                 }
-                if (row.requiredCssProperties) {
+                if (row.requiredCssProperties)
+                {
                     requiredCssProperties.push(row.requiredCssProperties);
                 }
-                if (row.moreRequirements) {
+                if (row.moreRequirements)
+                {
                     additionalRequirements.push(row.moreRequirements);
                 }
-                if (row.settings) {
+                if (row.settings)
+                {
                     settings.push(row.settings);
                 }
             })
-            .on("error", (error) => {
+            .on("error", (error) =>
+            {
                 console.error(error);
             })
             .write(data);  // this sends data to the csv parser
     }
-    catch (error) {
+    catch (error)
+    {
         console.error(`Error reading requirements file ${requirementsFileName}: ${error.message}`);
     }
 
     // Get settings from the settings array
-    if (process.platform === "darwin") {
+    if (process.platform === "darwin")
+    {
         submissionsPath = settings[0];
     }
-    else if (process.platform === "win32") {
+    else if (process.platform === "win32")
+    {
         submissionsPath = settings[1];
     }
 
@@ -149,31 +167,34 @@ function loadRequirements(requirementsFileName) {
 /* getSubFolders                                        */
 /* Determines the path to each subfolder, one for       */
 /* each lab part, and passes it to checkSubmission      */
-/* part == 0 indicates there is only one part           */
 /********************************************************/
 async function getSubFolders(
     parts,    // number of parts in the lab assignment
     areAllInOneDir, // true if all parts are in one folder
     submissionsPath,
     studentDir,
-    requiredElements,
-    report
-) {
+    requiredElements
+)
+{
     let studentDirPath = path.join(submissionsPath, studentDir);
-    let labPartSubDir = ""; // Directory containing the lab files
-    let fileName = ""; // Only used if all parts are in one folder
+    let labPartSubDir = ""; // Sub-directory containing the lab files
+    let fileName = ""; // Only used if multiple parts files are in one folder
+    let report = ""; // Report of the checks of the files for this student done or called in this function
+    try
+    {
 
-    try {
-
-        if (areAllInOneDir && parts == 1) {
-            // TODOD: Write this code
+        if (areAllInOneDir && parts == 1)
+        {
+            // TODO: Write this code
         }
-        else if (areAllInOneDir && parts > 1) {
+        else if (areAllInOneDir && parts > 1)
+        {
             // There files for two or more parts in studentDirPath
             // Find the file for each part and check it.
-            for (let part = 1; part <= parts; part++) {
+            for (let part = 1; part <= parts; part++)
+            {
                 report += "\nPart" + part + "\n";
-                // get the filename for this part
+                // get the filename for this part (assume the name contains "Part")
                 fileName = fs
                     .readdirSync(studentDirPath)
                     .find((file) => file.includes("Part" + part));
@@ -181,7 +202,62 @@ async function getSubFolders(
                 report += await checkSubmission(
                     studentDirPath,
                     path.join(studentDirPath, fileName),
-                    requiredElements,
+                    (part === 1) ? requiredElements1 : requiredElements2,
+                    requiredCssSelectors,
+                    requiredCssProperties,
+                    additionalRequirements,
+                );
+            }
+        }
+        else if (!areAllInOneDir && parts == 1)
+        {
+            // There is only one part 
+            // There might be no subfolder, check to see if there is a subfolder
+            // check for a subfolder in studentDir
+
+            const items = fs.readdirSync(studentDirPath, { withFileTypes: true });
+            const subfolders = items.filter((dirent) =>
+            {
+                const itemPath = path.join(studentDirPath, dirent.name);
+                return fs.statSync(itemPath).isDirectory();
+            });
+            if (subfolders.length === 0)
+            {
+                // There is no subfolder, so the lab files are in the studentDir
+                labPartSubDir = "";
+            }
+            else
+            {  // There should be one lab subfolder, but might be system subfolders, like __MACOSX
+
+                labPartSubDir = subfolders.find((dirent) => !dirent.name.startsWith("_") && !dirent.name.startsWith("."))
+                    .name;  // returns name of first valid dir found
+            }
+            report += await checkSubmission(
+                studentDirPath,
+                "", // assume there are multiple files to check
+                requiredElements1,
+                requiredCssSelectors,
+                requiredCssProperties,
+                additionalRequirements,
+            );
+
+        }
+        else if (!areAllInOneDir && parts > 1)
+        {
+            // TODO: This still needs to be debugged
+            // There are two or more subfolders named Part1, Part2, etc.
+            for (let part = 1; part <= parts; part++)
+            {
+                report += "\nPart" + part + "\n";
+                labPartSubDir = fs
+                    .readdirSync(studentDirPath)
+                    .find(
+                        (dir) => dir.toLowerCase().includes("part") && dir.endsWith(part)
+                    );
+                report += await checkSubmission(
+                    studentDirPath,
+                    "",
+                    (part === 1) ? requiredElements1 : requiredElements2,
                     requiredCssSelectors,
                     requiredCssProperties,
                     additionalRequirements,
@@ -239,7 +315,8 @@ async function getSubFolders(
         report
     );
     */
-    } catch (error) {
+    } catch (error)
+    {
         console.error(`Error reading directory ${studentDir}: ${error.message}`);
     }
     return report;
