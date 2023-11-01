@@ -4,7 +4,7 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
+            "name": "Windows Launch",
             "skipFiles": [
                 "<node_internals>/**"
             ],
@@ -12,6 +12,24 @@
             "args": [
                 "D:/Repos/CIS195-CourseMaterials/LabAutoGrading/CIS195Lab2Requirements.csv"
             ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "MacOS Launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/TestAnyLab.mjs",
+            "args": [
+                "/Volumes/DataCard/Repos/CIS195-CourseMaterials/LabAutoGrading/CIS195Lab2Requirements.csv"
+            ]
+        },
+        {
+            "type": "node-terminal",
+            "name": "JavaScript Debug Terminal",
+            "request": "launch",
+            "cwd": "${workspaceFolder}"
         },
         {
             "type": "node-terminal",

@@ -53,8 +53,8 @@ if (param === "--help" || param === undefined)
         console.log("Overwriting report files");
     }
     loadRequirements(param);
-    // Loop through all student subdirectories at the submissionsPath with dirs containing unzipped files
-    // studentDir will have a name like TyTitan_file
+    // Loop through all student subdirectories on the submissionsPath with dirs containing unzipped files
+    // When found, a student dir name will be stored in studentDir and will have a name like TyTitan_file
     for (const studentDir of fs
         .readdirSync(submissionsPath)
         .filter((dir) => !dir.startsWith(".") && dir.endsWith("_file")))
@@ -73,7 +73,7 @@ if (param === "--help" || param === undefined)
         let message = `Checking the ${studentDir} directory`;
         let report = message + "\n"; // Report of the checks of the files for this student
         report += await getSubFolders(
-            // all arguments except report and studentDir were set in loadRequirements
+            // all arguments except studentDir were set in loadRequirements
             numberOfParts,
             areAllInOneDir,
             submissionsPath,
@@ -212,28 +212,30 @@ async function getSubFolders(
         else if (!areAllInOneDir && parts == 1)
         {
             // There is only one part 
-            // There might be no subfolder, check to see if there is a subfolder
+            // There should be a subfolder, but might not be, check to see if there is one
+            
             // check for a subfolder in studentDir
-
             const items = fs.readdirSync(studentDirPath, { withFileTypes: true });
             const subfolders = items.filter((dirent) =>
             {
                 const itemPath = path.join(studentDirPath, dirent.name);
                 return fs.statSync(itemPath).isDirectory();
             });
-            if (subfolders.length === 0)
+            // If there are no subfolders, 
+            // or if StudentDir contains HTML files, then StudentDir is the lab folder
+            if (subfolders.length === 0 || (!!items.find((item) => item.name.endsWith(".html") || !!item.name.endsWith(".htm"))))
             {
                 // There is no subfolder, so the lab files are in the studentDir
                 labPartSubDir = "";
             }
             else
-            {  // There should be one lab subfolder, but might be system subfolders, like __MACOSX
+            {  // Exclude any system subfolders, like __MACOSX, and return the first valid subfolder
 
                 labPartSubDir = subfolders.find((dirent) => !dirent.name.startsWith("_") && !dirent.name.startsWith("."))
                     .name;  // returns name of first valid dir found
             }
             report += await checkSubmission(
-                studentDirPath,
+                path.join(studentDirPath, labPartSubDir),
                 "", // assume there are multiple files to check
                 requiredElements1,
                 requiredCssSelectors,
