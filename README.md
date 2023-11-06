@@ -12,7 +12,7 @@ The downloaded submissions are expected to be in a file with a name like: `CS 13
 The zip file is expected to contain:  
 - One or more .zip archives containing:  
   - One or more sub-directories.  
-This is what is used to unzip the files:  
+This is what this program uses to unzip the files:  
 - On Windows: 7zip  
 - On Mac OS: unzip  
   - 7zip can be installed on Mac Os using Homebrew: brew install p7zip
