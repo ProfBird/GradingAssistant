@@ -1,14 +1,15 @@
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
-// using 7zip to u nzip files on Windows
+// using 7zip to u nzip files on Windows, official web site: https://www.7-zip.org/
+// 7Zip docs here: https://documentation.help/7-Zip/start.htm
 // using unzip to unzip files on Mac OS
 // 7zip can be installed on Mac Os using Homebrew: brew install p7zip
 
 // This module will unzip any submissions downloaded from Moodle
 // let submissionsPath = "/Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Fall/Labs"
 // let submissionsPath = "G:/My Drive/Courses/CS133JS/23F/Labs";
-let submissionsPath = "G:/My Drive/Courses/CIS195/2023-Fall/Labs";
+let submissionsPath = "G:/My Drive/Courses/CS133JS/23F/Labs";
 // let submissionsPath = "/Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Summer/TermProject"
 
 // The downloaded submissions are expected to be in a file with a name like: 
@@ -17,11 +18,35 @@ let submissionsPath = "G:/My Drive/Courses/CIS195/2023-Fall/Labs";
 //     One or more .zip archives containing:
 //         One or more web site folders.
 
-// Unzip any submissions downloaded from Moodle into a new folder
-unzipFiles(submissionsPath);
+
+/****************/
+/* Main program */
+/****************/
+const param = process.argv[2];
+let overwrite = false;
+if (param === "--help" || param === undefined)
+{
+    console.log("Usage: node UnzipFiles.mjs filePath [options]");
+    console.log("Note: if the file path contains spaces, enclose it in quotes");
+    console.log("options:");
+    console.log("--help\t\tDisplay this help message");
+    console.log("--overwrite\tOverwrite existing unzipped files");
+} else
+{
+    if (process.argv[3] === "--overwrite")
+    {
+        overwrite = true;
+        console.log("Overwriting files");
+    }
+    // convert a Windows style path to a unix style path
+    submissionsPath = param.replace(/\\/g, '/');
+    // Unzip any submissions downloaded from Moodle into a new folder
+    unzipFiles(submissionsPath);
+}
 
 function unzipFiles(submissionsPath)
 {
+
     // Loop through all zip files in the submissionsPath directory
     for (const fileName of fs.readdirSync(submissionsPath))
     {
@@ -41,16 +66,37 @@ function unzipFiles(submissionsPath)
             // Unzip the file to the allSubmissionsFolderPath directory
             try
             {
+                let command = "";
                 //check for windows os
                 if (process.platform === "win32") // Windows
                 {
-                    const command = `7z x "${filePath}" -o"${allSubmissionsFolderPath}" -aoa`;
+                    // 7Zip switches: x = extract with full paths, o = output dir, aoa = overwrite all, aos = skip existing
+                    if (overwrite)
+                    {
+                        console.log("Overwriting files on path " + allSubmissionsFolderPath);
+                        command = `7z x "${filePath}" -o"${allSubmissionsFolderPath}" -aoa`;
+                    }
+                    else
+                    {
+                        console.log("Skipping existing files on path " + allSubmissionsFolderPath);
+                        command = `7z x "${filePath}" -o"${allSubmissionsFolderPath}" -aos`;
+                    }
                     execSync(command);
                 }
                 else if (process.platform === "darwin") // Mac OS
                 {
                     // using unzip on Mac OS
-                    const command = `unzip -q "${filePath}" -d "${allSubmissionsFolderPath}"`;
+                    // -q = quiet, -d = destination directory, -o = overwrite existing files
+                    if (overwrite)
+                    {
+                        console.log("Overwriting files on path " + allSubmissionsFolderPath);
+                        command = `unzip -oq "${filePath}" -d "${allSubmissionsFolderPath}"`;
+                    }
+                    else
+                    {
+                        console.log("Skipping existing files on path " + allSubmissionsFolderPath);
+                        command = `unzip -q "${filePath}" -d "${allSubmissionsFolderPath}"`;
+                    }
                     execSync(command);
                 }
             }
@@ -76,17 +122,17 @@ function unzipFiles(submissionsPath)
                 {
                     if (fileName.endsWith('.zip'))
                     {
-                        
-                        const filePath = path.join(studentFolderPath, fileName);
-                      /*  const folderName = fileName.replace('.zip', '');
-                        const folderPath = path.join(studentFolderPath, folderName);
 
-                        // Create the folder if it doesn't exist
-                        if (!fs.existsSync(folderPath))
-                        {
-                            fs.mkdirSync(folderPath);
-                        }
-                        */
+                        const filePath = path.join(studentFolderPath, fileName);
+                        /*  const folderName = fileName.replace('.zip', '');
+                          const folderPath = path.join(studentFolderPath, folderName);
+  
+                          // Create the folder if it doesn't exist
+                          if (!fs.existsSync(folderPath))
+                          {
+                              fs.mkdirSync(folderPath);
+                          }
+                          */
                         // Unzip the file to the folderPath directory
                         try
                         {

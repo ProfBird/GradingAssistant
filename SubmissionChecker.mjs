@@ -10,15 +10,18 @@ let countHTMLFiles = 0; // Number of html files found in the lab files
 
 /******* This is the central function for this program! **********/
 /* checkSubmission function                                      */
+/* checks one part of the lab assignment                         */
 /* Checks the files in the labDir for the required elements,     */
 /* properties and valid HTML and CSS for all sub-folders         */
 /*****************************************************************/
 async function checkSubmission(
     labDirPath, // full path to the lab folder or lab part subfolder.
-    filePath,   // Empty string if there are multiple .html files to check, otherwise the full path to the file to check
-    requiredElements = [],
+    filePath,   // Empty string if there are multiple .html files, otherwise full path to a single file
+    requiredElements = [],   // these assignments are the default values
     requiredSelectors = [],
     requiredProperties = [],
+    regularExpressions = [],
+    regExpDescriptions = [],
     additionalRequirements = []
 )
 {
@@ -29,8 +32,9 @@ async function checkSubmission(
     const foundSelectors = [];
     const foundProperties = [];
     const additionalRequirementResults = [];
+    const regExpResults = [];
     // initialize all elements to false
-    for (let i = 0; i <= 5; i++)
+    for (let i = 0; i < additionalRequirements.length; i++)
     {
         additionalRequirementResults.push(false);
     }
@@ -56,32 +60,34 @@ async function checkSubmission(
             }
         });
         return files;
-    }   // End of traverseDir function
+    }   /************** End of traverseDir inner function *************/
 
-    if (filePath === "") {
-    // Loop through all .html files in the lab directory and it's subdirectories
-    let files = [];
-    traverseDir(labDirPath, files);  // Call inner function
-    for (const filePath of files.filter((fileName) =>
-        // only check .html, .htm and .css files
-        /\.(html?|css)$/.test(fileName)))
+    if (filePath === "")
     {
-        // Read the contents of the file
+        // Loop through all .html files in the lab directory and it's subdirectories
+        let files = [];
+        traverseDir(labDirPath, files);  // Call inner function
+        for (const filePath of files.filter((fileName) =>
+            // only check .html, .htm and .css files
+            /\.(html?|css)$/.test(fileName)))
+        {
+            // Read the contents of the file
+            const fileContents = fs.readFileSync(filePath, "utf8");
+            // Parse the sub directories and file name out of the path
+            const relativePath = path.relative(labDirPath, filePath);
+
+            message = `Checking the ${relativePath} file`;
+            // console.log(message);
+            report += message + `\n`;
+            report += await checkFile(fileContents, relativePath);
+
+        } // end looping through files in labDirPath
+    } else
+    {
+        // Check the specific file specified by filePath
         const fileContents = fs.readFileSync(filePath, "utf8");
-        // Parse the sub directories and file name out of the path
-        const relativePath = path.relative(labDirPath, filePath);
-
-        message = `Checking the ${relativePath} file`;
-        // console.log(message);
-        report += message + `\n`;
-        report += await checkFile(fileContents, relativePath);
-
-    } // end looping through files in labDirPath
-} else {
-    // Check the specific file specified by filePath
-    const fileContents = fs.readFileSync(filePath, "utf8");
-    report += await checkFile(fileContents, filePath);
-}
+        report += await checkFile(fileContents, filePath);
+    }
     // TODO: Make separate checks for each part of the lab
 
     /*********** inner function *********/
@@ -89,14 +95,15 @@ async function checkSubmission(
     /************************************/
     async function checkFile(fileContents, fileName)
     {
-        let report = ""; // All messages for the operations in this function
+        let validationReport = ""; // All messages for the operations in this function
         // if the file is an .html or .htm file, validate it, get elements and rules it contains.
         if (/\.html?$/.test(fileName))
         {
             countHTMLFiles++;
             // Validate HTML
-            report += await validateHTML(fileContents,fileName);
+            validationReport += await validateHTML(fileContents, fileName);
             // Search file for regexp from moreRequirements array starting at index 3
+            /* I don't think I need this any more
             for (let i = 3; i < requiredElements.length; i++)
             {
                 const regexp = new RegExp(requiredElements[i], "g");
@@ -105,12 +112,12 @@ async function checkSubmission(
                     foundElements.push(requiredElements[i]);
                 }
             }
-
+*/
             // Get any required html elements from fileContents, put in foundElements
             const dom = new JSDOM(fileContents);
             for (const element of requiredElements)
             {
-                let elements = [];
+               let elements = [];
                 try
                 {
                     elements = dom.window.document.querySelectorAll(element);
@@ -118,7 +125,7 @@ async function checkSubmission(
                 {
                     message = `Error finding ${element} element in ${fileName}`;
                     console.error(message);
-                    report += message + `\n`;
+                    validationReport += message + `\n`;
                 }
                 // if something is in the elements array, then the element was found
                 // TODO: figure out a cleaner way to do this
@@ -182,7 +189,7 @@ async function checkSubmission(
         else // File is a css file
         {
             // Validate CSS
-            report += await validateCSS(fileContents, path.basename(filePath));
+            validationReport += await validateCSS(fileContents, path.basename(filePath));
             // TODO: check for embedded css styles in the html pages
             // Get any required css selectors from fileContents, put in foundSelectors
             for (const selector of requiredSelectors)
@@ -202,45 +209,51 @@ async function checkSubmission(
                 }
             } // end looping through requiredProperties
         } // end of processing .css files
-        // --- Check the file for additional requirements ---
 
+        // --- Check the file for additional requirements ---
         // Check for a special file name
-        const specialFileName = additionalRequirements[2];
-        if(specialFileName == undefined || specialFileName == "")
+        const specialFileName = additionalRequirements[0];
+        if (specialFileName == undefined || specialFileName == "")
         {
-            additionalRequirementResults[2] = true; // set to true if we are not looking for a special file name
+            additionalRequirementResults[0] = true; // set to true if we are not looking for a special file name
         }
         else
         {
-            // if the specail file name is found anywhere set the results to true
-            additionalRequirementResults[2] ||= (specialFileName === "" || filePath.includes(specialFileName)); // set to true if any file name matches
+            // if any file name has the special file name, set the results to true. Partial match for .htm an .html
+            additionalRequirementResults[0] ||= (specialFileName === "" || fileName.includes(specialFileName));
         }
-        // check for first regexp in moreRequirements array
-        const regexp3 = new RegExp(additionalRequirements[3], "gi");
-        additionalRequirementResults[3] ||= (regexp3.test(fileContents));
-        // check for second regexp in moreRequirements array
-        const regexp4 = new RegExp(additionalRequirements[4], "gi");
-        additionalRequirementResults[4] ||= (regexp4.test(fileContents));
-        // check for third regexp in moreRequirements array
-        const regexp5 = new RegExp(additionalRequirements[5], "mgi");
-        additionalRequirementResults[5] ||= (regexp5.test(fileContents));
-        return report;
-    } // End of checkFile function
+
+        // --- Check the file using regular expressions ---
+        // The boolean results are or'ed together from each file checked
+        // One search result is enough to set the overall result to true
+        for (let i = 0; i < regularExpressions.length; i++)
+        {
+            let regexp = new RegExp(regularExpressions[i], "gi");
+            regExpResults[i] ||= (regexp.test(fileContents)); // true / false result
+        }
+
+        return validationReport;
+    } // End of checkFile internal function
 
     // compare foundElements to requiredElements and log any missing elements
-    report = checkForRequiredElements(foundElements, requiredElements, report);
+    report = summarizeForRequiredElements(foundElements, requiredElements, report);
     // TODO: combine the following two functions into one and check for properties in specific selectors.
     if (requiredSelectors.length > 0)
     {
-        report = checkForRequiredSelectors(foundSelectors, requiredSelectors, report);
+        report = summarizeForRequiredSelectors(foundSelectors, requiredSelectors, report);
     }
     if (requiredProperties.length > 0)
     {
-        report = checkForRequiredProperties(foundProperties, requiredProperties, report);
+        report = summarizeForRequiredProperties(foundProperties, requiredProperties, report);
     }
-    // Check for the correct number of html files
-    report = checkAdditionalRequirements(report, countHTMLFiles, additionalRequirements, additionalRequirementResults);
-
+    if (additionalRequirements.length > 0)
+    {
+        report = summarizeAdditionalRequirements(report, countHTMLFiles, additionalRequirements, additionalRequirementResults);
+    }
+    if (regularExpressions.length > 0)
+    {
+        report = summarizeRegExpSearches(report, regExpResults, regExpDescriptions);
+    }
     return report;
 } // End of checkSubmission function
 
@@ -329,10 +342,10 @@ async function validateCSS(fileContents, fileName)
     return report;
 }
 
-/************************************/
-/* Check for required html elements */
-/************************************/
-function checkForRequiredElements(foundElements, requiredElements, report)
+/********************************************/
+/* Check results for required html elements */
+/********************************************/
+function summarizeForRequiredElements(foundElements, requiredElements, report)
 {
     const missingElements = requiredElements.filter(
         (element) => !foundElements.includes(element)
@@ -355,11 +368,11 @@ function checkForRequiredElements(foundElements, requiredElements, report)
     return report;
 }
 
-/************************************/
-/* Check for required css selectors */
-/************************************/
+/********************************************/
+/* Check results for required css selectors */
+/********************************************/
 // Todo - combine this function with checkForRequiredElements into one function
-function checkForRequiredSelectors(foundSelectors, requiredSelectors, report)
+function summarizeForRequiredSelectors(foundSelectors, requiredSelectors, report)
 {
     const missingSelectors = requiredSelectors.filter(
         (selector) => !foundSelectors.includes(selector)
@@ -381,11 +394,11 @@ function checkForRequiredSelectors(foundSelectors, requiredSelectors, report)
     return report;
 }
 
-/*************************************/
-/* Check for required css properties */
-/*************************************/
+/*********************************************/
+/* Check results for required css properties */
+/*********************************************/
 // TODO: combine this function with checkForRequiredElements/Selectors into one function
-function checkForRequiredProperties(foundProperties, requiredProperties, report)
+function summarizeForRequiredProperties(foundProperties, requiredProperties, report)
 {
     const missingProperties = requiredProperties.filter(
         (property) => !foundProperties.includes(property)
@@ -407,16 +420,16 @@ function checkForRequiredProperties(foundProperties, requiredProperties, report)
     return report;
 }
 
-/************************************/
-/* Check additional requirements    */
-/************************************/
-function checkAdditionalRequirements(report, countHTMLFiles, additionalRequirements, additionalRequirementResults)
+/************************************************/
+/* Check results for additional requirements    */
+/************************************************/
+function summarizeAdditionalRequirements(report, countHTMLFiles, additionalRequirements, additionalRequirementResults)
 {
     let areAllAdditionalRequirementsMet = true;
     let message = "";
 
-    // Report if less than the expected number of html files is found
     const requiredNumberOfHTMLFiles = parseInt(additionalRequirements[1]);
+    // Report if less than the expected number of html files is found
     if (countHTMLFiles < requiredNumberOfHTMLFiles)
     {
         areAllAdditionalRequirementsMet = false;
@@ -426,38 +439,10 @@ function checkAdditionalRequirements(report, countHTMLFiles, additionalRequireme
     }
 
     // Report if a special file name is required and not found
-    if (additionalRequirementResults[2] === false)
+    if (additionalRequirementResults[0] === false)
     {
         areAllAdditionalRequirementsMet = false;
-        message = `Missing ${specialFileName} file`;
-        console.log(message);
-        report += message + `\n`;
-    }
-
-    // Report if regexp searches fail
-    if (additionalRequirementResults[3] === false)
-    {
-        areAllAdditionalRequirementsMet = false;
-        // Todo: make this message more generic
-        message = `Missing external link in html files`;
-        console.log(message);
-        report += message + `\n`;
-    }
-
-    if (additionalRequirementResults[4] === false)
-    {
-        areAllAdditionalRequirementsMet = false;
-        // Todo: make this message more generic
-        message = `Missing internal link in html files`;
-        console.log(message);
-        report += message + `\n`;
-    }
-
-    if (additionalRequirementResults[5] === false)
-    {
-        areAllAdditionalRequirementsMet = false;
-        // Todo: make this message more generic
-        message = `Missing comment in html files`;
+        message = `Missing ${additionalRequirements[0]} file`;
         console.log(message);
         report += message + `\n`;
     }
@@ -472,6 +457,37 @@ function checkAdditionalRequirements(report, countHTMLFiles, additionalRequireme
     return report;
 }
 
+/****************************************************/
+/* Check results for regular expression searches    */
+/****************************************************/
+function summarizeRegExpSearches(report, regExpResults, regExpDescriptions)
+{
+    let message = "";
+    let didAllRegExpSearchesPass = true;
+
+    // Report if a regexp search fails
+    for (let i = 0; i < regExpResults.length; i++)
+    {
+        if (regExpResults[i] === false)
+        {
+            didAllRegExpSearchesPass = false;
+            message = `Missing ${regExpDescriptions[i]} in files`;
+            console.log(message);
+            report += message + `\n`;
+        }
+    }
+
+    if (didAllRegExpSearchesPass)
+    {
+        message = `All regular expression searches passed`;
+        console.log(message);
+        report += message + `\n`;
+    }
+
+    return report;
+}
+
+
 /************************************/
 /* Check rendered web page          */
 /************************************/
@@ -479,19 +495,21 @@ async function renderAndCheck(fileContents, fileName, requiredOutput)
 {
     let report = "";
 
-    puppeteer.launch({headless: "new"}).then(async (browser) =>
+    puppeteer.launch({ headless: "new" }).then(async (browser) =>
     {
         const page = await browser.newPage();
         await page.setContent(fileContents);
-       const text = await page.evaluate(() =>
+        const text = await page.evaluate(() =>
         {
             // Execute the script on the page
             const scripts = document.querySelectorAll("script");
-            scripts.forEach((script) => {
-                if (script.textContent) {
-                  eval(script.textContent);
+            scripts.forEach((script) =>
+            {
+                if (script.textContent)
+                {
+                    eval(script.textContent);
                 }
-              });
+            });
 
             // Get the rendered text
             return document.body.textContent;

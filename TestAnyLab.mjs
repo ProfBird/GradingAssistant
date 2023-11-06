@@ -25,7 +25,21 @@ const requiredElements2 = [];
 // Required CSS selectors and properties (global scope)
 const requiredCssSelectors = [];
 const requiredCssProperties = [];
-const additionalRequirements = []
+const additionalRequirements = [];
+// Parallel arrays
+const regularExpressions = [];
+const regExpDescriptions = [];
+// TODO: Change from parallel arrays to an array of objects
+/*
+// An object that contains a requirement and a description of the requirement
+ const requirement = {
+                         specification: "",
+                          description: "" 
+                    };
+// array of requirement objects
+const regExp = [];
+*/
+
 // Indexes into the additionalRequirements array
 // 0: Number of parts in the lab assignment
 // 1: Number of html files expected in the lab submission
@@ -72,13 +86,12 @@ if (param === "--help" || param === undefined)
         }
         let message = `Checking the ${studentDir} directory`;
         let report = message + "\n"; // Report of the checks of the files for this student
-        report += await getSubFolders(
+        report += await getSubDirectories(
             // all arguments except report and studentDir were set in loadRequirements
             numberOfParts,
             areAllInOneDir,
             submissionsPath,
-            studentDir,
-            requiredElements2);
+            studentDir);
         report += "\n";
 
         // Open the report file for writing and get its file descriptor
@@ -110,9 +123,13 @@ function loadRequirements(requirementsFileName)
     try
     {
         const data = fs.readFileSync(requirementsFileName);
-        csv()  // the .on functions sets up lisetners
-            .on("data", (row) =>
+        csv()  // the .on function sets up lisetners
+            .on("data", (row) =>    // row is an object containing the data from one row of the csv file
             {
+                if (row.settings)
+                {
+                    settings.push(row.settings);
+                }
                 if (row.requiredElements1)
                 {
                     requiredElements1.push(row.requiredElements1);
@@ -133,9 +150,13 @@ function loadRequirements(requirementsFileName)
                 {
                     additionalRequirements.push(row.moreRequirements);
                 }
-                if (row.settings)
+                if (row.regExp)
                 {
-                    settings.push(row.settings);
+                    regularExpressions.push(row.regExp);
+                }
+                if (row.regExpDescription)
+                {
+                    regExpDescriptions.push(row.regExpDescription);
                 }
             })
             .on("error", (error) =>
@@ -159,7 +180,7 @@ function loadRequirements(requirementsFileName)
         submissionsPath = settings[1];
     }
 
-    numberOfParts = additionalRequirements[0];
+    numberOfParts = settings[2];
     areAllInOneDir = (settings[3].toLowerCase() === "true");
 } // End of loadRequirements function
 
@@ -168,16 +189,16 @@ function loadRequirements(requirementsFileName)
 /* Determines the path to each subfolder, one for       */
 /* each lab part, and passes it to checkSubmission      */
 /********************************************************/
-async function getSubFolders(
+async function getSubDirectories(
     parts,    // number of parts in the lab assignment
     areAllInOneDir, // true if all parts are in one folder
     submissionsPath,
-    studentDir,
-    requiredElements
+    studentDir
 )
 {
     let studentDirPath = path.join(submissionsPath, studentDir);
-    let labPartSubDir = ""; // Sub-directory containing the lab files
+    let labAssignmentSubDir = ""; // Sub-directory, if any, containing files or folders for all parts
+    let labPartSubDir = ""; // Sub-directory containing the lab files for one part
     let fileName = ""; // Only used if multiple parts files are in one folder
     let report = ""; // Report of the checks of the files for this student done or called in this function
     try
@@ -205,16 +226,16 @@ async function getSubFolders(
                     (part === 1) ? requiredElements1 : requiredElements2,
                     requiredCssSelectors,
                     requiredCssProperties,
-                    additionalRequirements,
+                    regularExpressions,
+                    regExpDescriptions,
+                    additionalRequirements
                 );
             }
         }
         else if (!areAllInOneDir && parts == 1)
         {
             // There is only one part 
-            // There might be no subfolder, check to see if there is a subfolder
-            // check for a subfolder in studentDir
-
+            // There might be no subfolder, see if there is a subfolder in studentDir
             const items = fs.readdirSync(studentDirPath, { withFileTypes: true });
             const subfolders = items.filter((dirent) =>
             {
@@ -227,17 +248,19 @@ async function getSubFolders(
                 labPartSubDir = "";
             }
             else
-            {  // There should be one lab subfolder, but might be system subfolders, like __MACOSX
+            {  // There should be one lab subfolder, but there might be system subfolders, like __MACOSX
 
                 labPartSubDir = subfolders.find((dirent) => !dirent.name.startsWith("_") && !dirent.name.startsWith("."))
                     .name;  // returns name of first valid dir found
             }
             report += await checkSubmission(
-                studentDirPath,
+                path.join(studentDirPath, labPartSubDir),
                 "", // assume there are multiple files to check
                 requiredElements1,
                 requiredCssSelectors,
                 requiredCssProperties,
+                regularExpressions,
+                regExpDescriptions,
                 additionalRequirements,
             );
 
@@ -245,76 +268,47 @@ async function getSubFolders(
         else if (!areAllInOneDir && parts > 1)
         {
             // TODO: This still needs to be debugged
-            // There are two or more subfolders named Part1, Part2, etc.
+            // There shuld be two or more subfolders named Part1, Part2, etc.
+            // But there might be one subfolder that contains the part1, part2, etc. subfolders
+            const items = fs.readdirSync(studentDirPath, { withFileTypes: true });
+            const subfolders = items.filter((dirent) =>
+            {
+                const itemPath = path.join(studentDirPath, dirent.name);
+                return dirent.name[0] !== '.' && dirent.name[0] !== '_' && fs.statSync(itemPath).isDirectory();
+            });
+            if (subfolders.length === 0)
+            {
+                // There is no subfolder, so the lab files are in studentDir
+                labAssignmentSubDir = "";
+            }
+            // there is just one subfolder, the lab part subfolders should be in it
+            else if (subfolders.length === 1)
+            {
+                labAssignmentSubDir = subfolders[0].name;
+            }
+
+            // For all cases where ther is a subfolder for each part
             for (let part = 1; part <= parts; part++)
             {
                 report += "\nPart" + part + "\n";
                 labPartSubDir = fs
-                    .readdirSync(studentDirPath)
+                    .readdirSync(path.join(studentDirPath, labAssignmentSubDir))
                     .find(
-                        (dir) => dir.toLowerCase().includes("part") && dir.endsWith(part)
+                        (dir) => dir.toLowerCase().includes(part)
                     );
                 report += await checkSubmission(
-                    studentDirPath,
+                    path.join(studentDirPath, labAssignmentSubDir, labPartSubDir),
                     "",
                     (part === 1) ? requiredElements1 : requiredElements2,
                     requiredCssSelectors,
                     requiredCssProperties,
-                    additionalRequirements,
+                    regularExpressions,
+                    regExpDescriptions,
+                    additionalRequirements
                 );
             }
         }
-        /*
-        report += "\nPart1\n";
-        labPartSubDir = fs
-            .readdirSync(studentDirPath)
-            .find(
-                (dir) => dir.toLowerCase().includes("part") && dir.endsWith("1")
-            );
-    }
-    else
 
-    if (part > 0) {
-        // There are two or more subfolders named Part1, Part2, etc.
-        report += "\nPart" + part + "\n";
-        labPartSubDir = fs
-            .readdirSync(studentDirPath)
-            .find(
-                (dir) => dir.toLowerCase().includes("part") && dir.endsWith(part)
-            );
-    }
-    else {
-        // There is only one part 
-        //There might be no subfolder, check to see if there is a subfolder
-        // check for a subfolder in studentDir
-
-        const items = fs.readdirSync(studentDirPath, {withFileTypes: true} );
-        const subfolders = items.filter((dirent) => {
-            const itemPath = path.join(studentDirPath, dirent.name);
-            return fs.statSync(itemPath).isDirectory();
-        });
-        if (subfolders.length === 0) {
-            // There is no subfolder, so the lab files are in the studentDir
-            labPartSubDir = "";
-        }
-        else {  // There should be one lab subfolder, but might be system subfolders, like __MACOSX
-            
-            labPartSubDir = subfolders.find((dirent) => !dirent.name.startsWith("_") && !dirent.name.startsWith("."))
-                                   .name;  // returns name of first valid dir found
-        }
-
-    }
-
-    const labDirPath = path.join(studentDirPath, labPartSubDir);
-
-    report = await checkSubmission(
-        labDirPath,
-        requiredElements,
-        requiredCssSelectors,
-        requiredCssProperties,
-        report
-    );
-    */
     } catch (error)
     {
         console.error(`Error reading directory ${studentDir}: ${error.message}`);
