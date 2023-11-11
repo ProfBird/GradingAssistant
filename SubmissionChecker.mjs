@@ -39,29 +39,6 @@ async function checkSubmission(
         additionalRequirementResults.push(false);
     }
 
-
-    /*********** inner function *********/
-    /* Will be called recursively to    */
-    /* read files in all subdirectories */
-    /************************************/
-    function traverseDir(dir, files)
-    {
-        fs.readdirSync(dir).forEach((file) =>
-        {
-            let fullPath = path.join(dir, file);
-            if (fs.lstatSync(fullPath).isDirectory())
-            {
-                // console.log(fullPath);
-                files = traverseDir(fullPath, files); // <-- recursive call!
-            } else
-            {
-                // console.log(fullPath);
-                files.push(fullPath);
-            }
-        });
-        return files;
-    }   /************** End of traverseDir inner function *************/
-
     if (filePath === "")
     {
         // Loop through all .html files in the lab directory and it's subdirectories
@@ -88,7 +65,51 @@ async function checkSubmission(
         const fileContents = fs.readFileSync(filePath, "utf8");
         report += await checkFile(fileContents, filePath);
     }
-    // TODO: Make separate checks for each part of the lab
+
+    // compare foundElements to requiredElements and log any missing elements
+    report = summarizeForRequiredElements(foundElements, requiredElements, report);
+    // TODO: combine the following two functions into one and check for properties in specific selectors.
+    if (requiredSelectors.length > 0)
+    {
+        report = summarizeForRequiredSelectors(foundSelectors, requiredSelectors, report);
+    }
+    if (requiredProperties.length > 0)
+    {
+        report = summarizeForRequiredProperties(foundProperties, requiredProperties, report);
+    }
+    if (additionalRequirements.length > 0)
+    {
+        report = summarizeAdditionalRequirements(report, countHTMLFiles, additionalRequirements, additionalRequirementResults);
+    }
+    if (regularExpressions.length > 0)
+    {
+        report = summarizeRegExpSearches(report, regExpResults, regExpDescriptions);
+    }
+    return report;
+
+    
+    /*********** inner function *********/
+    /* Will be called recursively to    */
+    /* read files in all subdirectories */
+    /************************************/
+    function traverseDir(dir, files)
+    {
+        fs.readdirSync(dir).forEach((file) =>
+        {
+            let fullPath = path.join(dir, file);
+            if (fs.lstatSync(fullPath).isDirectory())
+            {
+                // console.log(fullPath);
+                files = traverseDir(fullPath, files); // <-- recursive call!
+            } else
+            {
+                // console.log(fullPath);
+                files.push(fullPath);
+            }
+        });
+        return files;
+    }   /************** End of traverseDir inner function *************/
+
 
     /*********** inner function *********/
     /* Do checks on an individual file  */
@@ -233,28 +254,8 @@ async function checkSubmission(
         }
 
         return validationReport;
-    } // End of checkFile internal function
+    } // End of checkFile inner function
 
-    // compare foundElements to requiredElements and log any missing elements
-    report = summarizeForRequiredElements(foundElements, requiredElements, report);
-    // TODO: combine the following two functions into one and check for properties in specific selectors.
-    if (requiredSelectors.length > 0)
-    {
-        report = summarizeForRequiredSelectors(foundSelectors, requiredSelectors, report);
-    }
-    if (requiredProperties.length > 0)
-    {
-        report = summarizeForRequiredProperties(foundProperties, requiredProperties, report);
-    }
-    if (additionalRequirements.length > 0)
-    {
-        report = summarizeAdditionalRequirements(report, countHTMLFiles, additionalRequirements, additionalRequirementResults);
-    }
-    if (regularExpressions.length > 0)
-    {
-        report = summarizeRegExpSearches(report, regExpResults, regExpDescriptions);
-    }
-    return report;
 } // End of checkSubmission function
 
 

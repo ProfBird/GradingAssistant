@@ -185,7 +185,7 @@ function loadRequirements(requirementsFileName)
 } // End of loadRequirements function
 
 /********************************************************/
-/* getSubFolders                                        */
+/* getSubDirectories                                        */
 /* Determines the path to each subfolder, one for       */
 /* each lab part, and passes it to checkSubmission      */
 /********************************************************/
@@ -203,6 +203,8 @@ async function getSubDirectories(
     let report = ""; // Report of the checks of the files for this student done or called in this function
     try
     {
+        // This code will start by assuming that students follwed instrucitons in terms of 
+        // what subfolders to use.  If they did not, the code will try to figure out what they did.
 
         if (areAllInOneDir && parts == 1)
         {
@@ -210,27 +212,9 @@ async function getSubDirectories(
         }
         else if (areAllInOneDir && parts > 1)
         {
-            // There files for two or more parts in studentDirPath
+            // There are home page files for two or more parts are on studentDirPath
             // Find the file for each part and check it.
-            for (let part = 1; part <= parts; part++)
-            {
-                report += "\nPart" + part + "\n";
-                // get the filename for this part (assume the name contains "Part")
-                fileName = fs
-                    .readdirSync(studentDirPath)
-                    .find((file) => file.includes("Part" + part));
-
-                report += await checkSubmission(
-                    studentDirPath,
-                    path.join(studentDirPath, fileName),
-                    (part === 1) ? requiredElements1 : requiredElements2,
-                    requiredCssSelectors,
-                    requiredCssProperties,
-                    regularExpressions,
-                    regExpDescriptions,
-                    additionalRequirements
-                );
-            }
+            await getLabPartFiles(studentDirPath);
         }
         else if (!areAllInOneDir && parts == 1)
         {
@@ -265,9 +249,8 @@ async function getSubDirectories(
             );
 
         }
-        else if (!areAllInOneDir && parts > 1)
+        else if (!areAllInOneDir && parts > 1)   // Lab 3 in fall 2023 is like this
         {
-            // TODO: This still needs to be debugged
             // There shuld be two or more subfolders named Part1, Part2, etc.
             // But there might be one subfolder that contains the part1, part2, etc. subfolders
             const items = fs.readdirSync(studentDirPath, { withFileTypes: true });
@@ -278,16 +261,36 @@ async function getSubDirectories(
             });
             if (subfolders.length === 0)
             {
-                // There is no subfolder, so the lab files are in studentDir
+                // There is no subfolder, so the lab files for both parts should be on studentDirPath
                 labAssignmentSubDir = "";
             }
-            // there is just one subfolder, the lab part subfolders should be in it
+            // There is just one subdir, it might be the assignment dir with the lab part subdirs in it
+            // or maybe the student just did one part and this is a sub-page or image subdir.
             else if (subfolders.length === 1)
             {
-                labAssignmentSubDir = subfolders[0].name;
+                // check to see if there are any html files on the studentDirPath, if so, 
+                // the subdir is probably not a lab part subdir
+                const htmlFiles = items.filter((dirent) =>
+                {
+                    const itemPath = path.join(studentDirPath, dirent.name);
+                    return (dirent.name.toLowerCase().endsWith(".html") 
+                        || dirent.name.toLowerCase().endsWith(".htm")) 
+                        && fs.statSync(itemPath).isFile();
+                });
+                if (htmlFiles.length > 0)
+                {
+                    // The subdir is probably not a lab part subdir, 
+                    // so the lab assignment and one part are probably directly on studentDirPath
+                    report += `Error: the subfolder, ${subfolders[0].name}, isn't a lab part subfolder.`;
+                    labAssignmentSubDir = "";
+                }
+                else
+                {
+                    // The subdir is probably the lab assignment dir with the lab part subdirs in it
+                    labAssignmentSubDir = subfolders[0].name;
+                }
             }
-
-            // For all cases where ther is a subfolder for each part
+            // For all cases where there is a subfolder for each part
             for (let part = 1; part <= parts; part++)
             {
                 report += "\nPart" + part + "\n";
@@ -296,16 +299,20 @@ async function getSubDirectories(
                     .find(
                         (dir) => dir.toLowerCase().includes(part)
                     );
-                report += await checkSubmission(
-                    path.join(studentDirPath, labAssignmentSubDir, labPartSubDir),
-                    "",
-                    (part === 1) ? requiredElements1 : requiredElements2,
-                    requiredCssSelectors,
-                    requiredCssProperties,
-                    regularExpressions,
-                    regExpDescriptions,
-                    additionalRequirements
-                );
+                // if a subdir for this part is defined, check it
+                if (labPartSubDir)
+                {
+                    report += await checkSubmission(
+                        path.join(studentDirPath, labAssignmentSubDir, labPartSubDir),
+                        "",
+                        (part === 1) ? requiredElements1 : requiredElements2,
+                        requiredCssSelectors,
+                        requiredCssProperties,
+                        regularExpressions,
+                        regExpDescriptions,
+                        additionalRequirements
+                    );
+                }
             }
         }
 
@@ -314,6 +321,36 @@ async function getSubDirectories(
         console.error(`Error reading directory ${studentDir}: ${error.message}`);
     }
     return report;
+
+
+    /***************   inner function   *****************************/
+    /* getLabPartFiles                                              */
+    /* Gets the home page files for each part of the lab assignment */
+    /****************************************************************/
+    async function getLabPartFiles(
+        assignmentDir   // The directory that should contain the subdirs for each part
+    )
+    {
+        for (let part = 1; part <= parts; part++)
+        {
+            report += "\nPart" + part + "\n";
+            // get the filename for this part (assume the name contains "Part")
+            fileName = fs
+                .readdirSync(assignmentDir)
+                .find((file) => file.includes("Part" + part));
+
+            report += await checkSubmission(
+                assignmentDir,
+                path.join(assignmentDir, fileName),
+                (part === 1) ? requiredElements1 : requiredElements2,
+                requiredCssSelectors,
+                requiredCssProperties,
+                regularExpressions,
+                regExpDescriptions,
+                additionalRequirements
+            );
+        }
+    }
 } // End of checkSubFolder function
 
 
