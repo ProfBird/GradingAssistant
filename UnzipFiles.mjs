@@ -28,6 +28,8 @@ if (param === "--help" || param === undefined)
 {
     console.log("Usage: node UnzipFiles.mjs filePath [options]");
     console.log("Note: if the file path contains spaces, enclose it in quotes");
+    console.log('Example Windows path: \"G:/My Drive/Courses/CS133JS/23F/Labs\"');
+    console.log('Example Mac OS path: \"/Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Fall/Labs\"');
     console.log("options:");
     console.log("--help\t\tDisplay this help message");
     console.log("--overwrite\tOverwrite existing unzipped files");
