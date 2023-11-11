@@ -7,10 +7,8 @@ import { execSync } from 'child_process';
 // 7zip can be installed on Mac Os using Homebrew: brew install p7zip
 
 // This module will unzip any submissions downloaded from Moodle
-// let submissionsPath = "/Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Fall/Labs"
 // let submissionsPath = "G:/My Drive/Courses/CS133JS/23F/Labs";
-let submissionsPath = "G:/My Drive/Courses/CS133JS/23F/Labs";
-// let submissionsPath = "/Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Summer/TermProject"
+let submissionsPath = "/Volumes/GoogleDrive/My Drive/Courses/CS133JS/23F/Labs";
 
 // The downloaded submissions are expected to be in a file with a name like: 
 // "CS 133JS Sp23 (Bird 41334)-Lab 6 Production Version-3803210.zip"
@@ -43,17 +41,25 @@ if (param === "--help" || param === undefined)
     // convert a Windows style path to a unix style path
     submissionsPath = param.replace(/\\/g, '/');
     // Unzip any submissions downloaded from Moodle into a new folder
-    unzipFiles(submissionsPath);
+    if (unzipFiles(submissionsPath))
+    {
+      console.log("Unzip completed succssfully.");   
+    }
+    else
+    {
+        console.log("No zip files found in " + submissionsPath);
+    }
 }
 
 function unzipFiles(submissionsPath)
 {
-
+    let zipFilesFound = false;
     // Loop through all zip files in the submissionsPath directory
     for (const fileName of fs.readdirSync(submissionsPath))
     {
         if (fileName.endsWith('.zip'))
         {
+            zipFilesFound = true;
             const filePath = path.join(submissionsPath, fileName);
             const folderName = fileName.replace('.zip', '');
             const allSubmissionsFolder = cleanSubmissionFolderName(folderName);
@@ -63,6 +69,7 @@ function unzipFiles(submissionsPath)
             if (!fs.existsSync(allSubmissionsFolderPath))
             {
                 fs.mkdirSync(allSubmissionsFolderPath);
+                console.log("Created folder " + allSubmissionsFolderPath);
             }
 
             // Unzip the file to the allSubmissionsFolderPath directory
@@ -163,7 +170,9 @@ function unzipFiles(submissionsPath)
             });
         }
     }
+    return zipFilesFound;
 
+    // Inner function //
     // Create a name for the folder that will hold the unzipped submissions
     function cleanSubmissionFolderName(folderName)
     {
