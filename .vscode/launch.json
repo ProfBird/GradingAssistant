@@ -10,7 +10,7 @@
             ],
             "program": "${workspaceFolder}/TestAnyLab.mjs",
             "args": [
-                "D:/Repos/CIS195-CourseMaterials/LabAutoGrading/CIS195Lab03GradeAssist.csv"
+                "G:/My Drive/Courses/CIS195/2023-Fall/Labs/CIS195Lab03GradeAssist.csv"
             ]
         },
         {
@@ -22,7 +22,7 @@
             ],
             "program": "${workspaceFolder}/TestAnyLab.mjs",
             "args": [
-                "/Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Fall/Labs/CIS195Lab03GradeAssist.csv"
+                "/Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Fall/Labs/CIS195Lab04GradeAssist.csv"
             ]
         },
         {
