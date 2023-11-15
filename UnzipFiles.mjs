@@ -8,6 +8,7 @@ import { execSync } from 'child_process';
 
 // This module will unzip any submissions downloaded from Moodle
 // let submissionsPath = "G:/My Drive/Courses/CS133JS/23F/Labs";
+// let submissionsPath = "/Users/birdb/Library/CloudStorage/GoogleDrive-birdb@lanecc.edu/My Drive/Courses/CIS195/2023-Fall/Labs"
 let submissionsPath = "/Volumes/GoogleDrive/My Drive/Courses/CS133JS/23F/Labs";
 
 // The downloaded submissions are expected to be in a file with a name like: 

@@ -173,11 +173,29 @@ function loadRequirements(requirementsFileName)
     // Get settings from the settings array
     if (process.platform === "darwin")
     {
-        submissionsPath = settings[0];
+        // if settings[0] has a relative path in it, 
+        // append it to the path of the requirements file
+        if (settings[0].startsWith("."))
+        {
+            submissionsPath = path.join(path.dirname(requirementsFileName), settings[0]);
+        }
+        else
+        {
+            submissionsPath = settings[0];
+        }
     }
     else if (process.platform === "win32")
     {
-        submissionsPath = settings[1];
+        // if settings[1] has a relative path in it, 
+        // append it to the path of the requirements file
+        if (settings[1].startsWith("."))
+        {
+            submissionsPath = path.join(path.dirname(requirementsFileName), settings[1]);
+        }
+        else
+        {
+            submissionsPath = settings[1];
+        }
     }
 
     numberOfParts = settings[2];
