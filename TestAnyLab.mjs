@@ -173,28 +173,27 @@ function loadRequirements(requirementsFileName)
     // Get settings from the settings array
     if (process.platform === "darwin")
     {
-        // if settings[0] has a relative path in it, 
-        // append it to the path of the requirements file
-        if (settings[0].startsWith("."))
-        {
-            submissionsPath = path.join(path.dirname(requirementsFileName), settings[0]);
-        }
-        else
+        // if settings[0] has a relative path in it, append it to the path of the requirements file
+        if (settings[0].startsWith("/"))  // aboslute path in settings
         {
             submissionsPath = settings[0];
+        }
+        else  // relative path in settings
+        {
+            submissionsPath = path.join(path.dirname(requirementsFileName), settings[0]);
         }
     }
     else if (process.platform === "win32")
     {
-        // if settings[1] has a relative path in it, 
-        // append it to the path of the requirements file
-        if (settings[1].startsWith("."))
-        {
-            submissionsPath = path.join(path.dirname(requirementsFileName), settings[1]);
-        }
-        else
+        // if settings[1] has a relative path in it, append it to the path of the requirements file
+        if (/^[a-zA-Z]:/.test(settings[1]) || settings[1] == "/" || settings[1] == "\\")  // absolute path in settings
+        if(settings[1].startsWith("C:"))  // absolute path in settings
         {
             submissionsPath = settings[1];
+        }
+        else  // relative path in settings
+        {
+            submissionsPath = path.join(path.dirname(requirementsFileName), settings[1]);
         }
     }
 

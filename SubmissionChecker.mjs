@@ -233,7 +233,8 @@ async function checkSubmission(
 
         // --- Check the file for additional requirements ---
         // Check for a special file name
-        const specialFileName = additionalRequirements[0];
+        const specialFileName = additionalRequirements[0] === '""' ? "" : additionalRequirements[0];
+        
         if (specialFileName == undefined || specialFileName == "")
         {
             additionalRequirementResults[0] = true; // set to true if we are not looking for a special file name
