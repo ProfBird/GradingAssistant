@@ -10,7 +10,7 @@
             ],
             "program": "${workspaceFolder}/TestAnyLab.mjs",
             "args": [
-                "G:/My Drive/Courses/CIS195/2023-Fall/Labs/CIS195Lab03GradeAssist.csv"
+                "G:/My Drive/Courses/CIS195/2023-Fall/Labs/CIS195Lab04GradeAssist.csv"
             ]
         },
         {

@@ -250,7 +250,7 @@ async function checkSubmission(
         // One search result is enough to set the overall result to true
         for (let i = 0; i < regularExpressions.length; i++)
         {
-            let regexp = new RegExp(regularExpressions[i], "gi");
+            let regexp = new RegExp(regularExpressions[i], "gim");
             regExpResults[i] ||= (regexp.test(fileContents)); // true / false result
         }
 
