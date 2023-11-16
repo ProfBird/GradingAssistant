@@ -7,6 +7,7 @@ import * as cssTree from "css-tree";
 import os from "os";
 
 let countHTMLFiles = 0; // Number of html files found in the lab files
+let countCSSFiles = 0; // Number of css files found in the lab files
 
 /******* This is the central function for this program! **********/
 /* checkSubmission function                                      */
@@ -79,7 +80,8 @@ async function checkSubmission(
     }
     if (additionalRequirements.length > 0)
     {
-        report = summarizeAdditionalRequirements(report, countHTMLFiles, additionalRequirements, additionalRequirementResults);
+        report = summarizeAdditionalRequirements(report, countHTMLFiles, countCSSFiles, 
+            foundSelectors, foundProperties, additionalRequirements, additionalRequirementResults);
     }
     if (regularExpressions.length > 0)
     {
@@ -209,8 +211,9 @@ async function checkSubmission(
         }
         else // File is a css file
         {
+            countCSSFiles++;
             // Validate CSS
-            validationReport += await validateCSS(fileContents, path.basename(filePath));
+            validationReport += await validateCSS(fileContents, fileName);
             // TODO: check for embedded css styles in the html pages
             // Get any required css selectors from fileContents, put in foundSelectors
             for (const selector of requiredSelectors)
@@ -425,11 +428,14 @@ function summarizeForRequiredProperties(foundProperties, requiredProperties, rep
 /************************************************/
 /* Check results for additional requirements    */
 /************************************************/
-function summarizeAdditionalRequirements(report, countHTMLFiles, additionalRequirements, additionalRequirementResults)
+//function summarizeAdditionalRequirements(report, countHTMLFiles, additionalRequirements, additionalRequirementResults)
+function summarizeAdditionalRequirements(report, countHTMLFiles, countCSSFiles, foundSelectors, foundProperties,
+    additionalRequirements, additionalRequirementResults)
 {
     let areAllAdditionalRequirementsMet = true;
     let message = "";
 
+    //TODO: Make a function for checking number of either CSS or HTML files
     const requiredNumberOfHTMLFiles = parseInt(additionalRequirements[1]);
     // Report if less than the expected number of html files is found
     if (countHTMLFiles < requiredNumberOfHTMLFiles)
@@ -440,11 +446,42 @@ function summarizeAdditionalRequirements(report, countHTMLFiles, additionalRequi
         report += message + `\n`;
     }
 
+    const requiredNumberOfCSSFiles = parseInt(additionalRequirements[2]);
+    // Report if less than the expected number of css files is found
+    if (countHTMLFiles < requiredNumberOfCSSFiles)
+    {
+        areAllAdditionalRequirementsMet = false;
+        message = `Found ${countCSSFiles} css files. Expected ${requiredNumberOfCSSFiles}`;
+        console.log(message);
+        report += message + `\n`;
+    }
     // Report if a special file name is required and not found
     if (additionalRequirementResults[0] === false)
     {
         areAllAdditionalRequirementsMet = false;
         message = `Missing ${additionalRequirements[0]} file`;
+        console.log(message);
+        report += message + `\n`;
+    }
+
+    // Report if the required number of selectors is not found
+    // TODO: check separately for embedded and external selectors
+    const requiredNumberOfSelectors = parseInt(additionalRequirements[3]) + parseInt(additionalRequirements[4]);
+    if (foundSelectors.length < requiredNumberOfSelectors)
+    {
+        areAllAdditionalRequirementsMet = false;
+        message = `Found ${foundSelectors.length} css rules. Expected ${requiredNumberOfSelectors}`;
+        console.log(message);
+        report += message + `\n`;
+    }
+
+    // Report if the required number of properties is not found
+    // TODO: check for unique property types not just the total number of properties
+    const requiredNumberOfProperties = parseInt(additionalRequirements[5] + parseInt(additionalRequirements[5]));
+    if (foundProperties.length < requiredNumberOfProperties)
+    {
+        areAllAdditionalRequirementsMet = false;
+        message = `Found ${foundProperties.length} css properties. Expected ${requiredNumberOfProperties}`;
         console.log(message);
         report += message + `\n`;
     }
