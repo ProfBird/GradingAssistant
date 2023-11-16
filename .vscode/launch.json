@@ -22,7 +22,7 @@
             ],
             "program": "${workspaceFolder}/TestAnyLab.mjs",
             "args": [
-                "/Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Fall/Labs/CIS195Lab04GradeAssist.csv"
+                "/Users/birdb/Library/CloudStorage/GoogleDrive-birdb@lanecc.edu/My Drive/Courses/CIS195/2023-Fall/Labs/CIS195Lab04GradeAssist.csv"
             ]
         },
         {
