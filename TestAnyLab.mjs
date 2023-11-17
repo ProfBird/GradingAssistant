@@ -187,7 +187,6 @@ function loadRequirements(requirementsFileName)
     {
         // if settings[1] has a relative path in it, append it to the path of the requirements file
         if (/^[a-zA-Z]:/.test(settings[1]) || settings[1] == "/" || settings[1] == "\\")  // absolute path in settings
-        if(settings[1].startsWith("C:"))  // absolute path in settings
         {
             submissionsPath = settings[1];
         }
