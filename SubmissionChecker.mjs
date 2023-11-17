@@ -5,6 +5,7 @@ import { JSDOM } from "jsdom";
 import puppeteer from "puppeteer";
 import * as cssTree from "css-tree";
 import os from "os";
+import { all } from "axios";
 
 let countHTMLFiles = 0; // Number of html files found in the lab files
 let countCSSFiles = 0; // Number of css files found in the lab files
@@ -30,8 +31,10 @@ async function checkSubmission(
     let report = ""; // All messages for the operations in this function
     const foundElements = []; // will hold required elements found in the lab files
     // TODO: make this a paramenter and define it in the main
-    const foundSelectors = [];
-    const foundProperties = [];
+    const foundSelectors = []; // all the required css slectors that were found in the css files and embedded css
+    const allSelectors = [];  // all the selectors found in the css files and embedded css for one part of the lab
+    const foundProperties = []; // all the required css properties that were found in the css files and embedded css
+    const allProperties = []; // all the properties found in the css files and embedded css for one part of the lab
     const additionalRequirementResults = [];
     const regExpResults = [];
     // initialize all elements to false
@@ -212,6 +215,16 @@ async function checkSubmission(
         else // File is a css file
         {
             countCSSFiles++;
+            // Get the css selectors from the css file
+            const cssSelectorRegExp = /([.#]?[a-zA-Z_-][\w-]*(\s*[>~+]\s*)?)+/gi;
+            let tempSelectors = fileContents.match(cssSelectorRegExp);
+            // using the spread operator to push the elements onto the allSelectors array
+            allSelectors.push(...tempSelectors);
+            
+            // Get the css properties from the css file
+            const cssPropertyRegExp = /([a-zA-Z_-][\w-]*)(?=\s*:)/gi;
+            allProperties.push(...fileContents.match(cssPropertyRegExp));
+
             // Validate CSS
             validationReport += await validateCSS(fileContents, fileName);
             // TODO: check for embedded css styles in the html pages
