@@ -27,8 +27,10 @@ const requiredCssSelectors = [];
 const requiredCssProperties = [];
 const additionalRequirements = [];
 // Parallel arrays
-const regularExpressions = [];
-const regExpDescriptions = [];
+const regExpForHTML1 = [];
+const regExpForHTML1Description = [];
+const regExpForCSS1 = [];
+const regExpForCSS1Description = [];
 // TODO: Change from parallel arrays to an array of objects
 /*
 // An object that contains a requirement and a description of the requirement
@@ -144,19 +146,29 @@ function loadRequirements(requirementsFileName)
                 }
                 if (row.requiredCssProperties)
                 {
+                    // remove whitespace
+                    row.requiredCssProperties = row.requiredCssProperties.replace(/\s/g, "");
                     requiredCssProperties.push(row.requiredCssProperties);
                 }
                 if (row.moreRequirements)
                 {
                     additionalRequirements.push(row.moreRequirements);
                 }
-                if (row.regExp)
+                if (row.regExpForHTML1)
                 {
-                    regularExpressions.push(row.regExp);
+                    regExpForHTML1.push(row.regExpForHTML1);
                 }
-                if (row.regExpDescription)
+                if (row.regExpForHTML1Description)
                 {
-                    regExpDescriptions.push(row.regExpDescription);
+                    regExpForHTML1Description.push(row.regExpForHTML1Description);
+                }
+                if (row.regExpForCSS1)
+                {
+                    regExpForCSS1.push(row.regExpForCSS1);
+                }
+                if (row.regExpForCSS1Description)
+                {
+                    regExpForCSS1Description.push(row.regExpForCSS1Description);
                 }
             })
             .on("error", (error) =>
@@ -220,7 +232,7 @@ async function getSubDirectories(
     try
     {
         // This code will start by assuming that students follwed instrucitons in terms of 
-        // what subfolders to use.  If they did not, the code will try to figure out what they did.
+        // what dirs and subdirs to use.  If they did not, the code will try to figure out what they did.
 
         if (areAllInOneDir && parts == 1)
         {
@@ -232,35 +244,67 @@ async function getSubDirectories(
             // Find the file for each part and check it.
             await getLabPartFiles(studentDirPath);
         }
-        else if (!areAllInOneDir && parts == 1)
+        else if (!areAllInOneDir && parts == 1)  // like lab 4 in fall 2023
         {
-            // There is only one part 
-            // There might be no subfolder, see if there is a subfolder in studentDir
-            const items = fs.readdirSync(studentDirPath, { withFileTypes: true });
-            const subfolders = items.filter((dirent) =>
-            {
-                const itemPath = path.join(studentDirPath, dirent.name);
-                return fs.statSync(itemPath).isDirectory();
-            });
-            if (subfolders.length === 0)
-            {
-                // There is no subfolder, so the lab files are in the studentDir
-                labPartSubDir = "";
-            }
-            else
-            {  // There should be one lab subfolder, but there might be system subfolders, like __MACOSX
+            // There is only one part.
+            // There might be no subdirectory, see if there is a subdir in studentDir.
+            // There might be nested subdirs in studentDir, 
+            // like Lab4/Home/ with the lab files in Home
 
-                labPartSubDir = subfolders.find((dirent) => !dirent.name.startsWith("_") && !dirent.name.startsWith("."))
-                    .name;  // returns name of first valid dir found
+            // use a loop to read each subfolder of studentDir unitl one is found that has .html (or .htm) files in it
+            // or there are no more subdirs
+            let done = false;
+            let subdirs = [];
+            while (!done)
+            {
+                // get amy subfolders in the studentDirPath + labAssignmentSubDir
+                const direntItems = fs.readdirSync(path.join(studentDirPath, labAssignmentSubDir),
+                    { withFileTypes: true });
+                // get just the subdirs in the studentDirPath which are not system directories
+                subdirs = direntItems.filter((dirent) =>
+                {
+                    return dirent.isDirectory() && !dirent.name.startsWith("_") && !dirent.name.startsWith(".");
+                });
+                if (subdirs.length === 0)
+                {
+                    // There are no subdirs, so the lab files should be in studentDir
+                    labAssignmentSubDir = "";
+                    done = true;
+                }
+                else
+                {
+                    // There are subdirs, return the first one, if any, that contains an html file
+                    const labAssignmentSubDirent = subdirs.find((subdirent) =>
+                    {
+                        const direntItems = fs.readdirSync(path.join(studentDirPath, labAssignmentSubDir, subdirent.name), { withFileTypes: true });
+                        return direntItems.some((dirent) =>
+                        {
+                            return (dirent.name.toLowerCase().endsWith(".html") || dirent.name.toLowerCase().endsWith(".htm")) && dirent.isFile();
+                        });
+                    });
+
+                    if (labAssignmentSubDirent)
+                    {
+                        done = true;  // we've found the lab subdir, so we're done
+                        labAssignmentSubDir = path.join(labAssignmentSubDir, labAssignmentSubDirent.name);
+                    }
+                    else
+                    {
+                        labAssignmentSubDir = path.join(labAssignmentSubDir, subdirs[0].name);  // use the first subdir
+                    }
+                }
             }
+
             report += await checkSubmission(
-                path.join(studentDirPath, labPartSubDir),
+                path.join(studentDirPath, labAssignmentSubDir),
                 "", // assume there are multiple files to check
                 requiredElements1,
                 requiredCssSelectors,
                 requiredCssProperties,
-                regularExpressions,
-                regExpDescriptions,
+                regExpForHTML1,
+                regExpForHTML1Description,
+                regExpForCSS1,
+                regExpForCSS1Description,
                 additionalRequirements,
             );
 
@@ -289,8 +333,8 @@ async function getSubDirectories(
                 const htmlFiles = items.filter((dirent) =>
                 {
                     const itemPath = path.join(studentDirPath, dirent.name);
-                    return (dirent.name.toLowerCase().endsWith(".html") 
-                        || dirent.name.toLowerCase().endsWith(".htm")) 
+                    return (dirent.name.toLowerCase().endsWith(".html")
+                        || dirent.name.toLowerCase().endsWith(".htm"))
                         && fs.statSync(itemPath).isFile();
                 });
                 if (htmlFiles.length > 0)
@@ -324,8 +368,10 @@ async function getSubDirectories(
                         (part === 1) ? requiredElements1 : requiredElements2,
                         requiredCssSelectors,
                         requiredCssProperties,
-                        regularExpressions,
-                        regExpDescriptions,
+                        regExpForHTML1,
+                        regExpForHTML1Description,
+                        regExpForCSS1,
+                        regExpForCSS1Description,
                         additionalRequirements
                     );
                 }
@@ -361,8 +407,10 @@ async function getSubDirectories(
                 (part === 1) ? requiredElements1 : requiredElements2,
                 requiredCssSelectors,
                 requiredCssProperties,
-                regularExpressions,
-                regExpDescriptions,
+                regExpForHTML1,
+                regExpForHTML1Description,
+                regExpForCSS1,
+                regExpForCSS1Description,
                 additionalRequirements
             );
         }

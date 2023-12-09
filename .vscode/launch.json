@@ -10,7 +10,7 @@
             ],
             "program": "${workspaceFolder}/TestAnyLab.mjs",
             "args": [
-                "G:/My Drive/Courses/CIS195/2023-Fall/Labs/CIS195Lab04GradeAssist.csv"
+                "G:/My Drive/Courses/CIS195/2023-Fall/Labs/CIS195Lab06GradeAssist.csv"
             ]
         },
         {
@@ -22,7 +22,7 @@
             ],
             "program": "${workspaceFolder}/TestAnyLab.mjs",
             "args": [
-                "/Users/birdb/Library/CloudStorage/GoogleDrive-birdb@lanecc.edu/My Drive/Courses/CIS195/2023-Fall/Labs/CIS195Lab04GradeAssist.csv"
+                "/Users/birdb/Library/CloudStorage/GoogleDrive-birdb@lanecc.edu/My Drive/Courses/CIS195/2023-Fall/Labs/CIS195Lab06GradeAssist.csv"
             ]
         },
         {

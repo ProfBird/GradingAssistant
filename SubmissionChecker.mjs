@@ -22,8 +22,10 @@ async function checkSubmission(
     requiredElements = [],   // these assignments are the default values
     requiredSelectors = [],
     requiredProperties = [],
-    regularExpressions = [],
-    regExpDescriptions = [],
+    regExpForHTML1 = [],
+    regExpForHTML1Description = [],
+    regExpForCSS1 = [],
+    regExpForCSS1Description = [],
     additionalRequirements = []
 )
 {
@@ -36,7 +38,8 @@ async function checkSubmission(
     const foundProperties = []; // all the required css properties that were found in the css files and embedded css
     const allProperties = []; // all the properties found in the css files and embedded css for one part of the lab
     const additionalRequirementResults = [];
-    const regExpResults = [];
+    let regExpHtmlResults = [];
+    let regExpCssResults = [];
     // initialize all elements to false
     for (let i = 0; i < additionalRequirements.length; i++)
     {
@@ -45,12 +48,12 @@ async function checkSubmission(
 
     if (filePath === "")
     {
-        // Loop through all .html files in the lab directory and it's subdirectories
+        // Loop through all HTML and CSS files in the lab directory and it's subdirectories
         let files = [];
         traverseDir(labDirPath, files);  // Call inner function
         for (const filePath of files.filter((fileName) =>
             // only check .html, .htm and .css files
-            /\.(html?|css)$/.test(fileName)))
+            /\.(html?|css)$/i.test(fileName)))
         {
             // Read the contents of the file
             const fileContents = fs.readFileSync(filePath, "utf8");
@@ -83,17 +86,25 @@ async function checkSubmission(
     }
     if (additionalRequirements.length > 0)
     {
-        report = summarizeAdditionalRequirements(report, countHTMLFiles, countCSSFiles, 
+        report += "Additional requirements:\n"
+        report += summarizeAdditionalRequirements(countHTMLFiles, countCSSFiles,
             allSelectors, allProperties,
             foundSelectors, foundProperties, additionalRequirements, additionalRequirementResults);
     }
-    if (regularExpressions.length > 0)
+    if (regExpForHTML1.length > 0)
     {
-        report = summarizeRegExpSearches(report, regExpResults, regExpDescriptions);
+        report += "Regular expression searches in HTML files:\n"
+        report += summarizeRegExpSearches(regExpHtmlResults, regExpForHTML1Description);
+    }
+
+    if (regExpForCSS1.length > 0)
+    {
+        report += "Regular expression searches in CSS files:\n"
+        report += summarizeRegExpSearches(regExpCssResults, regExpForCSS1Description);
     }
     return report;
 
-    
+
     /*********** inner function *********/
     /* Will be called recursively to    */
     /* read files in all subdirectories */
@@ -122,168 +133,188 @@ async function checkSubmission(
     /************************************/
     async function checkFile(fileContents, fileName)
     {
-        let validationReport = ""; // All messages for the operations in this function
-        // if the file is an .html or .htm file, validate it, get elements and rules it contains.
-        if (/\.html?$/.test(fileName))
+        let report = ""; // All messages for the operations in this function
+        // Do all the file checks if the fil is not empty
+        if (fileContents != "")
         {
-            countHTMLFiles++;
-            // Validate HTML
-            validationReport += await validateHTML(fileContents, fileName);
-            // Search file for regexp from moreRequirements array starting at index 3
-            /* I don't think I need this any more
-            for (let i = 3; i < requiredElements.length; i++)
+            if (/\.html?$/.test(fileName))
             {
-                const regexp = new RegExp(requiredElements[i], "g");
-                if (regexp.test(fileContents))
-                {
-                    foundElements.push(requiredElements[i]);
-                }
-            }
-*/
-            // Get any required html elements from fileContents, put in foundElements
-            const dom = new JSDOM(fileContents);
-            for (const element of requiredElements)
-            {
-               let elements = [];
-                try
-                {
-                    elements = dom.window.document.querySelectorAll(element);
-                } catch (error)
-                {
-                    message = `Error finding ${element} element in ${fileName}`;
-                    console.error(message);
-                    validationReport += message + `\n`;
-                }
-                // if something is in the elements array, then the element was found
-                // TODO: figure out a cleaner way to do this
-                if (elements.length !== 0)
-                {
-                    foundElements.push(element);
-                }
-            } // end looping through requiredElements
+                countHTMLFiles++;
+                // Validate HTML
+                report += await validateHTML(fileContents, fileName);
 
-            // Get embedded css out of the html file
-            let styleElement = dom.window.document.querySelector("style");
-            if (styleElement !== null)
-            {
-                const cssText = styleElement.textContent;
-                // put any embedded css selectors in foundSelectors
-                const ast = cssTree.parse(cssText);
-                // Get the embedded css selectors from the Abstract Syntax Tree (ast)
-                cssTree.walk(ast, (node) =>
+                // Get any required html elements from fileContents, put in foundElements
+                const dom = new JSDOM(fileContents);
+                for (const element of requiredElements)
                 {
-                    if (node.type === "Rule")
+                    let elements = [];
+                    try
                     {
-                        const selector = cssTree.generate(node.prelude);
-                        allSelectors.push(selector);
-                        if(requiredSelectors.includes(selector))
+                        elements = dom.window.document.querySelectorAll(element);
+                    } catch (error)
+                    {
+                        message = `Error finding ${element} element in ${fileName}`;
+                        console.error(message);
+                        report += message + `\n`;
+                    }
+                    // if something is in the elements array, then the element was found
+                    // TODO: figure out a cleaner way to do this
+                    if (elements.length !== 0)
+                    {
+                        foundElements.push(element);
+                    }
+                } // end looping through requiredElements
+
+                // Get embedded css out of the html file
+                let styleElement = dom.window.document.querySelector("style");
+                if (styleElement !== null)
+                {
+                    const cssText = styleElement.textContent;
+                    // put any embedded css selectors in foundSelectors
+                    const ast = cssTree.parse(cssText);
+                    // Get the embedded css selectors from the Abstract Syntax Tree (ast)
+                    cssTree.walk(ast, (node) =>
+                    {
+                        if (node.type === "Rule")
                         {
-                            foundSelectors.push(selector);
+                            const selector = cssTree.generate(node.prelude);
+                            allSelectors.push(selector);
+                            if (requiredSelectors.includes(selector))
+                            {
+                                foundSelectors.push(selector);
+                            }
+                        }
+                    });
+                    // Get all embedded css properties from the Abstract Syntax Tree (ast)
+                    cssTree.walk(ast, (node) =>
+                    {
+                        if (node.type === "Declaration")
+                        {
+                            const property = node.property;
+                            const value = cssTree.generate(node.value);
+                            allProperties.push(property);
+                            if (requiredProperties.includes(property))
+                            {
+                                foundProperties.push(property);
+                            }
+                            else if (requiredProperties.includes(property + ":" + value))
+                            {
+                                foundProperties.push(property + ":" + value);
+                            }
+                        }
+                    });
+                }
+
+                // Get elements with inline styles from the html file
+                const elements = dom.window.document.querySelectorAll("[style]");
+                // Get the CSS property names from each of the element's inline styles
+                for (const element of elements)
+                {
+                    const inlineStyle = element.getAttribute("style");
+                    if (inlineStyle !== null)
+                    {
+                        // Extract all property names from the inline style rule using a regular expression
+                        const propertyRegex = /([\w-]+)\s*:/g;
+                        let match; // array with capture group of matched property name
+                        while ((match = propertyRegex.exec(inlineStyle)) !== null)
+                        {
+                            foundProperties.push(match[1]);
                         }
                     }
-                });
-                // Get all embedded css properties from the Abstract Syntax Tree (ast)
-                cssTree.walk(ast, (node) =>
+                }
+
+                regExpHtmlResults = checkFileWithRegExp(regExpForHTML1, fileContents);
+
+                // Render the html page and check for required output
+                // TODO: Load required output from csv file
+                // TODO: debug renderAndCheck function
+                /*
+                const requiredOutput = [];
+                report += await renderAndCheck(fileContents, path.basename(filePath), requiredOutput);
+                */
+            }
+            else // File is a css file
+            {
+                countCSSFiles++;
+                // Get the css selectors from the css file
+                const cssSelectorRegExp = /([.#]?[a-zA-Z_-][\w-]*(\s*[>~+]\s*)?)+/gi;  // TODO: bug--this gets proeprties and values too
+                let tempSelectors = fileContents.match(cssSelectorRegExp);
+                // using the spread operator to push the elements onto the allSelectors array
+                allSelectors.push(...tempSelectors);
+
+                // Get the css properties from the css file
+                const cssPropertyRegExp = /([a-zA-Z_-][\w-]*)(?=\s*:)/gi;
+                allProperties.push(...fileContents.match(cssPropertyRegExp));
+
+                // Validate CSS
+                report += await validateCSS(fileContents, fileName);
+                // TODO: check for embedded css styles in the html pages. 
+                // 11/16/23, already getting them in foundSelectors and foundProperties, but the syntax might not be checked.
+
+                // Get any required css selectors from fileContents, put in foundSelectors
+
+                for (const selector of requiredSelectors)
                 {
-                    if (node.type === "Declaration")
+                    if (fileContents.includes(selector))
                     {
-                        const property = node.property;
-                        allProperties.push(property);
-                        if (requiredProperties.includes(property))
-                        {
-                            foundProperties.push(property);
-                        }
+                        foundSelectors.push(selector);
                     }
-                });
-            }
-
-            // Get elements with inline styles from the html file
-            const elements = dom.window.document.querySelectorAll("[style]");
-            // Get the CSS property names from each of the element's inline styles
-            for (const element of elements)
-            {
-                const inlineStyle = element.getAttribute("style");
-                if (inlineStyle !== null)
+                }
+                // Get any required css properties from fileContents, put in foundProperties
+                // TODO: Use cssTree to get the properties
+                // remove all whitespace from the fileContents, this was already done to the requiredProperties
+                fileContents = fileContents.replace(/\s/g, '');
+                for (let property of requiredProperties)
                 {
-                    // Extract all property names from the inline style rule using a regular expression
-                    const propertyRegex = /([\w-]+)\s*:/g;
-                    let match; // array with capture group of matched property name
-                    while ((match = propertyRegex.exec(inlineStyle)) !== null)
+                    if (fileContents.includes(property))
                     {
-                        foundProperties.push(match[1]);
+                        foundProperties.push(property);
                     }
-                }
-            }
+                } // end looping through requiredProperties
 
-            // Render the html page and check for required output
-            // TODO: Load required output from csv file
-            // TODO: debug renderAndCheck function
-            /*
-            const requiredOutput = [];
-            report += await renderAndCheck(fileContents, path.basename(filePath), requiredOutput);
-            */
-        }
-        else // File is a css file
-        {
-            countCSSFiles++;
-            // Get the css selectors from the css file
-            const cssSelectorRegExp = /([.#]?[a-zA-Z_-][\w-]*(\s*[>~+]\s*)?)+/gi;
-            let tempSelectors = fileContents.match(cssSelectorRegExp);
-            // using the spread operator to push the elements onto the allSelectors array
-            allSelectors.push(...tempSelectors);
-            
-            // Get the css properties from the css file
-            const cssPropertyRegExp = /([a-zA-Z_-][\w-]*)(?=\s*:)/gi;
-            allProperties.push(...fileContents.match(cssPropertyRegExp));
+                // Do regular expression searches of the CSS file contents
+                regExpHtmlResults = checkFileWithRegExp(regExpForCSS1, fileContents);
 
-            // Validate CSS
-            validationReport += await validateCSS(fileContents, fileName);
-            // TODO: check for embedded css styles in the html pages. 
-            // 11/16/23, already getting them in foundSelectors and foundProperties, but the syntax might not be checked.
-            // Get any required css selectors from fileContents, put in foundSelectors
-            for (const selector of requiredSelectors)
+            } // end of processing .css files
+
+            // --- Check the file for additional requirements ---
+            // Check for a special file name
+            const specialFileName = additionalRequirements[0] === '""' ? "" : additionalRequirements[0];
+
+            if (specialFileName == undefined || specialFileName == "")
             {
-                if (fileContents.includes(selector))
-                {
-                    foundSelectors.push(selector);
-                }
+                additionalRequirementResults[0] = true; // set to true if we are not looking for a special file name
             }
-            // Get any required css properties from fileContents, put in foundProperties
-            // TODO: Use cssTree to get the properties
-            for (const property of requiredProperties)
+            else
             {
-                if (fileContents.includes(property))
-                {
-                    foundProperties.push(property);
-                }
-            } // end looping through requiredProperties
-        } // end of processing .css files
-
-        // --- Check the file for additional requirements ---
-        // Check for a special file name
-        const specialFileName = additionalRequirements[0] === '""' ? "" : additionalRequirements[0];
-        
-        if (specialFileName == undefined || specialFileName == "")
+                // if any file name has the special file name, set the results to true. Partial match for .htm an .html
+                additionalRequirementResults[0] ||= (specialFileName === "" || fileName.includes(specialFileName));
+            }
+        } else
         {
-            additionalRequirementResults[0] = true; // set to true if we are not looking for a special file name
+            message = `File ${fileName} is empty`;
+            console.log(message);
+            report += message + `\n`;
         }
-        else
-        {
-            // if any file name has the special file name, set the results to true. Partial match for .htm an .html
-            additionalRequirementResults[0] ||= (specialFileName === "" || fileName.includes(specialFileName));
-        }
+        return report;
+    } // End of checkFile inner function
 
-        // --- Check the file using regular expressions ---
-        // The boolean results are or'ed together from each file checked
-        // One search result is enough to set the overall result to true
-        for (let i = 0; i < regularExpressions.length; i++)
+    /************************** inner function ***********************/
+    /*     ----- Check a file using regular expressions ------       */
+    /* Can be used for any file type, including CSS and HTML                    */
+    /* The boolean results are or'ed together from each file checked */
+    /* One search result is enough to set the overall result to true */
+    /*****************************************************************/
+    function checkFileWithRegExp(regExpArray, fileContents)
+    {
+        const regExpResults = [];
+        for (let i = 0; i < regExpArray.length; i++)
         {
-            let regexp = new RegExp(regularExpressions[i], "gim");
+            let regexp = new RegExp(regExpArray[i], "gim");
             regExpResults[i] ||= (regexp.test(fileContents)); // true / false result
         }
-
-        return validationReport;
-    } // End of checkFile inner function
+        return regExpResults;
+    } // End of checkFileWithRegExp inner function
 
 } // End of checkSubmission function
 
@@ -450,14 +481,16 @@ function summarizeForRequiredProperties(foundProperties, requiredProperties, rep
     return report;
 }
 
-/************************************************/
-/* Check results for additional requirements    */
-/************************************************/
-function summarizeAdditionalRequirements(report, countHTMLFiles, countCSSFiles, allSelectors, allProperties,  
+/**************************************************/
+/* Summarize results for additional requirements  */
+/* Summary of results of checking in all files    */
+/**************************************************/
+function summarizeAdditionalRequirements(countHTMLFiles, countCSSFiles, allSelectors, allProperties,
     foundSelectors, foundProperties, additionalRequirements, additionalRequirementResults)
 {
     let areAllAdditionalRequirementsMet = true;
     let message = "";
+    let report = "";
 
     //TODO: Make one function for checking number of either CSS or HTML files
     const requiredNumberOfHTMLFiles = parseInt(additionalRequirements[1]);
@@ -523,11 +556,13 @@ function summarizeAdditionalRequirements(report, countHTMLFiles, countCSSFiles, 
 }
 
 /****************************************************/
-/* Check results for regular expression searches    */
+/* Sumarize results or regular expression searches  */
+/* Summary of results of searches in all files      */
 /****************************************************/
-function summarizeRegExpSearches(report, regExpResults, regExpDescriptions)
+function summarizeRegExpSearches(regExpResults, regExpDescriptions)
 {
     let message = "";
+    let report = "";
     let didAllRegExpSearchesPass = true;
 
     // Report if a regexp search fails
