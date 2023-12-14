@@ -1,0 +1,8 @@
+line,settings,settingsDescription,requiredElements1,requiredCssSelectors,requiredCssSelectorsDescription,requiredCssProperties,requiredCssPropertiesDescription,regExpForHTML1,regExpForHTML1Description,moreRequirements,moreReqsDescription,Notes
+1,CIS195_F23Lab6Submissions,MacOS path,header,footer,optional,grid-template-areas,,<head>[\s\S]*<!--,Comment in head,index,File name,
+2,CIS195_F23Lab6Submissions,Windows path,footer,nav,optional,grid-area,,,,4,Total HTML files,
+3,1,Num of part folders,title,header,optional,display: grid,,,,2,Total CSS files,
+4,Lab06,Lab name,a,,,display: flex,,,,,,
+5,FALSE,Parts in subfolders,link[href][rel='stylesheet'],,,flex-direction,,,,,,
+,,,,,,align-items,optional,,,,,
+,,,,,,justify-content,optional,,,,,
