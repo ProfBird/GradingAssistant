@@ -18,7 +18,6 @@ To run the program use the following CLI command:
 
   - Windows path: "G:/My Drive/Courses/CS133JS/23F/Labs"
     
-
   - Mac OS path: "/Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Fall/Labs"
 
 
@@ -57,6 +56,30 @@ Here are the options:
 `--help      Display a help message`  
 `--overwrite Overwrite existing report files`  
 
+### Current Capabilities
+
+#### Requirements Checking
+
+The program can currently (as of 12/14/23) check the following kinds of requirements:
+
+- HTML
+  - Elements  
+    Check for specific required elements
+  - Attributes  
+    Check for specific required attributes in particular elements
+  - Syntax  
+    Check using the W3C HTML validator web service
+- CSS  
+  This works for external, embedded and inline CSS. 
+  - Selectors  
+    This includes complex selectors
+  - Properties
+  - Syntax
+- Number of CSS and number of HTML files
+- Regular expression searches of the HTML or CSS code
+- Existence of special file names, like index.html
+
 ### Requirements file
-The requirements file can be written in a spreadsheet and then saved in .csv format.
+
+A requirements file is used to configure the program to test a particular lab assignment. The requirements file can be written in a spreadsheet and then saved in .csv format.
 

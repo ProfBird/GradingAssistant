@@ -1,6 +1,6 @@
 # Grading Assistant for CIS 195
 
-TODO: This diagram is out of date and needs to be updates&mdash;10/23/23
+TODO: This diagram is out of date and needs to be updated&mdash;10/23/23
 
 
 
