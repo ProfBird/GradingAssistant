@@ -83,3 +83,38 @@ The program can currently (as of 12/14/23) check the following kinds of requirem
 
 A requirements file is used to configure the program to test a particular lab assignment. The requirements file can be written in a spreadsheet and then saved in .csv format.
 
+See the Docs folder for example requirements files
+
+### Output
+A text file with a summary report s is saved in the lab assignment folder for each student submission. Here is an example of a summary report:
+
+```
+Checking the TyTitan_file directory
+Checking the about.html file
+error error found on line 28 column 39: Bad value “contact us.html” for attribute “href” on element “a”: Illegal character in path segment: space is not allowed.
+info error found on line 15 column 25: Section lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all sections, or else use a “div” element instead for any cases where no heading is needed.
+Checking the css/responsive.css file
+css/responsive.css: 1
+                            parse-error
+                                Parse Error
+Checking the css/style.css file
+No errors found in css/style.css
+Checking the index.html file
+No errors found in index.html
+
+Missing 6 required elements
+Missing style element
+Missing header element
+Missing nav element
+Missing figure element
+Missing table th element
+Missing article element
+All required CSS selectors found
+Additional requirements:
+All additional requirements met
+Regular expression searches in HTML files:
+Missing Comment in head in files
+```
+
+
+
