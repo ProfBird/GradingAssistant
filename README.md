@@ -57,6 +57,8 @@ Here are the options:
 `--overwrite Overwrite existing report files`  
 
 ### Current Capabilities
+The program currently just does static checking of HTML and CSS files.
+See the [Roadmap](Docs/GradeAssistRoadmap.md) for plans to add additioanl capabilitites.
 
 #### Requirements Checking
 
@@ -83,10 +85,10 @@ The program can currently (as of 12/14/23) check the following kinds of requirem
 
 A requirements file is used to configure the program to test a particular lab assignment. The requirements file can be written in a spreadsheet and then saved in .csv format.
 
-See the Docs folder for example requirements files
+See the Docs folder for example requirements files.
 
 ### Output
-A text file with a summary report s is saved in the lab assignment folder for each student submission. Here is an example of a summary report:
+A text file with a summary report is saved in the lab assignment folder for each student's submission. Here is an example of a summary report:
 
 ```
 Checking the TyTitan_file directory
