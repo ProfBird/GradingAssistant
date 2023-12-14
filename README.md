@@ -32,10 +32,10 @@ The zip file is expected to contain one or more .zip archives, one or two for ea
 
 This is what UnzipFiles uses to unzip the files:  
 
-- On Windows: 7zip  
-- On Mac OS: unzip  
+- On Windows: [7zip](url)  
+- On Mac OS: unzip (a built-in Mac OS Archive Utility)
 
-  Note, If you want to use 7zip on Mac Os, it can be installed  using Homebrew: 
+  Note, If you want to use 7zip on Mac OS, it can be installed using Homebrew: 
 
    `brew install p7zip`
 
