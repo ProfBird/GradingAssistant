@@ -83,6 +83,8 @@ The program can currently (as of 12/14/23) check the following kinds of requirem
 
 A requirements file is used to configure the program to test a particular lab assignment. The requirements file can be written in a spreadsheet and then saved in .csv format.
 
+See the Docs folder for example requirements files
+
 ### Output
 A text file with a summary report s is saved in the lab assignment folder for each student submission. Here is an example of a summary report:
 
