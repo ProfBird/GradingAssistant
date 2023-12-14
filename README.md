@@ -5,8 +5,8 @@ This is my first Node.js project and I'm still learning. In fact, I haven't lear
 I am currently working on expanding the software to check JavaScript code in web pages for my [CS 133JS Beginning JavaScript Programming](https://github.com/LCC-CIT/CS133JS-CourseMaterials) course.
 
 There are two programs in this repository:
--  [UnzipFiles.mjs](#UnzipFiles.mjs)
--  [TestAnyLab.mjs](#TestAnyLab.mjs)
+-  [UnzipFiles](#UnzipFiles)
+-  [TestAnyLab](#TestAnyLab)
 
 ## Contributing
 If you would like to help with development, send me a message so we can keep our work coordinated. Feel free to:
@@ -14,7 +14,7 @@ If you would like to help with development, send me a message so we can keep our
 - Let me know which enhancement or new feature you would like to work on.
 - Ask for more documentation or information.
 
-## UnzipFiles.mjs
+## UnzipFiles
 This is a Node module for unzipping files that have been bulk downloaded from the Moodle Learning Management System. 
 
 ### Usage
@@ -51,7 +51,7 @@ This is what UnzipFiles uses to unzip the files:
 
 
 
-## TestAnyLab.mjs
+## TestAnyLab
 
 This is the software that checks the lab assignemnts unzipped by Unzipfiles. This is the expected folder structure:  
 `StudentName_file/LabX/<website files and folders>`  
