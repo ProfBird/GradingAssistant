@@ -14,6 +14,9 @@ If you would like to help with development, send me a message so we can keep our
 - Let me know which enhancement or new feature you would like to work on.
 - Ask for more documentation or information.
 
+### Development Workflow
+We will follow the [GitHub flow](https://docs.github.com/en/get-started/quickstart/github-flow). A dev making a code chang should do it on a new branch, the dev will issue a PR to me for code review, and once approved the dev can merge the branch into main.
+
 ## UnzipFiles
 This is a Node module for unzipping files that have been bulk downloaded from the Moodle Learning Management System. 
 
