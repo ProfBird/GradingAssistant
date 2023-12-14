@@ -1,5 +1,9 @@
 ## Use MSBuild to Automate Grading
 
+This is a series of answers I got from Bing Copilot.
+
+-----
+
 Yes, MSBuild is able to run cross-platform. MSBuild is the build engine and file format that Visual Studio uses to build .NET projects. [It provides the necessary tasks and targets to compile, test, and deploy .NET applications ](https://devblogs.microsoft.com/dotnet/msbuild-is-going-cross-platform-with-net-core/)[1](https://devblogs.microsoft.com/dotnet/msbuild-is-going-cross-platform-with-net-core/).
 
 MSBuild was open sourced in March 2015 and became part of the .NET Foundation. Since then, it has been ported to run on .NET Core, the open source, cross-platform version of .NET. [This allows MSBuild to run on Linux and Mac using the dotnet command ](https://devblogs.microsoft.com/dotnet/msbuild-is-going-cross-platform-with-net-core/)[2](https://stackoverflow.com/questions/45775817/msbuild-integrating-a-cross-platform-compiler-in-the-build).
