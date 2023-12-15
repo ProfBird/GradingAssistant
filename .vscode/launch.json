@@ -22,8 +22,31 @@
             ],
             "program": "${workspaceFolder}/TestAnyLab.mjs",
             "args": [
-                "/Users/birdb/Library/CloudStorage/GoogleDrive-birdb@lanecc.edu/My Drive/Courses/CIS195/2023-Fall/Labs/CIS195Lab06GradeAssist.csv"
+                "/Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Fall/Labs/CIS195Lab05GradeAssist.csv"
             ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Jest All",
+            "program": "${workspaceFolder}/node_modules/.bin/jest",
+            "args": [
+                "--runInBand"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "name": "Debug Jest Tests",
+            "type": "node",
+            "request": "launch",
+            "runtimeArgs": [
+              "--inspect-brk",
+              "${workspaceRoot}/node_modules/.bin/jest",
+              "--runInBand"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
         },
         {
             "type": "node-terminal",
