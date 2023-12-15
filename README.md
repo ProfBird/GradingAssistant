@@ -110,10 +110,6 @@ Checking the TyTitan_file directory
 Checking the about.html file
 error error found on line 28 column 39: Bad value “contact us.html” for attribute “href” on element “a”: Illegal character in path segment: space is not allowed.
 info error found on line 15 column 25: Section lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all sections, or else use a “div” element instead for any cases where no heading is needed.
-Checking the css/responsive.css file
-css/responsive.css: 1
-                            parse-error
-                                Parse Error
 Checking the css/style.css file
 No errors found in css/style.css
 Checking the index.html file
