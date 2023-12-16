@@ -169,40 +169,10 @@ async function checkSubmission(
                 let styleElement = dom.window.document.querySelector("style");
                 if (styleElement !== null)
                 {
-                    const cssText = styleElement.textContent;
-                    // put any embedded css selectors in foundSelectors
-                    const ast = cssTree.parse(cssText);
-                    // Get the embedded css selectors from the Abstract Syntax Tree (ast)
-                    cssTree.walk(ast, (node) =>
-                    {
-                        if (node.type === "Rule")
-                        {
-                            const selector = cssTree.generate(node.prelude);
-                            allSelectors.push(selector);
-                            if (requiredSelectors.includes(selector))
-                            {
-                                foundSelectors.push(selector);
-                            }
-                        }
-                    });
-                    // Get all embedded css properties from the Abstract Syntax Tree (ast)
-                    cssTree.walk(ast, (node) =>
-                    {
-                        if (node.type === "Declaration")
-                        {
-                            const property = node.property;
-                            const value = cssTree.generate(node.value);
-                            allProperties.push(property);
-                            if (requiredProperties.includes(property))
-                            {
-                                foundProperties.push(property);
-                            }
-                            else if (requiredProperties.includes(property + ":" + value))
-                            {
-                                foundProperties.push(property + ":" + value);
-                            }
-                        }
-                    });
+                    let foundSelectorsAndProperties = 
+                         getEmbeddedCssSelectorsAndProperties(styleElement, requiredSelectors, requiredProperties);
+                    foundSelectors.push(...foundSelectorsAndProperties.foundSelectors);
+                    foundProperties.push(...foundSelectorsAndProperties.foundProperties);
                 }
 
                 // Get elements with inline styles from the html file
@@ -402,6 +372,52 @@ async function validateCSS(fileContents, fileName)
     }
     return report;
 }
+
+/***************************************************************************************/
+/* Get the css selectors and properties from embedded css in an html file              */
+/* Returns an object with both the required selectors and properties that were found,  */
+/* as well as all the embedded selectors and properties.                               */
+/***************************************************************************************/
+function getEmbeddedCssSelectorsAndProperties(styleElement, requiredSelectors, requiredProperties) {
+    const allSelectors = [];
+    const foundSelectors = [];
+    const allProperties = [];
+    const foundProperties = [];
+
+    const cssText = styleElement.textContent;
+    const ast = cssTree.parse(cssText);
+
+    cssTree.walk(ast, (node) => {
+        if (node.type === "Rule") {
+            const selector = cssTree.generate(node.prelude);
+            allSelectors.push(selector);
+            if (requiredSelectors.includes(selector)) {
+                foundSelectors.push(selector);
+            }
+        }
+    });
+
+    cssTree.walk(ast, (node) => {
+        if (node.type === "Declaration") {
+            const property = node.property;
+            const value = cssTree.generate(node.value).trim();
+            allProperties.push(`${property}: ${value}`);
+            if (requiredProperties.includes(`${property}: ${value}`.trim())) {
+                foundProperties.push(`${property}: ${value}`);
+            } else if (requiredProperties.includes(property)) {
+                foundProperties.push(property);
+            }
+        }
+    });
+
+    return {
+        allSelectors,
+        foundSelectors,
+        allProperties,
+        foundProperties
+    };
+}
+
 
 /********************************************/
 /* Check results for required html elements */
@@ -622,4 +638,4 @@ async function renderAndCheck(fileContents, fileName, requiredOutput)
     return report;
 }
 
-export { checkSubmission };
+export { checkSubmission, getEmbeddedCssSelectorsAndProperties };
