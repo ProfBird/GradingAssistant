@@ -15,7 +15,11 @@ If you would like to help with development, send me a message so we can keep our
 - Ask for more documentation or information.
 
 ### Development Workflow
-We will follow the [GitHub flow](https://docs.github.com/en/get-started/quickstart/github-flow). A dev making a code change will do it on a new branch, the dev will issue a PR to me for code review, and once approved the dev can merge the branch into main.
+We will follow the [GitHub flow](https://docs.github.com/en/get-started/quickstart/github-flow). A dev making a code change will do it on a new branch, the dev will issue a PR to me for code review, and once approved the dev can merge the branch into main.  
+
+### Unit Testing
+[Mocha](https://mochajs.org) unit test files are in the test subfolder. Each bug fix or enhancement should include a unit test if one does not already exist.
+
 
 ------------
 
