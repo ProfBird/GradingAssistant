@@ -177,21 +177,9 @@ async function checkSubmission(
 
                 // Get elements with inline styles from the html file
                 const elements = dom.window.document.querySelectorAll("[style]");
-                // Get the CSS property names from each of the element's inline styles
-                for (const element of elements)
-                {
-                    const inlineStyle = element.getAttribute("style");
-                    if (inlineStyle !== null)
-                    {
-                        // Extract all property names from the inline style rule using a regular expression
-                        const propertyRegex = /([\w-]+)\s*:/g;
-                        let match; // array with capture group of matched property name
-                        while ((match = propertyRegex.exec(inlineStyle)) !== null)
-                        {
-                            foundProperties.push(match[1]);
-                        }
-                    }
-                }
+                // Get the CSS property names and values from each of the element's inline styles
+                const inlineStyles = getInlineStyles(elements, requiredProperties);
+                foundProperties.push(...inlineStyles.foundProperties);
 
                 regExpHtmlResults = checkFileWithRegExp(regExpForHTML1, fileContents);
 
@@ -418,6 +406,34 @@ function getEmbeddedCssSelectorsAndProperties(styleElement, requiredSelectors, r
     };
 }
 
+/*************************************************/
+/* Get the css properties and values from the    */
+/* inline styles in an html file                 */
+/*************************************************/
+function getInlineStyles(elements, requiredProperties) {
+    const allProperties = [];
+    const foundProperties = [];
+    for (const element of elements) {
+        const inlineStyle = element.getAttribute("style");
+        if (inlineStyle !== null) {
+            // Extract all property names and values from the inline style rule using a regular expression
+            const propertyRegex = /([\w-]+)\s*:\s*([^;]+)/g;
+            let match; // array with capture groups of matched property name and value
+            while ((match = propertyRegex.exec(inlineStyle)) !== null) {
+                const property = match[1];
+                const value = match[2].trim();
+                // TODO: This code is duplicated in getEmbeddedCssSelectorsAndProperties
+                allProperties.push(`${property}: ${value}`);
+                if (requiredProperties.includes(`${property}: ${value}`.trim())) {
+                    foundProperties.push(`${property}: ${value}`);
+                } else if (requiredProperties.includes(property)) {
+                    foundProperties.push(property);
+                }
+            }
+        }
+    }
+    return { allProperties, foundProperties };
+}
 
 /********************************************/
 /* Check results for required html elements */
@@ -638,4 +654,4 @@ async function renderAndCheck(fileContents, fileName, requiredOutput)
     return report;
 }
 
-export { checkSubmission, getEmbeddedCssSelectorsAndProperties };
+export { checkSubmission, getEmbeddedCssSelectorsAndProperties, getInlineStyles };
