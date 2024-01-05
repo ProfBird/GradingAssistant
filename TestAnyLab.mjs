@@ -1,7 +1,7 @@
 import fs from "fs";
 import csv from "csv-parser";
 import path from "path";
-
+import { HtmlAndCssChecker } from './HtmlAndCssChecker.mjs';
 import { checkSubmission } from "./SubmissionChecker.mjs";
 
 /* Location of the files downloaded from Moodle and unzipped */
@@ -19,38 +19,10 @@ import { checkSubmission } from "./SubmissionChecker.mjs";
 let submissionsPath = ""; // Path to the folder containing the student submissions
 let numberOfParts = 1; // Number of parts in this lab assignment, set later in loadRequirements
 let areAllInOneDir = true; // true if all parts are in one folder
-const HtmlAndCssRequirements = {
-    // Required HTML elements for parts 1 and 2 (global scope)
-    requiredElements1: [],
-    requiredElements2: [],
-    // Required CSS selectors and properties (global scope)
-    requiredCssSelectors: [],
-    requiredCssProperties: [],
-    additionalRequirements: [],
-    // Parallel arrays
-    // TODO: Change from parallel arrays to an array of objects
-    regExpForHTML1: [],
-    regExpForHTML1Description: [],
-    regExpForCSS1: [],
-    regExpForCSS1Description: []
-};
 
-/*
-// An object that contains a requirement and a description of the requirement
- const requirement = {
-                         specification: "",
-                          description: "" 
-                    };
-// array of requirement objects
-const regExp = [];
-*/
-
-// Indexes into the additionalRequirements array
-// 0: Number of parts in the lab assignment
-// 1: Number of html files expected in the lab submission
-// 2: If a special html file name is required, like index, it will be in the requirements file
-// 3+: Regular expressions to search for in the html files
-
+// Get the requirements from the HtmlAndCssChecker class
+let hcChecker = new HtmlAndCssChecker();
+let HtmlAndCssRequirements = hcChecker.requirements;
 
 /****************/
 /* Main program */
@@ -116,15 +88,16 @@ if (param === "--help" || param === undefined)
 /*************************************/
 /* Load requirements from a csv file */
 /*************************************/
+// TODO: Make this function general purpose so it works with any set of requirements
 function loadRequirements(requirementsFileName)
 {
     const settings = [];
     /* settings array elements will hold these settings values:
-    0: MacOsSubmissionPath
-    1: WindowsSubmissionPath
-    2: LabName
-    3: Are all parts in one folder? (true or false)
-*/
+        0: MacOsSubmissionPath
+        1: WindowsSubmissionPath
+        2: LabName
+        3: Are all parts in one folder? (true or false)
+    */
     try
     {
         const data = fs.readFileSync(requirementsFileName);
