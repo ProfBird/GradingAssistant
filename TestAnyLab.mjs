@@ -19,19 +19,22 @@ import { checkSubmission } from "./SubmissionChecker.mjs";
 let submissionsPath = ""; // Path to the folder containing the student submissions
 let numberOfParts = 1; // Number of parts in this lab assignment, set later in loadRequirements
 let areAllInOneDir = true; // true if all parts are in one folder
-// Required HTML elements for parts 1 and 2 (global scope)
-const requiredElements1 = [];
-const requiredElements2 = [];
-// Required CSS selectors and properties (global scope)
-const requiredCssSelectors = [];
-const requiredCssProperties = [];
-const additionalRequirements = [];
-// Parallel arrays
-const regExpForHTML1 = [];
-const regExpForHTML1Description = [];
-const regExpForCSS1 = [];
-const regExpForCSS1Description = [];
-// TODO: Change from parallel arrays to an array of objects
+const HtmlAndCssRequirements = {
+    // Required HTML elements for parts 1 and 2 (global scope)
+    requiredElements1: [],
+    requiredElements2: [],
+    // Required CSS selectors and properties (global scope)
+    requiredCssSelectors: [],
+    requiredCssProperties: [],
+    additionalRequirements: [],
+    // Parallel arrays
+    // TODO: Change from parallel arrays to an array of objects
+    regExpForHTML1: [],
+    regExpForHTML1Description: [],
+    regExpForCSS1: [],
+    regExpForCSS1Description: []
+};
+
 /*
 // An object that contains a requirement and a description of the requirement
  const requirement = {
@@ -134,41 +137,41 @@ function loadRequirements(requirementsFileName)
                 }
                 if (row.requiredElements1)
                 {
-                    requiredElements1.push(row.requiredElements1);
+                    HtmlAndCssRequirements.requiredElements1.push(row.requiredElements1);
                 }
                 if (row.requiredElements2)
                 {
-                    requiredElements2.push(row.requiredElements2);
+                    HtmlAndCssRequirements.requiredElements2.push(row.requiredElements2);
                 }
                 if (row.requiredCssSelectors)
                 {
-                    requiredCssSelectors.push(row.requiredCssSelectors);
+                    HtmlAndCssRequirements.requiredCssSelectors.push(row.requiredCssSelectors);
                 }
                 if (row.requiredCssProperties)
                 {
                     // remove whitespace
                     row.requiredCssProperties = row.requiredCssProperties.replace(/\s/g, "");
-                    requiredCssProperties.push(row.requiredCssProperties);
+                    HtmlAndCssRequirements.requiredCssProperties.push(row.requiredCssProperties);
                 }
                 if (row.moreRequirements)
                 {
-                    additionalRequirements.push(row.moreRequirements);
+                    HtmlAndCssRequirements.additionalRequirements.push(row.moreRequirements);
                 }
                 if (row.regExpForHTML1)
                 {
-                    regExpForHTML1.push(row.regExpForHTML1);
+                    HtmlAndCssRequirements.regExpForHTML1.push(row.regExpForHTML1);
                 }
                 if (row.regExpForHTML1Description)
                 {
-                    regExpForHTML1Description.push(row.regExpForHTML1Description);
+                    HtmlAndCssRequirements.regExpForHTML1Description.push(row.regExpForHTML1Description);
                 }
                 if (row.regExpForCSS1)
                 {
-                    regExpForCSS1.push(row.regExpForCSS1);
+                    HtmlAndCssRequirements.regExpForCSS1.push(row.regExpForCSS1);
                 }
                 if (row.regExpForCSS1Description)
                 {
-                    regExpForCSS1Description.push(row.regExpForCSS1Description);
+                    HtmlAndCssRequirements.regExpForCSS1Description.push(row.regExpForCSS1Description);
                 }
             })
             .on("error", (error) =>
@@ -295,17 +298,12 @@ async function getSubDirectories(
                 }
             }
 
+            // check the lab files in the labAssignmentSubDir
             report += await checkSubmission(
                 path.join(studentDirPath, labAssignmentSubDir),
                 "", // assume there are multiple files to check
-                requiredElements1,
-                requiredCssSelectors,
-                requiredCssProperties,
-                regExpForHTML1,
-                regExpForHTML1Description,
-                regExpForCSS1,
-                regExpForCSS1Description,
-                additionalRequirements,
+                1,  // there is only one lab part, number 1
+                HtmlAndCssRequirements
             );
 
         }
@@ -365,14 +363,8 @@ async function getSubDirectories(
                     report += await checkSubmission(
                         path.join(studentDirPath, labAssignmentSubDir, labPartSubDir),
                         "",
-                        (part === 1) ? requiredElements1 : requiredElements2,
-                        requiredCssSelectors,
-                        requiredCssProperties,
-                        regExpForHTML1,
-                        regExpForHTML1Description,
-                        regExpForCSS1,
-                        regExpForCSS1Description,
-                        additionalRequirements
+                        part,
+                        HtmlAndCssRequirements
                     );
                 }
             }
@@ -404,14 +396,8 @@ async function getSubDirectories(
             report += await checkSubmission(
                 assignmentDir,
                 path.join(assignmentDir, fileName),
-                (part === 1) ? requiredElements1 : requiredElements2,
-                requiredCssSelectors,
-                requiredCssProperties,
-                regExpForHTML1,
-                regExpForHTML1Description,
-                regExpForCSS1,
-                regExpForCSS1Description,
-                additionalRequirements
+                (part === 1) ? HtmlAndCssRequirements.requiredElements1 : HtmlAndCssRequirements.requiredElements2,
+                HtmlAndCssRequirements
             );
         }
     }

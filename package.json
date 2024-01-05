@@ -13,9 +13,11 @@
   "devDependencies": {
     "chai": "^4.3.10",
     "esm": "^3.2.25",
+    "jsdoc": "^4.0.2",
     "mocha": "^10.2.0"
   },
   "scripts": {
-    "test": "mocha --require esm"
+    "test": "mocha --require esm",
+    "docs": "jsdoc -d ./Docs ."
   }
 }
