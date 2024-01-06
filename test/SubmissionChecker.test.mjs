@@ -4,6 +4,8 @@ import { expect } from 'chai';
 import jsdom from 'jsdom';
 
 describe('SubmissionChecker', () => {
+
+    // Test the getEmbeddedCssSelectorsAndProperties() function
     describe('#getEmbeddedCssSelectorsAndProperties()', () => {
         it('should return correct selectors and properties', () => {
             // Arrange
