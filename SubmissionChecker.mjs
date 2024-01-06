@@ -636,39 +636,4 @@ function summarizeRegExpSearches(regExpResults, regExpDescriptions)
     return report;
 }
 
-
-/************************************/
-/* Check rendered web page          */
-/************************************/
-async function renderAndCheck(fileContents, fileName, requiredOutput)
-{
-    let report = "";
-
-    puppeteer.launch({ headless: "new" }).then(async (browser) =>
-    {
-        const page = await browser.newPage();
-        await page.setContent(fileContents);
-        const text = await page.evaluate(() =>
-        {
-            // Execute the script on the page
-            const scripts = document.querySelectorAll("script");
-            scripts.forEach((script) =>
-            {
-                if (script.textContent)
-                {
-                    eval(script.textContent);
-                }
-            });
-
-            // Get the rendered text
-            return document.body.textContent;
-        });
-        // log the page contents for debugging
-        console.log(text);
-        await browser.close();
-    });
-    report = text;
-    return report;
-}
-
 export { checkSubmission, getEmbeddedCssSelectorsAndProperties, getInlineStyles };
