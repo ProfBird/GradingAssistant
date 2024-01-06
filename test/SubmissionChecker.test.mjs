@@ -1,5 +1,5 @@
-import { getEmbeddedCssSelectorsAndProperties } from '../SubmissionChecker.mjs';
-import { getInlineStyles } from '../SubmissionChecker.mjs';
+import { getEmbeddedCssSelectorsAndProperties,
+    getInlineStyles } from '../SubmissionChecker.mjs';
 import { expect } from 'chai';
 import jsdom from 'jsdom';
 
@@ -55,4 +55,7 @@ describe('SubmissionChecker', () => {
             });
         });
     });
+
+
+
 });

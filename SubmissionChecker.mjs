@@ -10,27 +10,35 @@ import { all } from "axios";
 let countHTMLFiles = 0; // Number of html files found in the lab files
 let countCSSFiles = 0; // Number of css files found in the lab files
 
-/******* This is the central function for this program! **********/
-/* checkSubmission function                                      */
-/* checks one part of the lab assignment                         */
-/* Checks the files in the labDir for the required elements,     */
-/* properties and valid HTML and CSS for all sub-folders         */
-/*****************************************************************/
+/********* This is the central function for this program! **********
+* checkSubmission function                                      
+* checks one part of the lab assignment                         
+* Checks the files in the labDir for the required elements,     
+* properties and valid HTML and CSS for all sub-folders 
+* @param {string} labDirPath - The path to the lab folder or lab part subfolder.
+* @param {string} filePath - The path to the file to check. Empty string if there are multiple .html files.
+* @param {string} LabPart - The lab part number.        
+* @param {Object} requirements - The requirements to check against.
+* @property {Array<string>} requirements.requiredElements1 - Part1 required HTML elements.
+* @property {Array<string>} requirements.requiredElements2 - Part2 required HTML elements.
+* @property {Array<string>} requirements.requiredCssSelectors - The required CSS selectors.
+* @property {Array<string>} requirements.requiredCssProperties - The required CSS properties.
+* @property {Array<string>} requirements.regExpForHTML1 - Regular expressions to check against the HTML.
+* @property {Array<string>} requirements.regExpForHTML1Description - Descriptions of the regular expressions for the HTML.
+* @property {Array<string>} requirements.regExpForCSS1 - Regular expressions to check against the CSS.
+* @property {Array<string>} requirements.regExpForCSS1Description - Descriptions of the regular expressions for the CSS.
+* @property {Array<string>} requirements.additionalRequirements - Additional requirements.
+*/
 async function checkSubmission(
     labDirPath, // full path to the lab folder or lab part subfolder.
     filePath,   // Empty string if there are multiple .html files, otherwise full path to a single file
-    requiredElements = [],   // these assignments are the default values
-    requiredSelectors = [],
-    requiredProperties = [],
-    regExpForHTML1 = [],
-    regExpForHTML1Description = [],
-    regExpForCSS1 = [],
-    regExpForCSS1Description = [],
-    additionalRequirements = []
+    LabPart,    // lab part number
+    HtmlAndCssRequirements // object containing requirements arrays.
 )
 {
     let message = ""; // Individual message
     let report = ""; // All messages for the operations in this function
+    let requiredElements = (LabPart === 1) ? HtmlAndCssRequirements.requiredElements1 : HtmlAndCssRequirements.requiredElements2;
     const foundElements = []; // will hold required elements found in the lab files
     // TODO: make this a paramenter and define it in the main
     const foundSelectors = []; // all the required css slectors that were found in the css files and embedded css
@@ -41,7 +49,7 @@ async function checkSubmission(
     let regExpHtmlResults = [];
     let regExpCssResults = [];
     // initialize all elements to false
-    for (let i = 0; i < additionalRequirements.length; i++)
+    for (let i = 0; i < HtmlAndCssRequirements.additionalRequirements.length; i++)
     {
         additionalRequirementResults.push(false);
     }
@@ -76,31 +84,31 @@ async function checkSubmission(
     // compare foundElements to requiredElements and log any missing elements
     report = summarizeForRequiredElements(foundElements, requiredElements, report);
     // TODO: combine the following two functions into one and check for properties in specific selectors.
-    if (requiredSelectors.length > 0)
+    if (HtmlAndCssRequirements.requiredCssSelectors.length > 0)
     {
-        report = summarizeForRequiredSelectors(foundSelectors, requiredSelectors, report);
+        report = summarizeForRequiredSelectors(foundSelectors, HtmlAndCssRequirements.requiredCssSelectors, report);
     }
-    if (requiredProperties.length > 0)
+    if (HtmlAndCssRequirements.requiredCssProperties.length > 0)
     {
-        report = summarizeForRequiredProperties(foundProperties, requiredProperties, report);
+        report = summarizeForRequiredProperties(foundProperties, HtmlAndCssRequirements.requiredCssProperties, report);
     }
-    if (additionalRequirements.length > 0)
+    if (HtmlAndCssRequirements.additionalRequirements.length > 0)
     {
         report += "Additional requirements:\n"
         report += summarizeAdditionalRequirements(countHTMLFiles, countCSSFiles,
             allSelectors, allProperties,
-            foundSelectors, foundProperties, additionalRequirements, additionalRequirementResults);
+            foundSelectors, foundProperties, HtmlAndCssRequirements.additionalRequirements, additionalRequirementResults);
     }
-    if (regExpForHTML1.length > 0)
+    if (HtmlAndCssRequirements.regExpForHTML1.length > 0)
     {
         report += "Regular expression searches in HTML files:\n"
-        report += summarizeRegExpSearches(regExpHtmlResults, regExpForHTML1Description);
+        report += summarizeRegExpSearches(regExpHtmlResults, HtmlAndCssRequirements.regExpForHTML1Description);
     }
 
-    if (regExpForCSS1.length > 0)
+    if (HtmlAndCssRequirements.regExpForCSS1.length > 0)
     {
         report += "Regular expression searches in CSS files:\n"
-        report += summarizeRegExpSearches(regExpCssResults, regExpForCSS1Description);
+        report += summarizeRegExpSearches(regExpCssResults, HtmlAndCssRequirements.regExpForCSS1Description);
     }
     return report;
 
@@ -131,6 +139,7 @@ async function checkSubmission(
     /*********** inner function *********/
     /* Do checks on an individual file  */
     /************************************/
+    // TODO: make this a separate function that doesn't use global variables
     async function checkFile(fileContents, fileName)
     {
         let report = ""; // All messages for the operations in this function
@@ -170,7 +179,7 @@ async function checkSubmission(
                 if (styleElement !== null)
                 {
                     let foundSelectorsAndProperties = 
-                         getEmbeddedCssSelectorsAndProperties(styleElement, requiredSelectors, requiredProperties);
+                         getEmbeddedCssSelectorsAndProperties(styleElement, HtmlAndCssRequirements.requiredCssSelectors, HtmlAndCssRequirements.requiredCssProperties);
                     foundSelectors.push(...foundSelectorsAndProperties.foundSelectors);
                     foundProperties.push(...foundSelectorsAndProperties.foundProperties);
                 }
@@ -178,10 +187,10 @@ async function checkSubmission(
                 // Get elements with inline styles from the html file
                 const elements = dom.window.document.querySelectorAll("[style]");
                 // Get the CSS property names and values from each of the element's inline styles
-                const inlineStyles = getInlineStyles(elements, requiredProperties);
+                const inlineStyles = getInlineStyles(elements, HtmlAndCssRequirements.requiredCssProperties);
                 foundProperties.push(...inlineStyles.foundProperties);
 
-                regExpHtmlResults = checkFileWithRegExp(regExpForHTML1, fileContents);
+                regExpHtmlResults = checkFileWithRegExp(HtmlAndCssRequirements.regExpForHTML1, fileContents);
 
                 // Render the html page and check for required output
                 // TODO: Load required output from csv file
@@ -211,7 +220,7 @@ async function checkSubmission(
 
                 // Get any required css selectors from fileContents, put in foundSelectors
 
-                for (const selector of requiredSelectors)
+                for (const selector of HtmlAndCssRequirements.requiredCssSelectors)
                 {
                     if (fileContents.includes(selector))
                     {
@@ -222,7 +231,7 @@ async function checkSubmission(
                 // TODO: Use cssTree to get the properties
                 // remove all whitespace from the fileContents, this was already done to the requiredProperties
                 fileContents = fileContents.replace(/\s/g, '');
-                for (let property of requiredProperties)
+                for (let property of HtmlAndCssRequirements.requiredCssProperties)
                 {
                     if (fileContents.includes(property))
                     {
@@ -231,13 +240,13 @@ async function checkSubmission(
                 } // end looping through requiredProperties
 
                 // Do regular expression searches of the CSS file contents
-                regExpHtmlResults = checkFileWithRegExp(regExpForCSS1, fileContents);
+                regExpHtmlResults = checkFileWithRegExp(HtmlAndCssRequirements.regExpForCSS1, fileContents);
 
             } // end of processing .css files
 
             // --- Check the file for additional requirements ---
             // Check for a special file name
-            const specialFileName = additionalRequirements[0] === '""' ? "" : additionalRequirements[0];
+            const specialFileName = HtmlAndCssRequirements.additionalRequirements[0] === '""' ? "" : HtmlAndCssRequirements.additionalRequirements[0];
 
             if (specialFileName == undefined || specialFileName == "")
             {
@@ -361,11 +370,15 @@ async function validateCSS(fileContents, fileName)
     return report;
 }
 
-/***************************************************************************************/
-/* Get the css selectors and properties from embedded css in an html file              */
-/* Returns an object with both the required selectors and properties that were found,  */
-/* as well as all the embedded selectors and properties.                               */
-/***************************************************************************************/
+/***************************************************************************************
+/* Get the css selectors and properties from embedded css in an html file              
+ * Returns an object with both the required selectors and properties that were found,  
+ * as well as all the embedded selectors and properties.     
+ * @param {Object} styleElement - The style element containing the CSS.
+ * @param {Array<string>} requiredSelectors - The CSS selectors that are required.
+ * @param {Array<string>} requiredProperties - The CSS properties that are required.
+ * @returns {Object} An object containing the found and all selectors and properties.
+ */
 function getEmbeddedCssSelectorsAndProperties(styleElement, requiredSelectors, requiredProperties) {
     const allSelectors = [];
     const foundSelectors = [];
@@ -459,11 +472,15 @@ function summarizeForRequiredElements(foundElements, requiredElements, report)
         report += message + `\n`;
     }
     return report;
-}
+} 
 
-/********************************************/
-/* Check results for required css selectors */
-/********************************************/
+/********************************************
+ * Check results for required css selectors 
+ * @param {Array<string>} foundSelectors - The CSS selectors that were found.
+ * @param {Array<string>} requiredSelectors - The CSS selectors that are required.
+ * @param {string} report - The report string to append to.
+ * @returns {string} The updated report string.
+ */
 // Todo - combine this function with checkForRequiredElements into one function
 function summarizeForRequiredSelectors(foundSelectors, requiredSelectors, report)
 {
@@ -616,41 +633,6 @@ function summarizeRegExpSearches(regExpResults, regExpDescriptions)
         report += message + `\n`;
     }
 
-    return report;
-}
-
-
-/************************************/
-/* Check rendered web page          */
-/************************************/
-async function renderAndCheck(fileContents, fileName, requiredOutput)
-{
-    let report = "";
-
-    puppeteer.launch({ headless: "new" }).then(async (browser) =>
-    {
-        const page = await browser.newPage();
-        await page.setContent(fileContents);
-        const text = await page.evaluate(() =>
-        {
-            // Execute the script on the page
-            const scripts = document.querySelectorAll("script");
-            scripts.forEach((script) =>
-            {
-                if (script.textContent)
-                {
-                    eval(script.textContent);
-                }
-            });
-
-            // Get the rendered text
-            return document.body.textContent;
-        });
-        // log the page contents for debugging
-        console.log(text);
-        await browser.close();
-    });
-    report = text;
     return report;
 }
 

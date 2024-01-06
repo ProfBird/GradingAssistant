@@ -1,7 +1,7 @@
 import fs from "fs";
 import csv from "csv-parser";
 import path from "path";
-
+import { HtmlAndCssChecker } from './HtmlAndCssChecker.mjs';
 import { checkSubmission } from "./SubmissionChecker.mjs";
 
 /* Location of the files downloaded from Moodle and unzipped */
@@ -19,35 +19,7 @@ import { checkSubmission } from "./SubmissionChecker.mjs";
 let submissionsPath = ""; // Path to the folder containing the student submissions
 let numberOfParts = 1; // Number of parts in this lab assignment, set later in loadRequirements
 let areAllInOneDir = true; // true if all parts are in one folder
-// Required HTML elements for parts 1 and 2 (global scope)
-const requiredElements1 = [];
-const requiredElements2 = [];
-// Required CSS selectors and properties (global scope)
-const requiredCssSelectors = [];
-const requiredCssProperties = [];
-const additionalRequirements = [];
-// Parallel arrays
-const regExpForHTML1 = [];
-const regExpForHTML1Description = [];
-const regExpForCSS1 = [];
-const regExpForCSS1Description = [];
-// TODO: Change from parallel arrays to an array of objects
-/*
-// An object that contains a requirement and a description of the requirement
- const requirement = {
-                         specification: "",
-                          description: "" 
-                    };
-// array of requirement objects
-const regExp = [];
-*/
-
-// Indexes into the additionalRequirements array
-// 0: Number of parts in the lab assignment
-// 1: Number of html files expected in the lab submission
-// 2: If a special html file name is required, like index, it will be in the requirements file
-// 3+: Regular expressions to search for in the html files
-
+let HtmlAndCssRequirements = {}; // Object containing the HTML and CSS requirements
 
 /****************/
 /* Main program */
@@ -68,7 +40,13 @@ if (param === "--help" || param === undefined)
         overwrite = true;  // overwrite _report.txt files
         console.log("Overwriting report files");
     }
-    loadRequirements(param);
+    // param is the requirements file name
+    loadSettings(param);
+
+    // Get the requirements from the HtmlAndCssChecker class
+    let hcChecker = new HtmlAndCssChecker(param);
+    HtmlAndCssRequirements = hcChecker.requirements;
+
     // Loop through all student subdirectories at the submissionsPath with dirs containing unzipped files
     // studentDir will have a name like TyTitan_file
     for (const studentDir of fs
@@ -111,17 +89,17 @@ if (param === "--help" || param === undefined)
 
 
 /*************************************/
-/* Load requirements from a csv file */
+/* Load settings from a csv requirements file */
 /*************************************/
-function loadRequirements(requirementsFileName)
+function loadSettings(requirementsFileName)
 {
     const settings = [];
     /* settings array elements will hold these settings values:
-    0: MacOsSubmissionPath
-    1: WindowsSubmissionPath
-    2: LabName
-    3: Are all parts in one folder? (true or false)
-*/
+        0: MacOsSubmissionPath
+        1: WindowsSubmissionPath
+        2: LabName
+        3: Are all parts in one folder? (true or false)
+    */
     try
     {
         const data = fs.readFileSync(requirementsFileName);
@@ -131,44 +109,6 @@ function loadRequirements(requirementsFileName)
                 if (row.settings)
                 {
                     settings.push(row.settings);
-                }
-                if (row.requiredElements1)
-                {
-                    requiredElements1.push(row.requiredElements1);
-                }
-                if (row.requiredElements2)
-                {
-                    requiredElements2.push(row.requiredElements2);
-                }
-                if (row.requiredCssSelectors)
-                {
-                    requiredCssSelectors.push(row.requiredCssSelectors);
-                }
-                if (row.requiredCssProperties)
-                {
-                    // remove whitespace
-                    row.requiredCssProperties = row.requiredCssProperties.replace(/\s/g, "");
-                    requiredCssProperties.push(row.requiredCssProperties);
-                }
-                if (row.moreRequirements)
-                {
-                    additionalRequirements.push(row.moreRequirements);
-                }
-                if (row.regExpForHTML1)
-                {
-                    regExpForHTML1.push(row.regExpForHTML1);
-                }
-                if (row.regExpForHTML1Description)
-                {
-                    regExpForHTML1Description.push(row.regExpForHTML1Description);
-                }
-                if (row.regExpForCSS1)
-                {
-                    regExpForCSS1.push(row.regExpForCSS1);
-                }
-                if (row.regExpForCSS1Description)
-                {
-                    regExpForCSS1Description.push(row.regExpForCSS1Description);
                 }
             })
             .on("error", (error) =>
@@ -210,7 +150,7 @@ function loadRequirements(requirementsFileName)
 
     numberOfParts = settings[2];
     areAllInOneDir = (settings[3].toLowerCase() === "true");
-} // End of loadRequirements function
+} // End of loadSettings function
 
 /********************************************************/
 /* getSubDirectories                                        */
@@ -295,17 +235,12 @@ async function getSubDirectories(
                 }
             }
 
+            // check the lab files in the labAssignmentSubDir
             report += await checkSubmission(
                 path.join(studentDirPath, labAssignmentSubDir),
                 "", // assume there are multiple files to check
-                requiredElements1,
-                requiredCssSelectors,
-                requiredCssProperties,
-                regExpForHTML1,
-                regExpForHTML1Description,
-                regExpForCSS1,
-                regExpForCSS1Description,
-                additionalRequirements,
+                1,  // there is only one lab part, number 1
+                HtmlAndCssRequirements
             );
 
         }
@@ -365,14 +300,8 @@ async function getSubDirectories(
                     report += await checkSubmission(
                         path.join(studentDirPath, labAssignmentSubDir, labPartSubDir),
                         "",
-                        (part === 1) ? requiredElements1 : requiredElements2,
-                        requiredCssSelectors,
-                        requiredCssProperties,
-                        regExpForHTML1,
-                        regExpForHTML1Description,
-                        regExpForCSS1,
-                        regExpForCSS1Description,
-                        additionalRequirements
+                        part,
+                        HtmlAndCssRequirements
                     );
                 }
             }
@@ -404,14 +333,8 @@ async function getSubDirectories(
             report += await checkSubmission(
                 assignmentDir,
                 path.join(assignmentDir, fileName),
-                (part === 1) ? requiredElements1 : requiredElements2,
-                requiredCssSelectors,
-                requiredCssProperties,
-                regExpForHTML1,
-                regExpForHTML1Description,
-                regExpForCSS1,
-                regExpForCSS1Description,
-                additionalRequirements
+                (part === 1) ? HtmlAndCssRequirements.requiredElements1 : HtmlAndCssRequirements.requiredElements2,
+                HtmlAndCssRequirements
             );
         }
     }
