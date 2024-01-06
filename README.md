@@ -9,7 +9,8 @@ There are two programs in this repository:
 -  [TestAnyLab](#TestAnyLab)
 
 ## Contributing
-If you would like to help with development, send me a message so we can keep our work coordinated. Feel free to:
+If you would like to help with development take a look at the GitHub Issues and the [roadmap](./docs/GradAssistRoadmap.md)
+Then send me a message so we can keep our work coordinated. Feel free to:
 - Let me know which issue you would like to work on so I can send you some test data (anonymized student lab submissions)
 - Let me know which enhancement or new feature you would like to work on.
 - Ask for more documentation or information.
