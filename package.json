@@ -18,6 +18,6 @@
   },
   "scripts": {
     "test": "mocha --require esm",
-    "docs": "jsdoc -d ./Docs ."
+    "docs": "jsdoc -d ./docs ."
   }
 }

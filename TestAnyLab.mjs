@@ -19,10 +19,7 @@ import { checkSubmission } from "./SubmissionChecker.mjs";
 let submissionsPath = ""; // Path to the folder containing the student submissions
 let numberOfParts = 1; // Number of parts in this lab assignment, set later in loadRequirements
 let areAllInOneDir = true; // true if all parts are in one folder
-
-// Get the requirements from the HtmlAndCssChecker class
-let hcChecker = new HtmlAndCssChecker();
-let HtmlAndCssRequirements = hcChecker.requirements;
+let HtmlAndCssRequirements = {}; // Object containing the HTML and CSS requirements
 
 /****************/
 /* Main program */
@@ -43,7 +40,13 @@ if (param === "--help" || param === undefined)
         overwrite = true;  // overwrite _report.txt files
         console.log("Overwriting report files");
     }
-    loadRequirements(param);
+    // param is the requirements file name
+    loadSettings(param);
+
+    // Get the requirements from the HtmlAndCssChecker class
+    let hcChecker = new HtmlAndCssChecker(param);
+    HtmlAndCssRequirements = hcChecker.requirements;
+
     // Loop through all student subdirectories at the submissionsPath with dirs containing unzipped files
     // studentDir will have a name like TyTitan_file
     for (const studentDir of fs
@@ -86,10 +89,9 @@ if (param === "--help" || param === undefined)
 
 
 /*************************************/
-/* Load requirements from a csv file */
+/* Load settings from a csv requirements file */
 /*************************************/
-// TODO: Make this function general purpose so it works with any set of requirements
-function loadRequirements(requirementsFileName)
+function loadSettings(requirementsFileName)
 {
     const settings = [];
     /* settings array elements will hold these settings values:
@@ -107,44 +109,6 @@ function loadRequirements(requirementsFileName)
                 if (row.settings)
                 {
                     settings.push(row.settings);
-                }
-                if (row.requiredElements1)
-                {
-                    HtmlAndCssRequirements.requiredElements1.push(row.requiredElements1);
-                }
-                if (row.requiredElements2)
-                {
-                    HtmlAndCssRequirements.requiredElements2.push(row.requiredElements2);
-                }
-                if (row.requiredCssSelectors)
-                {
-                    HtmlAndCssRequirements.requiredCssSelectors.push(row.requiredCssSelectors);
-                }
-                if (row.requiredCssProperties)
-                {
-                    // remove whitespace
-                    row.requiredCssProperties = row.requiredCssProperties.replace(/\s/g, "");
-                    HtmlAndCssRequirements.requiredCssProperties.push(row.requiredCssProperties);
-                }
-                if (row.moreRequirements)
-                {
-                    HtmlAndCssRequirements.additionalRequirements.push(row.moreRequirements);
-                }
-                if (row.regExpForHTML1)
-                {
-                    HtmlAndCssRequirements.regExpForHTML1.push(row.regExpForHTML1);
-                }
-                if (row.regExpForHTML1Description)
-                {
-                    HtmlAndCssRequirements.regExpForHTML1Description.push(row.regExpForHTML1Description);
-                }
-                if (row.regExpForCSS1)
-                {
-                    HtmlAndCssRequirements.regExpForCSS1.push(row.regExpForCSS1);
-                }
-                if (row.regExpForCSS1Description)
-                {
-                    HtmlAndCssRequirements.regExpForCSS1Description.push(row.regExpForCSS1Description);
                 }
             })
             .on("error", (error) =>
@@ -186,7 +150,7 @@ function loadRequirements(requirementsFileName)
 
     numberOfParts = settings[2];
     areAllInOneDir = (settings[3].toLowerCase() === "true");
-} // End of loadRequirements function
+} // End of loadSettings function
 
 /********************************************************/
 /* getSubDirectories                                        */
