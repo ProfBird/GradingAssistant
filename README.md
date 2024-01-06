@@ -21,6 +21,15 @@ We will follow the [GitHub flow](https://docs.github.com/en/get-started/quicksta
 ### Unit Testing
 [Mocha](https://mochajs.org) unit test files are in the test subfolder. Each bug fix or enhancement should include a unit test if one does not already exist.
 
+### JSDoc
+On 1/5/2024, I started using [JSDoc](https://jsdoc.app). I maninly did this so I could keep track of types.
+New code has JSDoc comments, I'm slowly adding JSDoc comments to old code.
+
+### ES6 Classes
+On 1/5/2024, I started refactoring the code to use ES6 classes. Part of the reason was to make the code more modular. I want to have a separate class for each type of testing: HTML+CSS, JavaScript, C#, etc.
+There are currently these two classes: 
+- HtmlAndCssChecker - I'm in the process of moving code specific to checking HTML and CSS out of SubmissionChecker into this class.
+- JSChecker - This is a new class for checking JavaScript in web pages and .js files.
 
 ------------
 
