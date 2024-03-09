@@ -1,4 +1,9 @@
 # GradingAssistant
+
+[TOC]
+
+## Introduction
+
 I initially wrote this software to check web pages containing HTML and CSS for my [CIS 195 Web Authoring](https://github.com/LCC-CIT/CIS195-CourseMaterials) course at Lane Community College.
 This is my first Node.js project and I'm still learning. In fact, I haven't learned to use ES6 classes yet. At some point I will refactor this code to make it object oriented!
 
@@ -33,7 +38,7 @@ There are currently these two classes:
 
 ------------
 
-## UnzipFiles
+## UnzipFiles Program
 This is a Node module for unzipping files that have been bulk downloaded from the Moodle Learning Management System. 
 
 ### Usage
@@ -70,7 +75,7 @@ This is what UnzipFiles uses to unzip the files:
 
 -----------
 
-## TestAnyLab
+## TestAnyLab Program
 
 This is the software that checks the lab assignemnts unzipped by Unzipfiles. This is the expected folder structure:  
 `StudentName_file/LabX/<website files and folders>`  

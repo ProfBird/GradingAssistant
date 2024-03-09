@@ -100,7 +100,7 @@ export class HtmlAndCssChecker {
     } // End of loadRequirements method
 
    /**
-    * Validatee the HTML syntax using the W3C validator.
+    * Validate the HTML syntax using the W3C validator.
     * @param {*} fileContents 
     * @param {*} fileName 
     * @returns 

@@ -22,7 +22,9 @@
             ],
             "program": "${workspaceFolder}/TestAnyLab.mjs",
             "args": [
-                "/Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Fall/Labs/CIS195Lab05GradeAssist.csv"
+                "/Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Fall/Labs/CIS195Lab05GradeAssist.csv",
+                "--html",
+                "--overwrite"
             ]
         },
         {
@@ -34,7 +36,9 @@
             ],
             "program": "${workspaceFolder}/TestAnyLab.mjs",
             "args": [
-                "/Volumes/GoogleDrive/My Drive/Courses/CS133JS/23F/Labs/CS133JSLab01GradeAssist.csv"
+                "/Volumes/GoogleDrive/My Drive/Courses/CS133JS/23F/Labs/CS133JS_Lab01GradeAssist.csv",
+                "--js",
+                "--overwrite"
             ]
         },
         {
