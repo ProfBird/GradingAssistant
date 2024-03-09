@@ -4,7 +4,7 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "CIS195 Windows Launch",
+            "name": "Windows Launch",
             "skipFiles": [
                 "<node_internals>/**"
             ],
@@ -16,25 +16,13 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "CIS195 MacOS Launch",
+            "name": "MacOS Launch",
             "skipFiles": [
                 "<node_internals>/**"
             ],
             "program": "${workspaceFolder}/TestAnyLab.mjs",
             "args": [
                 "/Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Fall/Labs/CIS195Lab05GradeAssist.csv"
-            ]
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "CS133JS MacOS Launch",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${workspaceFolder}/TestAnyLab.mjs",
-            "args": [
-                "/Volumes/GoogleDrive/My Drive/Courses/CS133JS/23F/Labs/CS133JSLab01GradeAssist.csv"
             ]
         },
         {

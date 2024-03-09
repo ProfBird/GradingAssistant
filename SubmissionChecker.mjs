@@ -2,8 +2,10 @@ import fs from "fs";
 import path from "path";
 import fetch from "node-fetch";
 import { JSDOM } from "jsdom";
+import puppeteer from "puppeteer";
 import * as cssTree from "css-tree";
 import os from "os";
+import { all } from "axios";
 
 let countHTMLFiles = 0; // Number of html files found in the lab files
 let countCSSFiles = 0; // Number of css files found in the lab files
@@ -15,8 +17,7 @@ let countCSSFiles = 0; // Number of css files found in the lab files
 * properties and valid HTML and CSS for all sub-folders 
 * @param {string} labDirPath - The path to the lab folder or lab part subfolder.
 * @param {string} filePath - The path to the file to check. Empty string if there are multiple .html files.
-* @param {string} LabPart - The lab part number.  
-* @param {Object} settings - The settings for this lab assignment.      
+* @param {string} LabPart - The lab part number.        
 * @param {Object} requirements - The requirements to check against.
 * @property {Array<string>} requirements.requiredElements1 - Part1 required HTML elements.
 * @property {Array<string>} requirements.requiredElements2 - Part2 required HTML elements.
@@ -28,12 +29,10 @@ let countCSSFiles = 0; // Number of css files found in the lab files
 * @property {Array<string>} requirements.regExpForCSS1Description - Descriptions of the regular expressions for the CSS.
 * @property {Array<string>} requirements.additionalRequirements - Additional requirements.
 */
-// TODO: move all the html and css checks to the HtmlAndCssChecker class, then the HtmlAndCssRequirements won't ned to be a parameter.
 async function checkSubmission(
     labDirPath, // full path to the lab folder or lab part subfolder.
     filePath,   // Empty string if there are multiple .html files, otherwise full path to a single file
     LabPart,    // lab part number
-    settings,   // object containing settings
     HtmlAndCssRequirements // object containing requirements arrays.
 )
 {
@@ -151,10 +150,7 @@ async function checkSubmission(
             {
                 countHTMLFiles++;
                 // Validate HTML
-                if (HtmlAndCssRequirements.additionalRequirements[3].toLowerCase() === "true")
-                {
-                    report += await validateHTML(fileContents, fileName);
-                }
+                report += await validateHTML(fileContents, fileName);
 
                 // Get any required html elements from fileContents, put in foundElements
                 const dom = new JSDOM(fileContents);
@@ -294,6 +290,85 @@ async function checkSubmission(
 /* All the following functions are called by checkSubmission     */
 /*****************************************************************/
 
+/***************************/
+/* validateHTML function   */
+/***************************/
+async function validateHTML(fileContents, fileName)
+{
+    let message = ""; // Individual message
+    let report = ""; // All messages for the files in this lab submission
+    try
+    {
+        const response = await fetch("https://validator.w3.org/nu/?out=json", {
+            method: "POST",
+            headers: {
+                "Content-Type": "text/html; charset=utf-8",
+            },
+            body: fileContents,
+        });
+
+        // The response from the validator will be "deconstructed" into two variable validationMessages
+        const { messages: validationMessages } = await response.json();
+
+        // Check for any errors
+        if (validationMessages.length > 0)
+        {
+            // Loop through all the errors and log them
+            for (const validationMessage of validationMessages)
+            {
+                message = `${validationMessage.type} error found on line ${validationMessage.lastLine} column ${validationMessage.lastColumn}: ${validationMessage.message}`;
+                console.log(message);
+                report += message + `\n`;
+            }
+            report += os.EOL; // add a blank line after the errors
+        } else
+        {
+            message = `No errors found in ${fileName}`;
+            //console.log(message);
+            report += message + `\n`;
+        }
+    } catch (error)
+    {
+        console.error(error);
+    }
+    return report;
+} // End of validateHTML function
+
+/*************************/
+/* Validate CSS function */
+/*************************/
+async function validateCSS(fileContents, fileName)
+{
+    let message = ""; // Individual message
+    let report = ""; // All messages for the files in this lab submission
+
+    const response = await fetch(
+        `https://jigsaw.w3.org/css-validator/validator?profile=css3&output=soap12&text=${fileContents}`
+    );
+
+    if (response.ok)
+    {
+        const xmlText = await response.text();
+        const dom = new JSDOM(xmlText, { contentType: "text/xml" });
+        const messages = dom.window.document.getElementsByTagName("m:error");
+        if (messages.length === 0)
+        {
+            report += `No errors found in ${fileName}\n`;
+        } else
+        {
+            for (const message of messages)
+            {
+                const messageText = message.textContent.trim();
+                report += `${fileName}: ${messageText}\n`;
+            }
+            report += os.EOL; // add a blank line after the errors
+        }
+    } else
+    {
+        console.error("Error: Invalid response");
+    }
+    return report;
+}
 
 /***************************************************************************************
 /* Get the css selectors and properties from embedded css in an html file              
