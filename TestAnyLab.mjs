@@ -32,34 +32,41 @@ let labSettings = {
 /****************/
 const requirementsFileName = process.argv[2];
 let overwrite = false;
+let quitProgram = false;
 console.log(`param = ${requirementsFileName}`);
-for (let i = 3; i < process.argv.length; i++) { // Start from the second argument
-    switch (process.argv[i]) {
-        case '--help':
-            console.log("Usage: node TestAnyLab.mjs requirementsFileName.csv [options]");
-            console.log("options:");
-            console.log("--help\t\tDisplay this help message");
-            console.log("--overwrite\tOverwrite existing report files");
-            console.log("--html\t\tCheck HTML and CSS files");
-            console.log("--javascript or --js\tCheck JavaScript files");
-           // return;  Exit the program after displaying the help message
-        case '--overwrite':
-            overwrite = true;
-            console.log("Overwriting report files");
-            break;
-            case '--html':
-            labSettings.isHTMLandCSS = true;
-            console.log("Checking HTML and CSS files");
-            break;
-        case '--javascript':
-        case '--js':
-            labSettings.isJavaScript = true;
-            console.log("Checking JavaScript files");
-            break;
-        default:
-            console.log(`Unknown option: ${process.argv[i]}`);
-            break;
-    }
+switch (process.argv[3]) {
+    case '--help':
+        console.log("Usage: node TestAnyLab.mjs requirementsFileName.csv [options]");
+        console.log("options:");
+        console.log("--help\t\tDisplay this help message");
+        console.log("--overwrite\tOverwrite existing report files");
+        console.log("--html\t\tCheck HTML and CSS files");
+        console.log("--javascript or --js\tCheck JavaScript files");
+        quitProgram = true;  // exit the program after displaying the help message
+        break;
+    case '--overwrite':
+        overwrite = true;
+        console.log("Overwriting report files");
+        break;
+    /*
+    case '--html':
+    labSettings.isHTMLandCSS = true;
+    console.log("Checking HTML and CSS files");
+    break;
+    
+case '--javascript':
+case '--js':
+    labSettings.isJavaScript = true;
+    console.log("Checking JavaScript files");
+    break;
+    */
+    default:
+        console.log(`Unknown option: ${process.argv[3]}`);
+        quitProgram = true;
+        break;
+}
+
+if (quitProgram != true) {
     loadSettings(requirementsFileName);
 
     // Get the requirements for the types of checks being done
@@ -108,7 +115,7 @@ for (let i = 3; i < process.argv.length; i++) { // Start from the second argumen
 
         console.log(report);
     }  // End of for loop through student directories
-}  // if param was not --help
+}  // if param was not --help or undefined
 // end of main program
 
 
@@ -169,7 +176,9 @@ function loadSettings(requirementsFileName) {
     }
 
     labSettings.numberOfParts = settings[2];
-    labSettings.areAllInOneDir = (settings[3].toLowerCase() === "true");
+    labSettings.areAllInOneDir = (settings[3].toLowerCase() == "true");
+    labSettings.isHTMLandCSS = (settings[4].toLowerCase() == "true");
+    labSettings.isJavaScript = (settings[5].toLowerCase() == "true");
 } // End of loadSettings function
 
 /********************************************************/
