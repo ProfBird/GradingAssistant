@@ -1,8 +1,10 @@
-# GradingAssistant
+<h1>GradingAssistant</h1>
+
+<h3>Table of Contents</h3>
 
 [TOC]
 
-## Introduction
+# Introduction
 
 I initially wrote this software to check web pages containing HTML and CSS for my [CIS 195 Web Authoring](https://github.com/LCC-CIT/CIS195-CourseMaterials) course at Lane Community College.
 This is my first Node.js project and I'm still learning. In fact, I haven't learned to use ES6 classes yet. At some point I will refactor this code to make it object oriented!
@@ -13,35 +15,14 @@ There are two programs in this repository:
 -  [UnzipFiles](#UnzipFiles)
 -  [TestAnyLab](#TestAnyLab)
 
-## Contributing
-If you would like to help with development take a look at the GitHub Issues and the [roadmap](./docs/GradeAssistRoadmap.md)
-Then send me a message so we can keep our work coordinated. Feel free to:
-- Let me know which issue you would like to work on so I can send you some test data (anonymized student lab submissions)
-- Let me know which enhancement or new feature you would like to work on.
-- Ask for more documentation or information.
 
-### Development Workflow
-We will follow the [GitHub flow](https://docs.github.com/en/get-started/quickstart/github-flow). A dev making a code change will do it on a new branch, the dev will issue a PR to me for code review, and once approved the dev can merge the branch into main.  
-
-### Unit Testing
-[Mocha](https://mochajs.org) unit test files are in the test subfolder. Each bug fix or enhancement should include a unit test if one does not already exist.
-
-### JSDoc
-On 1/5/2024, I started using [JSDoc](https://jsdoc.app). I maninly did this so I could keep track of types.
-New code has JSDoc comments, I'm slowly adding JSDoc comments to old code.
-
-### ES6 Classes
-On 1/5/2024, I started refactoring the code to use ES6 classes. Part of the reason was to make the code more modular. I want to have a separate class for each type of testing: HTML+CSS, JavaScript, C#, etc.
-There are currently these two classes: 
-- HtmlAndCssChecker - I'm in the process of moving code specific to checking HTML and CSS out of SubmissionChecker into this class.
-- JSChecker - This is a new class for checking JavaScript in web pages and .js files.
 
 ------------
 
-## UnzipFiles Program
+# UnzipFiles Program
 This is a Node module for unzipping files that have been bulk downloaded from the Moodle Learning Management System. 
 
-### Usage
+## Usage
 
 To run the program use the following CLI command:
 
@@ -59,7 +40,7 @@ To run the program use the following CLI command:
   -    `--help`   Display the help message
   -   `--overwrite`   Overwrite existing unzipped files
 
-### Downloaded Zip File Expectations
+## Downloaded Zip File Expectations
 
 The downloaded submissions are expected to be in a file with a name like: `CS 133JS Sp23 (Bird 41334)-Lab 6 Production Version-3803210.zip`  
 The zip file is expected to contain one or more .zip archives, one or two for each student. Each zip archive may contain one or more sub-folders.  
@@ -75,7 +56,7 @@ This is what UnzipFiles uses to unzip the files:
 
 -----------
 
-## TestAnyLab Program
+# TestAnyLab Program
 
 This is the software that checks the lab assignemnts unzipped by Unzipfiles. This is the expected folder structure:  
 `StudentName_file/LabX/<website files and folders>`  
@@ -83,18 +64,18 @@ Or, if there are two parts:
 `StudentName_file/Part1/<website files and folders>`  
 `                 Part2/<website files and folders>`  
 
- ### Running the program
+ ## Running the program
  Use this command to run the program:  
 `node TestAnyLab.mjs requirementsFileName.csv [options]`  
 Here are the options:  
 `--help      Display a help message`  
 `--overwrite Overwrite existing report files`  
 
-### Current Capabilities
+## Current Capabilities
 The program currently just does static checking of HTML and CSS files.
 See the [Roadmap](Docs/GradeAssistRoadmap.md) for plans to add additioanl capabilitites.
 
-#### Requirements Checking
+### Requirements Checking
 
 The program can currently (as of 12/14/23) check the following kinds of requirements:
 
@@ -115,13 +96,13 @@ The program can currently (as of 12/14/23) check the following kinds of requirem
 - Regular expression searches of the HTML or CSS code
 - Existence of special file names, like index.html
 
-### Requirements file
+## Requirements file
 
 A requirements file is used to configure the program to test a particular lab assignment. The requirements file can be written in a spreadsheet and then saved in .csv format.
 
 See the Docs folder for example requirements files.
 
-### Output
+## Output
 A text file with a summary report is saved in the lab assignment folder for each student's submission. Here is an example of a summary report:
 
 ```
@@ -150,3 +131,32 @@ Missing Comment in head in files
 
 
 
+# Contributing
+
+If you would like to help with development take a look at the GitHub Issues and the [roadmap](./docs/GradeAssistRoadmap.md)
+Then send me a message so we can keep our work coordinated. Feel free to:
+
+- Let me know which issue you would like to work on so I can send you some test data (anonymized student lab submissions)
+- Let me know which enhancement or new feature you would like to work on.
+- Ask for more documentation or information.
+
+## Development Workflow
+
+We will follow the [GitHub flow](https://docs.github.com/en/get-started/quickstart/github-flow). A dev making a code change will do it on a new branch, the dev will issue a PR to me for code review, and once approved the dev can merge the branch into main.  
+
+## Unit Testing
+
+[Mocha](https://mochajs.org) unit test files are in the test subfolder. Each bug fix or enhancement should include a unit test if one does not already exist.
+
+## JSDoc
+
+On 1/5/2024, I started using [JSDoc](https://jsdoc.app). I maninly did this so I could keep track of types.
+New code has JSDoc comments, I'm slowly adding JSDoc comments to old code.
+
+## ES6 Classes
+
+On 1/5/2024, I started refactoring the code to use ES6 classes. Part of the reason was to make the code more modular. I want to have a separate class for each type of testing: HTML+CSS, JavaScript, C#, etc.
+There are currently these two classes: 
+
+- HtmlAndCssChecker - I'm in the process of moving code specific to checking HTML and CSS out of SubmissionChecker into this class.
+- JSChecker - This is a new class for checking JavaScript in web pages and .js files.

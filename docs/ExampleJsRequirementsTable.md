@@ -2,7 +2,7 @@
 
 ## Combined HTML and JS Requirements
 
-This table is from a .csv. It has settings for HTML and JavaScript
+This table is from CS133JS_Lab01GradeAssist.csv. It has settings for HTML and JavaScript
 
 The 1 or 2 at the end of a requirement type indicates whether it's for part 1 or part 2
 
