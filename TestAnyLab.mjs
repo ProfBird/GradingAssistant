@@ -62,7 +62,6 @@ switch (process.argv[3]) {
 if (quitProgram != true) {
     loadSettings(requirementsFileName);
 
-
     // Loop through all student subdirectories at submissionsPath and 
     // call methods to check submissions
     // studentDir will have a name like TyTitan_file
@@ -81,20 +80,30 @@ if (quitProgram != true) {
         }
         let message = `Checking the ${studentDir} directory`;
         let report = message + "\n"; // Report of the checks of the files for this student
-        
-       // Assume the files for all parts are in studentDir
+        let studentDirPath = path.join(labSettings.submissionsPath, studentDir)
+
         // Loop for each part
         for (let part = 1; part <= labSettings.numberOfParts; part++) {
             report += "\nPart" + part + "\n";
+            if(labSettings.isHTML)
+            {
+                // TODO: Rewrite checkSubmision
             report += await checkSubmission(
                 path.join(labSettings.submissionsPath, studentDir),
                 "",
                 part,
                 labSettings.HtmlAndCssRequirements
             );
+            }
+            if(labSettings.isJavaScript)
+            {
+               // Assume the files for all parts are in studentDirPath
+                report +=  await checkers[1].checkSubmission(studentDirPath,
+                "",
+                part)
+            }
         }
         
-
         report += "\n";
 
         // Open the report file for writing and get its file descriptor

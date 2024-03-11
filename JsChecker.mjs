@@ -35,11 +35,11 @@ export class JsChecker extends Checker {
             csv()  // the .on function sets up lisetners
                 .on("data", (row) =>    // row is an object containing the data from one row of the csv file
                 {
-                    if (row.UnitTests) {
-                        this.requirements.UnitTests.push(row.requiredElements1);
+                    if (row.unitTests) {
+                        this.requirements.UnitTests.push(row.unitTests);
                     }
-                    if (row.FilesToTest) {
-                        this.requirements.FilesToTest.push(row.requiredElements2);
+                    if (row.filesToTest) {
+                        this.requirements.FilesToTest.push(row.filesToTest);
                     }
                 })
                 .on("error", (error) => {
@@ -48,6 +48,23 @@ export class JsChecker extends Checker {
                 .write(fileBuffer);  // this sends data to the csv parser function above
     } // End of loadRequirements function
 
+
+    /**
+     * checkSubmission method
+     * Checks a file or files in a dir against the requriements
+     * @param {string} labDirPath 
+     * @param {string} fileName 
+     * @param {string} labPart 
+     */
+    async checkSubmission(
+        labDirPath, // full path to a student's lab folder or lab part subfolder.
+        fileName,   // Empty string if there are multiple files to check, otherwise name of file to check
+        labPart,    // lab part number
+    )
+    {
+        fileName = this.requirements.FilesToTest[labPart];
+        return;
+    }
 
 
     /**

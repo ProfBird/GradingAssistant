@@ -47,6 +47,19 @@
             ]
         },
         {
+            "type": "node",
+            "request": "launch",
+            "name": "CS133JS Windows Launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/TestAnyLab.mjs",
+            "args": [
+                "G:/My Drive//Courses/CS133JS/24W/CS133JSW24Lab05/CS133JS_Lab05A_GradeAssist.csv",
+                "--overwrite"
+            ]
+        },
+        {
             "type": "node-terminal",
             "name": "JavaScript Debug Terminal",
             "request": "launch",
