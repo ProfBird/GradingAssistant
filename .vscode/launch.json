@@ -22,8 +22,7 @@
             ],
             "program": "${workspaceFolder}/TestAnyLab.mjs",
             "args": [
-                "/Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Fall/Labs/CIS195Lab05GradeAssist.csv",
-                "--html",
+                "/Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Fall/Labs/Lab5/CIS195Lab05GradeAssist.csv",
                 "--overwrite"
             ]
         },
@@ -34,10 +33,16 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
+            /*
             "program": "${workspaceFolder}/TestAnyLab.mjs",
             "args": [
                 "/Volumes/GoogleDrive/My Drive/Courses/CS133JS/23F/Labs/CS133JS_Lab01GradeAssist.csv",
-                "--js",
+                "--overwrite"
+            ]
+            */
+            "program": "${workspaceFolder}/TestAnyLab.mjs",
+            "args": [
+                "/Volumes/GoogleDrive/My Drive/Courses/CS133JS/24W/CS133JSW24Lab05/CS133JS_Lab05A_GradeAssist.csv",
                 "--overwrite"
             ]
         },

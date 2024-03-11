@@ -4,7 +4,7 @@
 
 This table is from CS133JS_Lab01GradeAssist.csv. It has settings for HTML and JavaScript
 
-The 1 or 2 at the end of a requirement type indicates whether it's for part 1 or part 2
+The 1 or 2 at the end of a requirement type in column headings indicate whether it's for part 1 or part 2
 
 The requiredJs checks are done with regular expressions (I think?)
 
@@ -17,7 +17,7 @@ The requiredJs checks are done with regular expressions (I think?)
 | 4    | TRUE                      | All parts in one directory | prompt         | 1         |             |           | [id]                         |             |                   |             |                   |                           |                |                           |                  | 8                   | External CSS rules    | Check for combined CSS rules |
 | 5    | TRUE                      | Check HTML                 | var            | 9         |             |           | [class]                      |             |                   |             |                   |                           |                |                           |                  | 4                   | Unique property types |                              |
 | 6    | FALSE                     | Check CSS                  | const          | 1         |             |           |                              |             |                   |             |                   |                           |                |                           |                  |                     |                       |                              |
-|      | TRUE                      | Check JavaScript           | Number         | 1         |             |           |                              |             |                   |             |                   |                           |                |                           |                  |                     |                       |                              |
+| 7    | TRUE                      | Check JavaScript           | Number         | 1         |             |           |                              |             |                   |             |                   |                           |                |                           |                  |                     |                       |                              |
 |      |                           |                            | String         | 1         |             |           |                              |             |                   |             |                   |                           |                |                           |                  |                     |                       |                              |
 |      |                           |                            | toFixed        | 1         |             |           |                              |             |                   |             |                   |                           |                |                           |                  |                     |                       |                              |
 |      |                           |                            | document.write | 8         |             |           |                              |             |                   |             |                   |                           |                |                           |                  |                     |                       |                              |

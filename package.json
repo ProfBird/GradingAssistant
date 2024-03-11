@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@types/node": "^20.11.25",
     "axios": "^1.4.0",
     "css-tree": "^2.3.1",
     "csv-parser": "^3.0.0",

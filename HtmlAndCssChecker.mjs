@@ -1,16 +1,18 @@
 import fs from "fs";
 import path from "path";
 import csv from "csv-parser";
+import {Checker} from "./Checker.mjs";
 
 /** HtmlAndCssChecker class
 * This class is used to check HTML and CSS requirements.
 */
-export class HtmlAndCssChecker {
+export class HtmlAndCssChecker extends Checker {
     /**  Constructor for HtmlAndCssChecker class
-     * @param {string} requirementsFileName - The path to the file containing requirements.
+     * @param {Buffer} requirementsFileBuffer - Returned by fs.readFileSync
      */
-    constructor(requirementsFileName) {
-        this.loadRequirements(requirementsFileName);
+    constructor(requirementsFileBuffer) {
+        super();
+        this.loadRequirements(requirementsFileBuffer);
     }
 
     /**
@@ -50,12 +52,11 @@ export class HtmlAndCssChecker {
 
     // Methods
 
-    /*************************************/
-    /* Load requirements from a csv file */
-    /*************************************/
-    loadRequirements(requirementsFileName) {
-        try {
-            const data = fs.readFileSync(requirementsFileName);
+    /** loadRequirements method
+     * Load requirements for checking HTML and CSS files.
+     * @param {BUFFER} fileBuffer 
+     */
+    loadRequirements(fileBuffer) {
             csv()  // the .on function sets up lisetners
                 .on("data", (row) =>    // row is an object containing the data from one row of the csv file
                 {
@@ -92,11 +93,7 @@ export class HtmlAndCssChecker {
                 .on("error", (error) => {
                     console.error(error);
                 })
-                .write(data);  // this sends data to the csv parser
-        }
-        catch (error) {
-            console.error(`Error reading requirements file ${requirementsFileName}: ${error.message}`);
-        }
+                .write(fileBuffer);  // this sends data to the csv parser
     } // End of loadRequirements method
 
    /**

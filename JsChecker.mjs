@@ -1,60 +1,58 @@
 import fs from "fs";
 import path from "path";
 import csv from "csv-parser";
+import {Checker} from "./Checker.mjs";
 
 /** JsChecker class
 * This class is used to check JavaScript requirements.
 */
-export class JsChecker {
+export class JsChecker extends Checker {
     /**  Constructor for JsChecker class
      * @param {string} requirementsFileName - The path to the file containing requirements.
      */
     constructor(requirementsFileName) {
+        super();
         this.loadRequirements(requirementsFileName);
-
     }
 
     /**
-  * Object to hold the HTML and CSS requirements.
-  * @property {Array<string>} TBD1 - Some requirements for part 1.
-  * @property {Array<string>} TBD2 - Some requriements for part 2.
-  */
-    // TODO: Add real requirements, these are just placeholders
+     * Object to hold the HTML and CSS requirements.
+     * @property {Array<string>} UnitTests - Unit test file names for part1, part2, etc.
+     * @property {Array<string>} FilesToTest -  Name of files to test for part1, part2, etc.
+     */
     requirements = {
-        TBD1: [],
-        TBD2: []
+        UnitTests: [], 
+        FilesToTest: []
     };
 
     // Methods
 
-    /*************************************/
-    /* Load requirements from a csv file */
-    /*************************************/
-    loadRequirements(requirementsFileName) {
-        try {
-            const data = fs.readFileSync(requirementsFileName);
+    /** loadRequirements method
+     * Load requirements for checking JavaScript files.
+     * @param {Buffer} fileBuffer - file buffer containing requirements.
+     */
+    loadRequirements(fileBuffer) {
             csv()  // the .on function sets up lisetners
                 .on("data", (row) =>    // row is an object containing the data from one row of the csv file
                 {
-                    if (row.TBD1) {
-                        this.requirements.TBD1.push(row.requiredElements1);
+                    if (row.UnitTests) {
+                        this.requirements.UnitTests.push(row.requiredElements1);
                     }
-                    if (row.TBD2) {
-                        this.requirements.TBD2.push(row.requiredElements2);
+                    if (row.FilesToTest) {
+                        this.requirements.FilesToTest.push(row.requiredElements2);
                     }
                 })
                 .on("error", (error) => {
                     console.error(error);
                 })
-                .write(data);  // this sends data to the csv parser
-        }
-        catch (error) {
-            console.error(`Error reading requirements file ${requirementsFileName}: ${error.message}`);
-        }
+                .write(fileBuffer);  // this sends data to the csv parser function above
     } // End of loadRequirements function
 
+
+
     /**
-    * Checks the HTML for the required elements and regular expressions.
+    * renderAndCheck method
+    * Checks JS code in script elements in an HTML file.
     * @param {string} html - The HTML to check.
     * @param {string} fileName - The name of the file being checked.
     * @returns {string} - A report of the results.
