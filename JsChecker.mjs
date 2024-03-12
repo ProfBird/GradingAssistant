@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import csv from "csv-parser";
-import {Checker} from "./Checker.mjs";
+import { Checker } from "./Checker.mjs";
 
 /** JsChecker class
 * This class is used to check JavaScript requirements.
@@ -21,7 +21,7 @@ export class JsChecker extends Checker {
      * @property {Array<string>} FilesToTest -  Name of files to test for part1, part2, etc.
      */
     requirements = {
-        UnitTests: [], 
+        UnitTests: [],
         FilesToTest: []
     };
 
@@ -32,20 +32,20 @@ export class JsChecker extends Checker {
      * @param {Buffer} fileBuffer - file buffer containing requirements.
      */
     loadRequirements(fileBuffer) {
-            csv()  // the .on function sets up lisetners
-                .on("data", (row) =>    // row is an object containing the data from one row of the csv file
-                {
-                    if (row.unitTests) {
-                        this.requirements.UnitTests.push(row.unitTests);
-                    }
-                    if (row.filesToTest) {
-                        this.requirements.FilesToTest.push(row.filesToTest);
-                    }
-                })
-                .on("error", (error) => {
-                    console.error(error);
-                })
-                .write(fileBuffer);  // this sends data to the csv parser function above
+        csv()  // the .on function sets up lisetners
+            .on("data", (row) =>    // row is an object containing the data from one row of the csv file
+            {
+                if (row.unitTests) {
+                    this.requirements.UnitTests.push(row.unitTests);
+                }
+                if (row.filesToTest) {
+                    this.requirements.FilesToTest.push(row.filesToTest);
+                }
+            })
+            .on("error", (error) => {
+                console.error(error);
+            })
+            .write(fileBuffer);  // this sends data to the csv parser function above
     } // End of loadRequirements function
 
 
@@ -58,9 +58,41 @@ export class JsChecker extends Checker {
     async checkSubmission(
         labDirPath, // full path to a student's lab folder or lab part subfolder.
         labPart,    // lab part number
-    )
-    {
-        fileName = this.requirements.FilesToTest[labPart];
+    ) {
+        let fileToTestPath = path.join(labDirPath, this.requirements.FilesToTest[labPart]);
+        let fileContents = fs.readFileSync(fileToTestPath, "utf8");
+        // Unit test file path is relative to the requirements file for now 3/11/24
+        let unitTestFileName = this.requirements.UnitTests[labPart];
+
+        const mocha = new Mocha();
+
+        mocha.addFile(unitTestFileName); // Add the unit test file
+        process.env.TESTED_FILE = fileToTestPath; // specify the file to be tested
+
+        // Create a promise that resolves when all tests have finished
+        const testsFinished = new Promise((resolve) => {
+            runner.on('end', resolve);
+        });
+
+        // Run the tests.
+        // The anonymous function is a callback function that is invoked when the tests have finished.
+        const runner = mocha.run(function (failures) {
+            process.exitCode = failures ? 1 : 0;  // exit with non-zero status if there were failures
+        });
+
+        // Listen for the 'fail' event.
+        runner.on('fail', function (test, err) {
+            console.log('Test failed:');
+            console.log('Test name: ' + test.title);
+            console.log('Error message: ' + err.message);
+        });
+
+        // Wait for all tests to finish before continuing
+        testsFinished.then(() => {
+            console.log('All tests finished. Continuing execution...');
+            // Continue with your code here
+        });
+
         return;
     }
 

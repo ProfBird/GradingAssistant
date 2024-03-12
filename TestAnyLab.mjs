@@ -6,7 +6,7 @@ import { HtmlAndCssChecker } from './HtmlAndCssChecker.mjs';
 import { JsChecker } from './JsChecker.mjs';
 import { checkSubmission } from "./SubmissionChecker.mjs";
 
-/* Location of the files downloaded from Moodle and unzipped */
+/* Location of the files downloaded from Moodle and unzipped on dev machines */
 // Windows path:  G:/My Drive/Courses/CIS195/2023-Summer/LabXX/CIS195_Su23LabXSubmissions
 // Mac OS path: /Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Summer/LabX/CIS195_Su23LabXSubmissions
 // Alt Mac OS path: /Users/admin/Documents/CIS195/Lab05/CIS195_Su23Lab5Submissions
@@ -35,13 +35,13 @@ const checkers = [];
 /****************/
 /* Main program */
 /****************/
-const requirementsFileName = process.argv[2];
+const requirementsFilePath = process.argv[2]; // absolute path including the file name
 let overwrite = false;
 let quitProgram = false;
-console.log(`param = ${requirementsFileName}`);
+console.log(`param = ${requirementsFilePath}`);
 switch (process.argv[3]) {
     case '--help':
-        console.log("Usage: node TestAnyLab.mjs requirementsFileName.csv [options]");
+        console.log("Usage: node TestAnyLab.mjs requirementsFilePath.csv [options]");
         console.log("options:");
         console.log("--help\t\tDisplay this help message");
         console.log("--overwrite\tOverwrite existing report files");
@@ -60,7 +60,7 @@ switch (process.argv[3]) {
 }
 
 if (quitProgram != true) {
-    loadSettings(requirementsFileName);
+    loadSettings(requirementsFilePath);
 
     // Loop through all student subdirectories at submissionsPath and 
     // call methods to check submissions
@@ -125,9 +125,9 @@ if (quitProgram != true) {
 * Load general settings from a csv requirements file
 * (Specific requiremnts for HTML, CSS, JS, etc. loaded
 * by a method in the classes that check those files.) 
-* @param {string} requirementsFileName - The csv requirements file name
+* @param {string} requirementsFilePath - The csv requirements file name
 */
-function loadSettings(requirementsFileName) {
+function loadSettings(requirementsFilePath) {
     const settings = [];
     /* settings array elements will hold these settings values:
         0: MacOsSubmissionPath (can be relative or absolute)
@@ -140,7 +140,7 @@ function loadSettings(requirementsFileName) {
         7: Check JavaScript files - TRUE or FALSE
     */
     try {
-        const fileBuffer = fs.readFileSync(requirementsFileName);
+        const fileBuffer = fs.readFileSync(requirementsFilePath);
         csv()  // the .on function sets up lisetners
             .on("data", (row) =>    // row is an object containing the data from one row of the csv file
             {
@@ -170,19 +170,19 @@ function loadSettings(requirementsFileName) {
         }
     }
     catch (error) {
-        console.error(`Error processing requirements file ${requirementsFileName}: ${error.message}`);
+        console.error(`Error processing requirements file ${requirementsFilePath}: ${error.message}`);
     }
 
     // Determine path to submissions folder
     if (process.platform === "darwin") {
-        // if settings[0] has a relative path in it, append it to the path of the requirements file
-        if (settings[0].startsWith("/"))  // aboslute path in settings
+        // if settings[0] has a relative path in it, append it to the path to the requirements file
+        if (settings[0].startsWith("/"))  // an aboslute path is in settings
         {
             labSettings.submissionsPath = settings[0];
         }
-        else  // relative path in settings
+        else  // a relative path is in settings
         {
-            labSettings.submissionsPath = path.join(path.dirname(requirementsFileName), settings[0]);
+            labSettings.submissionsPath = path.join(path.dirname(requirementsFilePath), settings[0]);
         }
     }
     else if (process.platform === "win32") {
@@ -193,7 +193,7 @@ function loadSettings(requirementsFileName) {
         }
         else  // relative path in settings
         {
-            labSettings.submissionsPath = path.join(path.dirname(requirementsFileName), settings[1]);
+            labSettings.submissionsPath = path.join(path.dirname(requirementsFilePath), settings[1]);
         }
     }
 } // End of loadSettings function
