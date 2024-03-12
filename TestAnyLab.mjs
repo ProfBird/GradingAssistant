@@ -98,9 +98,7 @@ if (quitProgram != true) {
             if(labSettings.isJavaScript)
             {
                // Assume the files for all parts are in studentDirPath
-                report +=  await checkers[1].checkSubmission(studentDirPath,
-                "",
-                part)
+                report +=  await checkers[1].checkSubmission(studentDirPath, part)
             }
         }
         
