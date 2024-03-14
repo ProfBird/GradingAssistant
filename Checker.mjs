@@ -2,7 +2,7 @@
 export class Checker {
 
     /**  Constructor for base class
-     * @param {string} requirementsFileName - The path to the file containing requirements.
+     * @param {Buffer} requirementsFileBuffer - Contents of the requirements file.
      */
     constructor() {
         // Initialization code goes here

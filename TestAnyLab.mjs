@@ -5,6 +5,7 @@ import { Checker } from "./Checker.mjs";
 import { HtmlAndCssChecker } from './HtmlAndCssChecker.mjs';
 import { JsChecker } from './JsChecker.mjs';
 import { checkSubmission } from "./SubmissionChecker.mjs";
+import Mocha from 'mocha';
 
 /* Location of the files downloaded from Moodle and unzipped on dev machines */
 // Windows path:  G:/My Drive/Courses/CIS195/2023-Summer/LabXX/CIS195_Su23LabXSubmissions
@@ -82,13 +83,15 @@ if (quitProgram != true) {
         let report = message + "\n"; // Report of the checks of the files for this student
         let studentDirPath = path.join(labSettings.submissionsPath, studentDir)
 
-        // Loop for each part
+        // Loop for each part - if there are sub-parts we consider them to be additional parts
         for (let part = 1; part <= labSettings.numberOfParts; part++) {
             report += "\nPart" + part + "\n";
             if(labSettings.isHTML)
             {
-                // TODO: Rewrite checkSubmision
-            report += await checkSubmission(
+                // TODO: Rewrite checkSubmision and move some code into HtmlAndCssChecker
+                // report +=  await checkers[0].checkSubmission(studentDirPath, part)
+                // We're still using the old checkSubmission function that also finds the right dirs and files
+                report += await checkSubmission(
                 path.join(labSettings.submissionsPath, studentDir),
                 "",
                 part,
@@ -165,7 +168,7 @@ function loadSettings(requirementsFilePath) {
             checkers.push(hcChecker);
         }
         if(labSettings) {
-            let jsChecker = new JsChecker(fileBuffer);
+            let jsChecker = new JsChecker(fileBuffer, path.dirname(requirementsFilePath));
             checkers.push(jsChecker);
         }
     }
