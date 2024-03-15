@@ -81,34 +81,32 @@ export class JsChecker extends Checker {
             if (!fs.existsSync(unitTestFilePath)) {
                 throw new Error("File not found: " + unitTestFilePath);
             }
+
             const mocha = new Mocha();
             mocha.addFile(unitTestFilePath); // Add the unit test file
             process.env.TESTED_FILE = fileToTestPath; // specify the file to be tested
-
             // Create a promise that resolves when all tests have finished
-            const testsFinished = new Promise((resolve) => {
-                runner.on('end', resolve);
+            const testsFinished = new Promise((resolve, reject) => {
+                const runner = mocha.run(failures => {
+                    if (failures) {
+                        reject(new Error(`${failures} tests failed.`));
+                    } else {
+                        resolve();
+                    }
+                });
+
+                runner.on('fail', function (test, err) {
+                    report += 'Test failed: ' + test.title + err.message + '\n';
+                });
             });
 
-            // Run the tests.
-            // The anonymous function is a callback function that is invoked when the tests have finished.
-            const runner = mocha.run(function (failures) {
-                report += failures ? "Passed" : "Failed"; 
-            });
-
-            // Listen for the 'fail' event, meaning the test didn't pass.
-            runner.on('fail', function (test, err) {
-                // console.log('Test failed:');
-                // console.log('Test name: ' + test.title);
-                // console.log('Error message: ' + err.message);
-                report += 'Test failed: ' + test.title + err.message + '\n';
-            });
-
-            // Wait for all tests to finish before continuing
-            testsFinished.then(() => {
-                console.log('All tests finished. Continuing execution...');
-                // Continue with your code here
-            });
+            try {
+                await testsFinished;
+                report += "Passed";
+            } catch (error) {
+                report += "Failed";
+            }
+            
         } catch (error) {
             console.log(error.message);
         }
