@@ -82,9 +82,11 @@ export class JsChecker extends Checker {
                 throw new Error("File not found: " + unitTestFilePath);
             }
 
+            // Now run the unit tests for this student's lab file.
+            report += "Checking " + fileToTest + "\n";
             const mocha = new Mocha();
-            mocha.addFile(unitTestFilePath); // Add the unit test file
-            process.env.TESTED_FILE = fileToTestPath; // specify the file to be tested
+            mocha.addFile(unitTestFilePath); // Add the file containing the unit tests
+            process.env.TESTED_FILE = fileToTestPath; // set the environment variable to the file to be tested
             // Create a promise that resolves when all tests have finished
             const testsFinished = new Promise((resolve, reject) => {
                 const runner = mocha.run(failures => {
@@ -93,6 +95,10 @@ export class JsChecker extends Checker {
                     } else {
                         resolve();
                     }
+                });
+
+                runner.on('suite', function(suite) {
+                    report +=  'Testing: ' + suite.title + '\n';
                 });
 
                 runner.on('fail', function (test, err) {
@@ -104,7 +110,7 @@ export class JsChecker extends Checker {
                 await testsFinished;
                 report += "Passed";
             } catch (error) {
-                report += "Failed";
+                report += "Failed tests: " + error.message;
             }
             
         } catch (error) {

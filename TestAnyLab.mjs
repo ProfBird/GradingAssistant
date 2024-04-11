@@ -66,8 +66,7 @@ if (quitProgram != true) {
     // Loop through all student subdirectories at submissionsPath and 
     // call methods to check submissions
     // studentDir will have a name like TyTitan_file
-    for (const studentDir of fs
-        .readdirSync(labSettings.submissionsPath)
+    for (const studentDir of fs.readdirSync(labSettings.submissionsPath)
         .filter((dir) => !dir.startsWith(".") && dir.endsWith("_file"))) {
         // skip if studentDir contains a file ending in _report.txt
         if (fs.readdirSync(path.join(labSettings.submissionsPath, studentDir))
@@ -80,6 +79,7 @@ if (quitProgram != true) {
             continue;
         }
         let message = `Checking the ${studentDir} directory`;
+        console.log(message);
         let report = message + "\n"; // Report of the checks of the files for this student
         let studentDirPath = path.join(labSettings.submissionsPath, studentDir)
 
