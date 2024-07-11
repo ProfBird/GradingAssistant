@@ -22,8 +22,7 @@
             ],
             "program": "${workspaceFolder}/TestAnyLab.mjs",
             "args": [
-                "/Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Fall/Labs/Lab5/CIS195Lab05GradeAssist.csv",
-                "--overwrite"
+                "Temp/CIS195TermProjectGradeAssist.csv"
             ]
         },
         {

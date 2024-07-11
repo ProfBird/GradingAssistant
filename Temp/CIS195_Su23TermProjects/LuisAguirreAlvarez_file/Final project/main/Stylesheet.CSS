@@ -1,0 +1,34 @@
+body {
+    background-color: rgb(44, 44, 44);
+    color: white;
+    font-size: large;
+    text-align: center;
+}
+
+#imag {
+    background-image: url('./image/anime_club_logo.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: norepeat;
+    min-height: 20em;
+    min-width: 20em;
+    top: 1em;
+    left: 1em;
+}
+
+a {
+    color: white;
+}
+
+footer {
+    position: 0;
+    bottom: 0;
+}
+
+.hd {
+    font-size: larger;
+}
+
+.pd {
+    font-style: italic;
+}

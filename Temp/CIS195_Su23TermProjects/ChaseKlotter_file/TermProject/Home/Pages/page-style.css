@@ -1,0 +1,71 @@
+.body-1 {
+    justify-content: center;
+    text-align: left;
+    vertical-align: top;
+    display: inline-flex;
+    gap: 5%;
+    width: 100%;
+}
+
+.fig-1 {
+    width: 30%;
+    margin: 0%;
+}
+
+.img-1 {
+    width: 100%;
+}
+
+.fig-2 {
+    text-align: right;
+    margin: 0%;
+    width: 30%;
+}
+
+.figcaption-2 {
+    margin-left: 50%;
+}
+
+.img-2 {
+    width: 100%;
+}
+
+p {
+    text-align: center;
+    width: 30%;
+}
+
+.body {
+    display: inline-block;
+    text-align: center;
+}
+
+.p-1 {
+    width: fit-content;
+    text-align: center;
+    background-color: indigo;
+    border: solid rgb(49, 0, 84);
+    padding: 2%;
+}
+
+.p-body {
+    background-color: indigo;
+    border: solid rgb(49, 0, 84);
+    text-align: left;
+}
+
+blockquote {
+    text-align: center;
+    width: 50%;
+    background-color: indigo;
+    border: solid rgb(49, 0, 84);
+}
+
+header {
+    text-align: center;
+}
+
+figcaption {
+    width: 50%;
+    font-size: small;
+}

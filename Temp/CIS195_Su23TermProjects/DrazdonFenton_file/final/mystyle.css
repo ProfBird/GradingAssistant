@@ -1,0 +1,84 @@
+/*White smoke just in case, for whatever reason, the aliceblue fails to load*/
+body {
+    text-align: justify;
+    display: grid;
+    grid-template-areas:
+        'nav nav nav'
+        'aside header header'
+        'aside main main'
+        'footer footer footer';
+    gap: 10px;
+    background-color: aliceblue, whitesmoke;
+    padding: 10px;
+}
+
+.header {
+    grid-area: header;
+}
+/*A special little border modification in one of the regimental colors*/
+.aside {
+    grid-area: aside;
+    border-radius: 25px;
+  border: 2px solid #108010;
+}
+
+.main {
+    grid-area: main;
+}
+
+.footer {
+    grid-area: footer;
+}
+
+.nav {
+    grid-area: nav;
+}
+nav p {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    margin: auto;
+    display: inline-block;
+    text-align: center;
+    /*The width will be the key to properly spaced navi-buttons*/
+    width: 25%;
+    border-radius: 25px;
+    margin: 2px;
+    padding: 2px;
+    border: solid;
+    background-color: aliceblue;
+}
+
+figure {
+    border-radius: 10px;
+    margin: 5px;
+    padding: 4px;
+    border: 1px;
+    border-style: solid;
+    width: auto;
+}
+
+header {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+nav a {
+    color: rgb(94, 28, 105);
+    text-decoration: none;
+}
+/*And here, visited links get the other half of the regimental colors*/
+a:visited {
+    color: rgb(155, 132, 2)
+}
+
+nav a:hover {
+    color: rgb(22, 188, 22);
+    font-size: large;
+}

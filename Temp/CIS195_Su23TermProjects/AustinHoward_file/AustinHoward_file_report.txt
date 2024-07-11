@@ -1,0 +1,44 @@
+Checking the AustinHoward_file directory
+Checking the beardedDragons.html file
+error error found on line 1 column 16: Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.
+error error found on line 29 column 271: No “p” element in scope but a “p” end tag seen.
+error error found on line 31 column 290: No “p” element in scope but a “p” end tag seen.
+
+Checking the care.html file
+error error found on line 1 column 16: Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.
+error error found on line 30 column 328: No “p” element in scope but a “p” end tag seen.
+error error found on line 33 column 16: Element “li” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)
+error error found on line 34 column 16: Element “li” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)
+error error found on line 35 column 16: Element “li” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)
+error error found on line 39 column 410: No “p” element in scope but a “p” end tag seen.
+error error found on line 43 column 535: No “p” element in scope but a “p” end tag seen.
+
+Checking the foods.html file
+error error found on line 1 column 16: Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.
+error error found on line 73 column 336: No “p” element in scope but a “p” end tag seen.
+error error found on line 75 column 352: No “p” element in scope but a “p” end tag seen.
+error error found on line 78 column 407: No “p” element in scope but a “p” end tag seen.
+
+Checking the gallery.html file
+error error found on line 1 column 16: Start tag seen without seeing a doctype first. Expected “<!DOCTYPE html>”.
+error error found on line 28 column 42: An “img” element must have an “alt” attribute, except under certain conditions. For details, consult guidance on providing text alternatives for images.
+error error found on line 29 column 42: An “img” element must have an “alt” attribute, except under certain conditions. For details, consult guidance on providing text alternatives for images.
+error error found on line 30 column 42: An “img” element must have an “alt” attribute, except under certain conditions. For details, consult guidance on providing text alternatives for images.
+error error found on line 31 column 42: An “img” element must have an “alt” attribute, except under certain conditions. For details, consult guidance on providing text alternatives for images.
+error error found on line 32 column 42: An “img” element must have an “alt” attribute, except under certain conditions. For details, consult guidance on providing text alternatives for images.
+error error found on line 33 column 42: An “img” element must have an “alt” attribute, except under certain conditions. For details, consult guidance on providing text alternatives for images.
+error error found on line 34 column 42: An “img” element must have an “alt” attribute, except under certain conditions. For details, consult guidance on providing text alternatives for images.
+error error found on line 35 column 42: An “img” element must have an “alt” attribute, except under certain conditions. For details, consult guidance on providing text alternatives for images.
+error error found on line 36 column 42: An “img” element must have an “alt” attribute, except under certain conditions. For details, consult guidance on providing text alternatives for images.
+
+Checking the index.html file
+info error found on line 32 column 13: Section lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all sections, or else use a “div” element instead for any cases where no heading is needed.
+error error found on line 47 column 69: An “img” element must have an “alt” attribute, except under certain conditions. For details, consult guidance on providing text alternatives for images.
+error error found on line 48 column 44: Element “figcaption” not allowed as child of element “div” in this context. (Suppressing further errors from this subtree.)
+
+Checking the styles.css file
+No errors found in styles.css
+Missing 2 required elements
+Missing figure element
+Missing img[alt] element
+

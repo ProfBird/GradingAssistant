@@ -1,0 +1,127 @@
+nav {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    background-color: rgb(251, 203, 105);
+}
+
+#container {
+    display: grid;
+    grid-template-columns: min-content;
+    align-items: center;
+    grid-template-areas:
+        'nav nav nav'
+        'header header header'
+        'intro intro intro'
+        'aside main main'
+        'table table table'
+        'footer footer footer'
+}
+
+table, td, th {
+    border: thin rgb(63, 37, 27) solid;
+    border-collapse: collapse;
+    padding: 8px;
+}
+
+th {
+    background-color: rgb(250, 223, 143);
+    font-size: larger;
+}
+
+caption {
+    font-size: larger;
+    padding: 0 0 5px 0;
+}
+
+td {
+    background-color: rgb(254, 251, 194);
+}
+
+figure, blockquote, table, footer, h1, article {
+    text-align: center;
+}
+
+aside figure {
+    margin-top: 30px;
+    position: relative;
+    left: 60px;
+}
+
+body {
+    margin: 0 auto;
+    width: 90%;
+    background-image: linear-gradient(to bottom, rgb(253, 231, 196), rgb(250, 250, 219));
+    font-family: 'Albert Sans', sans-serif;
+    font-size: 13pt;
+    color: rgb(63, 37, 27);
+}
+
+nav p, article {
+    font-size: 14pt;
+    padding: 10px;
+    border-radius: 60px;
+}
+
+article {
+    background-color: rgb(251, 203, 105);
+}
+
+nav p {
+    background-color: rgb(225, 154, 82);
+}
+
+a {
+    color: rgb(61, 37, 27);
+    text-decoration: none;
+    font-weight: bolder;
+}
+
+a:hover {
+    color: rgb(250, 250, 219);
+}
+
+section a:hover {
+    color: black;
+    font-size: larger;
+}
+
+.currentpage {
+    font-size: 18pt;
+}
+
+h1, h2 {
+    font-family: 'Caveat', sans-serif;
+}
+
+h1 {
+    text-align: center;
+    font-size: 34pt;
+}
+
+h2 {
+    font-size: 22pt;
+    background-color: rgb(250, 223, 143);
+    padding: 5px;
+}
+
+section {
+    margin: 0 auto;
+    width: 80%;
+}
+
+article, table {
+    margin: 0 auto;
+    width: 90%;
+}
+
+hr {
+    background-color: rgba(0, 0, 0, 0);
+    border: dashed rgb(155, 119, 99) 2px;
+    margin: 20px 0;
+}
+
+strong {
+    font-size: larger;
+}

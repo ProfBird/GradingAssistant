@@ -1,0 +1,52 @@
+Checking the DianaLovette_file directory
+Checking the about.html file
+info error found on line 44 column 37: Consider using the “h1” element as a top-level heading only (all “h1” elements are treated as top-level headings by many screen readers and other tools).
+info error found on line 58 column 38: Consider using the “h1” element as a top-level heading only (all “h1” elements are treated as top-level headings by many screen readers and other tools).
+info error found on line 72 column 39: Consider using the “h1” element as a top-level heading only (all “h1” elements are treated as top-level headings by many screen readers and other tools).
+error error found on line 78 column 36: Element “br” not allowed as child of element “ul” in this context. (Suppressing further errors from this subtree.)
+error error found on line 82 column 36: Element “br” not allowed as child of element “ul” in this context. (Suppressing further errors from this subtree.)
+error error found on line 86 column 36: Element “br” not allowed as child of element “ul” in this context. (Suppressing further errors from this subtree.)
+error error found on line 90 column 36: Element “br” not allowed as child of element “ul” in this context. (Suppressing further errors from this subtree.)
+error error found on line 94 column 36: Element “br” not allowed as child of element “ul” in this context. (Suppressing further errors from this subtree.)
+error error found on line 99 column 28: No “p” element in scope but a “p” end tag seen.
+info error found on line 41 column 46: Section lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all sections, or else use a “div” element instead for any cases where no heading is needed.
+info error found on line 2 column 6: Consider adding a “lang” attribute to the “html” start tag to declare the language of this document.
+
+Checking the basics.html file
+info error found on line 43 column 28: Consider using the “h1” element as a top-level heading only (all “h1” elements are treated as top-level headings by many screen readers and other tools).
+info error found on line 40 column 21: Section lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all sections, or else use a “div” element instead for any cases where no heading is needed.
+info error found on line 61 column 28: Consider using the “h1” element as a top-level heading only (all “h1” elements are treated as top-level headings by many screen readers and other tools).
+info error found on line 70 column 28: Consider using the “h1” element as a top-level heading only (all “h1” elements are treated as top-level headings by many screen readers and other tools).
+info error found on line 79 column 28: Consider using the “h1” element as a top-level heading only (all “h1” elements are treated as top-level headings by many screen readers and other tools).
+info error found on line 88 column 28: Consider using the “h1” element as a top-level heading only (all “h1” elements are treated as top-level headings by many screen readers and other tools).
+info error found on line 97 column 28: Consider using the “h1” element as a top-level heading only (all “h1” elements are treated as top-level headings by many screen readers and other tools).
+info error found on line 106 column 28: Consider using the “h1” element as a top-level heading only (all “h1” elements are treated as top-level headings by many screen readers and other tools).
+info error found on line 57 column 46: Section lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all sections, or else use a “div” element instead for any cases where no heading is needed.
+info error found on line 2 column 6: This document appears to be written in English. Consider adding “lang="en"” (or variant) to the “html” start tag.
+
+Checking the contact.html file
+info error found on line 42 column 46: Section lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all sections, or else use a “div” element instead for any cases where no heading is needed.
+info error found on line 2 column 6: Consider adding a “lang” attribute to the “html” start tag to declare the language of this document.
+
+Checking the index.html file
+info error found on line 43 column 28: Consider using the “h1” element as a top-level heading only (all “h1” elements are treated as top-level headings by many screen readers and other tools).
+error error found on line 57 column 28: No “p” element in scope but a “p” end tag seen.
+info error found on line 60 column 42: Section lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all sections, or else use a “div” element instead for any cases where no heading is needed.
+info error found on line 40 column 21: Section lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all sections, or else use a “div” element instead for any cases where no heading is needed.
+info error found on line 2 column 6: Consider adding a “lang” attribute to the “html” start tag to declare the language of this document.
+
+Checking the static/css/main.css file
+main.css: 1
+                            parse-error
+
+                            
+
+                                Parse Error
+
+Checking the vocab-table.html file
+info error found on line 41 column 36: Section lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all sections, or else use a “div” element instead for any cases where no heading is needed.
+info error found on line 2 column 6: Consider adding a “lang” attribute to the “html” start tag to declare the language of this document.
+
+Missing 1 required elements
+Missing style element
+

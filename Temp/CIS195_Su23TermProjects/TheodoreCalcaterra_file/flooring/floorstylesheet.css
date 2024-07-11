@@ -1,0 +1,162 @@
+/*
+Term Project Yarn   
+created by Ted Calcaterra
+Date: 8/13/2023
+*/
+
+/*CSS Validated 08/17/2023*/
+
+/* General Body style*/
+body {
+    width: 90%;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 18pt;
+    background-color: rgb(152, 159, 127);
+    margin: auto;
+}
+
+/* Page layout with CSS grid areas */
+body {
+    display: grid;
+    grid-template-areas:
+        "nav nav nav"
+        "header header header"
+        "figure1 section1 section1"
+        "section2 section2 section2"
+        "section3 section3 section3"
+        "article article article"
+        "div div div"
+        "footer footer footer";
+}
+
+nav {
+    grid-area: nav;
+}
+
+header {
+    grid-area: header;
+}
+
+/* SECTIONS */
+/* first section */
+section:first-of-type {
+    grid-area: section1;
+}
+
+/* second section */
+section:nth-of-type(2) {
+    grid-area: section2;
+}
+
+/* third section */
+section:nth-of-type(3) {
+    grid-area: section3;
+}
+
+/* figures */
+#fig1 {
+    grid-area: figure1;
+}
+
+#fig2 {
+    grid-area: figure2;
+}
+
+#fig3 {
+    grid-area: figure3;
+}
+
+article {
+    grid-area: article;
+}
+
+div {
+    grid-area: div;
+}
+
+footer {
+    grid-area: footer;
+}
+
+/* Structural styles using flexbox */
+
+/* Horizontal FLEXBOX: Nav Element */
+nav {
+    display: flex;
+    justify-content: space-between;
+}
+
+a:hover {
+    font-size: larger;
+}
+
+nav a {
+    padding: 10px;
+    border: 2px;
+    border-radius: 15%;
+    height: 30px;
+    width: 30%;
+    margin: 20px;
+    border-style: groove;
+    background-color: rgb(100, 74, 118);
+    font-variant: small-caps;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+    color: black;
+    text-decoration: none;
+    text-align: center;
+}
+
+/* Vertical FLEXBOX: Header Element */
+header {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    text-align: center;
+    width: 100%;
+}
+
+header hr {
+    width: 100%;
+}
+
+header h1 {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 200px;
+    margin: 0px;
+}
+
+section h2 {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 50px;
+}
+
+header img {
+    border-radius: 15px;
+    height: 800px;
+    margin: auto;
+    border: solid;
+    padding: 2px;
+}
+
+/* Style the sections using a vertical flexbox */
+section {
+    /*display: flex;*/
+    /*flex-direction: column;*/
+    margin: 10px;
+}
+
+/* Horizontal FLEXBOX: Footer Element */
+footer div {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+}
+
+footer span {
+    width: fit-content;
+}
+
+figcaption {
+    text-align: center;
+}

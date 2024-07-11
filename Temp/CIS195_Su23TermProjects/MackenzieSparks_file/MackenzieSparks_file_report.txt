@@ -1,0 +1,15 @@
+Checking the MackenzieSparks_file directory
+Checking the page1.html file
+No errors found in page1.html
+Checking the index.html file
+No errors found in index.html
+Checking the stylesheet.css file
+No errors found in stylesheet.css
+Checking the page4.html file
+No errors found in page4.html
+Checking the page3.html file
+No errors found in page3.html
+Checking the page2.html file
+No errors found in page2.html
+All required elements found
+

@@ -1,0 +1,59 @@
+h1 {
+    font-size: larger;
+    font-weight: bold;
+    text-align: center;
+    font-family: fantasy;
+}
+
+body {
+    background-color: lightpink;
+    font-family: 'Times';
+    color: rgb(40, 53, 16);
+}
+
+.navigation {
+    float: left;
+    color: palevioletred;
+    margin: 5px;
+    padding: 5px;
+    border-radius: 5px;
+    border-style: double;
+    background-color: rgb(251, 215, 221);
+}
+
+.center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 500px;
+}
+
+figcaption {
+    text-align: center;
+}
+
+a:visited {
+    color: rgb(253, 79, 108);
+}
+
+h2,
+h3 {
+    text-align: center;
+}
+
+table,
+td,
+th {
+    border: solid;
+    border-collapse: collapse;
+    padding: 4px;
+    text-align: left;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: rgb(255, 150, 168);
+}
+
+
+.body-backround {
+    background-image: url(Unknown-1.jpeg);
+}

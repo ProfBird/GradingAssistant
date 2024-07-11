@@ -1,0 +1,20 @@
+Checking the AshleyBakker_file directory
+Checking the crossstitch/crossstitch.html file
+info error found on line 34 column 38: Article lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all articles.
+
+Checking the home/index.html file
+info error found on line 40 column 38: Article lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all articles.
+
+Checking the punchneedle/punchneedle.html file
+info error found on line 31 column 38: Article lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all articles.
+
+Checking the stumpwork/stumpwork.html file
+info error found on line 31 column 38: Article lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all articles.
+
+Checking the stylesheet.css file
+No errors found in stylesheet.css
+Checking the surface/surface.html file
+info error found on line 32 column 38: Article lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all articles.
+
+All required elements found
+

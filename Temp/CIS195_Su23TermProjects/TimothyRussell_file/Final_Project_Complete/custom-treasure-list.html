@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <!--Written by Tim Russell 8/2/23 for the Final Project of CIS195 Web Authoring-->
+    <title>Tim's Dungeon Master Tools - Custom Items</title>
+    <link href="scripts/css-final-project.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.typekit.net/xuf6fra.css">
+    <script src="scripts/headerfooterloader.js"></script>
+    <script src="scripts/backgoundChanger.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Custom Treasure List</h1>
+    </header>
+    <nav>
+    </nav>
+    <main>
+        <section>
+            <h2>Custom Items</h2>
+            <span>Below is a listing of custom items that I have created for various campaigns. Flavor text of each item comes from my homebrew campaign, based off of the Forgotten Realms, but with custom content. These items have been playtested, and I have done my best to remove any over powered elements.</span>
+            <br><br>
+        </section>
+        <article id="customItemContainer"> <!--Items entered below will be formatted with CSS Grid-->
+
+            <section class="customItem">
+                <div class="itemName">Memorial Scimatar</div>
+                <div class="itemType">Weapon(Scimatar)</div><div class="itemRarity">Rare</div><div class="needsAttune">Requires Attunement</div>
+                <div class="itemDesc">Created by the Yuan-Ti clerics of Asparis. When the bearer kills a monster with this weapon, treat this weapon as a +1 weapon whenever your fight another monster of that kind. When the weapon is unattuned, it loses its memory.</div>
+                <div class="attuneDesc">This weapon is attuned after its first kill. It becomes unattuned if given to another person.</div>
+                <figure class="itemImage"><img src="images/scimatar.png" alt="Illustration of a scimatar sword"></figure>
+            </section>
+
+            <section class="customItem">
+                <div class="itemName">Atai Cloak</div>
+                <div class="itemType">Wonderous Item</div><div class="itemRarity">Uncommon</div><div class="needsAttune">Requires Attunement</div>
+                <div class="itemDesc">These cloaks are a standard issue to Gensai Peacekeepers of the Atai mountain region. This specific cloak has the name "Teves Flamewise" embroidered on the seam. Once per day, the wearer my use their reaction to reduce fall damage by 1d6.</div>
+                <div class="attuneDesc">To attune the cloak must be worn for 8 consecutive hours. If not worn for a period of 5 days, the user loses attunement.</div>
+                <figure class="itemImage"><img class="itemImage" src="images/cloak.png" alt="Illustration of a cloak"></figure>
+            </section>
+
+            <section class="customItem">
+                <div class="itemName">Evesdropping Mug</div>
+                <div class="itemType">Wonderous Item</div><div class="itemRarity">Uncommon</div><div class="needsAttune">Requires Attunement</div>
+                <div class="itemDesc">A devious device crafted by a jealous dwarven sorcerer from the realm of Amethyst Halls. As long as the mug and owner are on the same plane, the owner can hear through this item as if they are present.</div>
+                <div class="attuneDesc">To attune the bearer must drink a full serving of ale or mead out of the mug while another person tells them a secret.</div>
+                <figure class="itemImage"><img class="itemImage" src="images/mug.png" alt="Illustration of a mug"></figure>
+            </section>
+
+            <section class="customItem">
+                <div class="itemName">Ring of Ooze Holding</div>
+                <div class="itemType">Wonderous Item</div><div class="itemRarity">Rare</div><div class="needsAttune"></div>
+                <div class="itemDesc">The wizard Gilvan's developed this ring out of neccssity, after finding his tower infested with oozes after a long absense. Once per day the wearer can cast Hold Monster as a 5th level spell on creatures with the OOZE classification. Save vs Wis DC14. </div>
+                <div class="attuneDesc"></div>
+                <figure class="itemImage"><img class="itemImage" src="images/ring.png" alt="Illustration of a ring"></figure>
+            </section>
+
+
+
+
+
+
+
+
+
+
+
+        </article>
+
+
+
+    </main>
+    <footer>
+    </footer>
+
+
+
+
+    <script>
+                /* These scripts load the header, nav, and footer elements, so they do not need to be repeated in each HTML page. */
+        let red = 36;
+        let redUpOrDown = "down";
+        headerLoader();
+        navLoader();
+        footerLoader();
+        window.setInterval(backgroundChanger, 150);
+    </script>
+</body>
+</html>

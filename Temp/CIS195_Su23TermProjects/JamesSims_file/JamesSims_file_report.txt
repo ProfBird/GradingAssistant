@@ -1,0 +1,21 @@
+Checking the JamesSims_file directory
+Checking the index.html file
+No errors found in index.html
+Checking the page-2.html file
+No errors found in page-2.html
+Checking the page-3.html file
+No errors found in page-3.html
+Checking the page-4.html file
+No errors found in page-4.html
+Checking the page-5.html file
+No errors found in page-5.html
+Checking the stylesheet.css file
+No errors found in stylesheet.css
+Missing 6 required elements
+Missing table element
+Missing tr element
+Missing th element
+Missing td element
+Missing section element
+Missing article element
+

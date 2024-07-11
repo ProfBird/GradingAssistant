@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <!--Chase Klotter 8/20/2023-->
+    <meta charset="UTF-8">
+    <title>Dam-archy In The USA</title>
+    <link rel="stylesheet" href="main-style.css">
+    <style>
+        .elwha {
+            margin: 0;
+            padding: 0;
+            display: inline-block;
+        }
+
+        .header-h4 {
+            text-align: center;
+        }
+
+        .body-d {
+            font-size: 85%;
+            background-color: indigo;
+            border: solid rgb(49, 0, 84);
+        }
+
+        figcaption {
+            font-size: 70%;
+        }
+
+        blockquote {
+            margin: 0;
+            padding: 0;
+            padding-top: 1%;
+        }
+
+        h2,
+        h3,
+        h4 {
+            margin: 0;
+            padding: 0;
+        }
+
+        table,
+        tr,
+        th,
+        td {
+            border: solid;
+        }
+
+        table {
+            background-color: indigo;
+            border-color: rgb(49, 0, 84);
+            border-width: 5px;
+        }
+
+        td {
+            border-width: 1px;
+            border-color: greenyellow;
+        }
+
+        table {
+            margin-top: 1%;
+        }
+
+        tfoot {
+            font-size: 80%;
+        }
+
+        .foot {
+            border: none;
+        }
+
+
+        /*regular css above!*/
+        /*grid layout below!*/
+
+
+        section#a {
+            grid-area: a;
+            margin: 0;
+            padding: 0;
+            background-color: indigo;
+            border: solid rgb(49, 0, 84);
+        }
+
+        section#b {
+            grid-area: b;
+            width: 100%;
+        }
+
+        section#c {
+            grid-area: c;
+            width: 100%;
+        }
+
+        section#d {
+            grid-area: d;
+            width: 100%;
+        }
+
+        section#e {
+            grid-area: e;
+        }
+
+        section#f {
+            grid-area: f;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-areas:
+                "e a a f"
+                "e a a f"
+                "b c c d"
+                "b c c d";
+            gap: 3.5%;
+            width: fit-content;
+            text-align: center;
+            padding: 1%;
+        }
+    </style>
+</head>
+<body title="European Space Agency image of the Ganges River Delta">
+    <nav>
+        <ul class="nav-ul">
+            <li class="nav-list"><a href="./Pages/elwha.html">Elwha River Restoration Progress</a></li>
+            <li class="nav-list"><a href="./Pages/oregon.html">Oregon Dam Removal Projects</a></li>
+            <li class="nav-list"><a href="./Pages/experience.html">Personal Experience</a></li>
+            <li class="nav-list"><a href="./Pages/history.html">Brief History</a></li>
+        </ul>
+    </nav>
+
+    <header>
+        <h1 class="header">"Dam-archy" in the USA</h1>
+        <h4 class="header-h4">For decades the U.S. dammed every river it could. Now, due to Tribes and environmental
+            pressures they are being removed. <br>Long live free rivers.</h4>
+    </header>
+    <hr>
+
+    <div class="grid-container">
+        <section id="a">
+            <h2>Elwha River Dam Removal and Restoration</h2>
+            <figure class="elwha">
+                <img class="elwha1-img" src="./Images/elwha-img1.jpg" alt="A painted crack on Glines Canyon Dam.">
+                <figcaption class="elwha1">The Glines Canyon Dam blocking sacred Salmon from natural habitats. A crack
+                    painted on foreshadows the dams future. Photo:
+                    Mikal Jakubal</figcaption>
+            </figure>
+            <div class="elwha-body">
+                <blockquote
+                    cite="https://www.nps.gov/olym/learn/nature/elwha-ecosystem-restoration.htm#:~:text=Today%2C%20the%20Elwha%20River%20once,Strait%20of%20Juan%20de%20Fuca.">
+                    "For over a century, the web of ecological and cultural connections in the Elwha Valley were broken
+                    -then the river's story changed course. In 1992, Congress passed the Elwha River Ecosystem and
+                    Fisheries
+                    Restoration Act, authorizing dam removal to restore the altered ecosystem and the native anadromous
+                    fisheries therein. After two decades of planning, the largest dam removal in U.S. history began on
+                    September 17, 2011. Six months later the Elwha Dam was gone, followed by the Glines Canyon Dam in
+                    2014. Today, the Elwha River once again flows freely from its headwaters in the Olympic Mountains to
+                    the
+                    Strait of Juan de Fuca."<br>-National Parks Service
+                </blockquote>
+            </div>
+        </section>
+        <section id="b">
+            <h3>Noable Dam Removal Projects in Oregon</h3>
+            <table>
+                <tr>
+                    <th>Klamath River Restoration Project</th>
+                    <th>Lower Snake River Dam Removals</th>
+                </tr>
+                <tr>
+                    <td>J.C. Boyle Dam</td>
+                    <td>Lower Granite Dam</td>
+                </tr>
+                <tr>
+                    <td>Copco No.1 Dam</td>
+                    <td>Little Goose Dam</td>
+                </tr>
+                <tr>
+                    <td>Copco No. 2 Dam</td>
+                    <td>Lower Monumental Dam</td>
+                </tr>
+                <tr>
+                    <td>Iron Gate Dam</td>
+                    <td>Ice Harbor Dam</td>
+                </tr>
+                <tfoot>
+                    <tr>
+                        <td class="foot">Dam removals are scheduled to be completed by the end of 2024.</td>
+                        <td class="foot">This project is still in its planning stages as congress discusses what actions
+                            are to be taken.</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </section>
+
+        <section id="c">
+            <h3>A brief history of America's relationship with dams.</h3>
+            <figure class="map-dams">
+                <img src="./Images/map-dams.png" alt="Map of all the dams in the U.S.">
+                <figcaption>A map of every dam in the US. Map: Caitlin Dempsey, Data: National Inventory of Dams, U.S.
+                    Army Corps of Engineers.</figcaption>
+            </figure>
+        </section>
+
+        <section id="d">
+            <h3>My personal experiences with dams and restoration projects.</h3>
+            <p class="body-d">I have first hand experience working in watersheds and on rivers that have seen negative
+                effects of dams. The Provo River is an example of
+                restoration that can occur without the immediate removal of dams, while the San Juan and Colorado Rivers
+                show us the negative impacts of
+                damming one of the largest and most historic waterways in the west. A unique experience I had was
+                assisting with flood relief in Iowa along
+                the Missouri River, the particular area I was in had been inundated with water for three weeks because
+                of dams placed above and below them
+                on the river. <span><a href="./Pages/experience.html">Click here</a></span> to learn more!</p>
+        </section>
+    </div>
+
+    <footer>
+        Website by Chase Klotter &copy;08-20-2023. All Rights Reserved.
+    </footer>
+
+</body>
+
+</html>

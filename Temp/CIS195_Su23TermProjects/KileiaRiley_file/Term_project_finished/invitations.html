@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Wedding Website</title>
+    <link href="homestyle.css" rel="stylesheet" />
+    <style>
+      footer {
+        border-top: 0.5px solid;
+        padding-top: 0.5%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="title">
+      <h1>Corey & Kahla</h1>
+      <h2>WE'D LOVE TO HAVE YOU THERE</h2>
+      <hr />
+    </div>
+
+    <ul style="align-items: center; margin-bottom: 14%" class="navbar">
+      <li><a href="index.html">Home</a></li>
+      <li><a class="active" href="invitations.html">RSVP</a></li>
+      <li><a href="registry.html">Registry</a></li>
+      <li><a href="info.html">Information</a></li>
+      <li><a href="schedule.html">Schedule</a></li>
+    </ul>
+
+    <form>
+      <fieldset>
+        <legend>Will you be attending?</legend>
+        <label for="attending">Yes</label>
+        <input type="radio" id="attending" name="attendance" value="Yes" />
+        <label for="not_attending">No</label>
+        <input type="radio" id="not_attending" name="attendance" value="No" />
+      </fieldset>
+      <label for="verification">ID Number</label>
+      <input type="text" id="verification" name="verify" />
+      <br />
+      <label for="name">Full Name</label>
+      <input type="text" id="name" name="identification" />
+      <br />
+      <label for="guests">Additional Guests (adults)</label>
+      <input type="number" id="guests" name="guests_adults" />
+      <br />
+      <label for="children">Additional Guests (children)</label>
+      <input type="number" id="children" name="guests_children" />
+      <br />
+      <label for="food">Any Allergies</label>
+      <input type="text" id="food" name="allergies" />
+      <br />
+      <fieldset>
+        <legend>Choose One</legend>
+        <label for="food1">Chicken</label>
+        <input type="radio" id="food1" name="food_preference" value="Chicken" />
+        <label for="food2">Beef</label>
+        <input type="radio" id="food2" name="food_preference" value="Beef" />
+        <label for="food3">Vegetarian</label>
+        <input
+          type="radio"
+          id="food3"
+          name="food_preference"
+          value="Vegetarian"
+        />
+      </fieldset>
+      <input
+        type="submit"
+        value="Submit"
+        style="margin-left: 16.5px"
+        class="submit"
+      />
+    </form>
+
+    <footer style="text-align: center">
+      Kileia Riley &#183; Creative Commons &#183; August 2023
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,45 @@
+Checking the TheodoreCalcaterra_file directory
+Checking the carpet/carpet.html file
+No errors found in carpet.html
+Checking the floorstylesheet.css file
+floorstylesheet.css: 1
+                            parse-error
+body
+                            
+                                exp
+                            
+                            
+                                90
+                            
+                            zero
+
+                            
+
+                                Value Error :  width (nullvisudet.html#propdef-width)
+
+                                only “0” can be a “unit”. You must put a unit after your number :
+floorstylesheet.css: 1
+                            parse-error
+body
+                            
+                                unrecognized
+                            
+                            
+                                90?20   font-family: 'Times New Roman', Times, serif
+                            
+                            generator.unrecognize
+
+                            
+
+                                Parse Error
+
+Checking the index.html file
+No errors found in index.html
+Checking the tile/tile.html file
+No errors found in tile.html
+Checking the vinyl/vinyl.html file
+No errors found in vinyl.html
+Checking the wood/wood.html file
+No errors found in wood.html
+All required elements found
+

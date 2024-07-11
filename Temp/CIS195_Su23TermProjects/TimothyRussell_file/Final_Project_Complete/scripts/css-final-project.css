@@ -1,0 +1,392 @@
+
+body{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 75%;
+    min-width: 700px;
+    max-width: 1200px;
+    margin: auto;
+    /*background-image: url(../images/bg-image.jpg); */
+    background-color: rgb(36, 0, 0);
+    font-family: "eixample-dip", sans-serif;
+    font-weight: 200;
+    font-style: normal;
+}
+
+header{
+    padding: 1%;
+    text-align: center;
+    background-color: #705d5d;
+}
+
+nav {
+    display:flex;
+    flex-direction: row;
+    margin: 0px;
+    justify-content: space-evenly;
+    padding: 0%;
+    background-color: #3D1212;
+    list-style-type: none;
+}
+
+.navButtons{
+    vertical-align:middle;
+    border-left: 2px solid #240000;
+    border-right: 2px solid #240000;
+    padding-top: 12px;
+    padding-bottom: 12px;   
+    padding-left: 50px;
+    padding-right: 50px;
+    flex-grow: 1;
+}
+
+nav a{
+    color: #bfa6a6;
+    text-decoration: none;
+    font-family: "jaf-herb", serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+a{
+    color:#240000;
+}
+
+
+main {
+    padding: 1%;
+    background-color: #705d5d;
+}
+
+footer {
+    padding: 1%;
+    background-color: #705d5d;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+}
+
+h1{
+    font-family: "jaf-herb", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 400%;
+    color:#240000;
+}
+
+h2{
+    font-family: "jaf-herb", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 200%;
+    color:#240000;
+    text-align: center;
+}
+
+figcaption{
+    font-size: smaller;
+}
+
+button{
+    background-color: #BFA6A6;
+    color:#240000;
+    border-radius: 10px;
+}
+
+strong{
+    font-weight: 400;
+    font-size: larger;
+}
+
+select{
+    background-color: #BFA6A6;
+
+}
+
+input{
+    background-color: #BFA6A6;
+
+}
+
+
+/* Dice image Display Styling */
+
+.dieValueMenuButtons{
+    height:25px;
+    width:46px;
+}
+
+.dieQuantityMenuButtons{
+    height:25px;
+    width:31px;
+}
+
+#D4display{
+    background-image: url(../images/D4.png);
+    width:20px;
+    height:20px;
+    padding-bottom:70px;
+    padding-top: 60px;
+    padding-left:65px;
+    padding-right:65px;
+    text-align: center;
+    font-family: "jaf-herb", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: xx-large;
+}
+
+#D6display{
+    background-image: url(../images/D6.png);
+    width:20px;
+    height:20px;
+    padding-bottom:75px;
+    padding-top: 55px;
+    padding-left:65px;
+    padding-right:65px;
+    text-align: center;
+    font-family: "jaf-herb", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: xx-large;
+}
+
+#D8display{
+    background-image: url(../images/D8.png);
+    width:20px;
+    height:20px;
+    padding-bottom:85px;
+    padding-top: 45px;
+    padding-left:65px;
+    padding-right:65px;
+    text-align: center;
+    font-family: "jaf-herb", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: xx-large;
+}
+
+#D10display{
+    background-image: url(../images/D10.png);
+    width:20px;
+    height:20px;
+    padding-bottom:95px;
+    padding-top: 35px;
+    padding-left:65px;
+    padding-right:65px;
+    text-align: center;
+    font-family: "jaf-herb", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: xx-large;
+}
+
+#D12display{
+    background-image: url(../images/D12.png);
+    width:20px;
+    height:20px;
+    padding-bottom:80px;
+    padding-top: 50px;
+    padding-left:65px;
+    padding-right:65px;
+    text-align: center;
+    font-family: "jaf-herb", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: xx-large;
+}
+
+#D20display{
+    background-image: url(../images/D20.png);
+    width:20px;
+    height:20px;
+    padding-bottom:80px;
+    padding-top: 45px;
+    padding-left:65px;
+    padding-right:65px;
+    text-align: center;
+    font-family: "jaf-herb", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: xx-large;
+}
+
+#D100display{
+    background-image: url(../images/D100.png);
+    width:20px;
+    height:20px;
+    padding-bottom:80px;
+    padding-top: 50px;
+    padding-left:65px;
+    padding-right:65px;
+    text-align: center;
+    font-family: "jaf-herb", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: xx-large;
+}
+
+#dieDisplay{
+    display: grid;
+    grid-template-columns: 150px 150px 150px 150px 150px ;
+    grid-template-rows: auto auto auto;
+
+}
+
+#dieTotal{
+    font-family: "jaf-herb", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size:x-large;
+}
+
+
+/* Custom Item Box Styling */
+
+#customItemContainer{
+    display:grid;
+    gap:20px;
+    grid-template-columns: auto auto auto;
+}
+
+
+
+.customItem{
+    display:grid;
+    width: 300px;
+    height: 400px;
+    padding: 5px;
+    gap: 10px;
+    grid-template-areas:
+    'itemName itemName itemName'
+    'itemType itemRarity needsAttune'
+    'itemDesc itemDesc itemDesc'
+    'attuneDesc itemImage itemImage';
+    border: 2px double #3D1212;
+}
+
+.itemName{
+    grid-area: itemName;
+    text-align: center;
+    font-family: "jaf-herb", serif;
+    font-weight: 300;
+    font-style: normal;
+    font-size: large;
+    background-color: #240000;
+    color:#BFA6A6;
+}
+
+.itemType{
+    grid-area: itemType;
+    font-style: italic;
+    font-size: small;
+}
+
+.itemRarity{
+    grid-area: itemRarity;
+    font-style: italic;
+    font-size: small;
+}
+
+.needsAttune{
+    grid-area: needsAttune;
+    font-style: italic;
+    font-size: small;
+}
+
+.itemDesc{
+    grid-area: itemDesc;
+}
+
+.attuneDesc{
+    grid-area: attuneDesc;
+    font-style: italic;
+    font-size: small;
+}
+
+.itemImage{
+    grid-area: itemImage;
+    width: 100%;
+    margin:0%;
+}
+
+img{
+    width:100%;
+}
+
+
+
+/* Random Encounter Table Styling */
+
+.encounterTables{
+    max-width: 1000px;
+    min-width: 500px;
+    border: 2px double #3D1212;
+}
+
+.tableHeader{
+    text-align: center;
+    font-family: "jaf-herb", serif;
+    font-weight: 300;
+    font-style: normal;
+    font-size: large;
+}
+
+thead{
+    background-color:#240000;
+    color:#BFA6A6;
+}
+
+tbody tr:nth-child(even){
+    background-color: #BFA6A6;
+}
+
+td{
+    padding: 5px;
+}
+
+
+
+
+/*index page buttons */
+
+#indexButtonsContainer{
+    display:grid;
+    width:80%;
+    grid-template-columns: 50% 50% ;
+    grid-template-rows: 100px 100px;
+    gap:15px;
+    margin: auto;
+
+
+}
+
+.indexButtons{
+    background-color:#240000 ;
+    width:100%;
+    height:100%;
+    object-fit: cover;
+    overflow: hidden;
+    border-radius: 15px;
+    margin: 0px;
+}
+
+.indexButtonText{
+    position:relative;
+    text-align:center;
+    top: -115%;
+    font-family: "jaf-herb", serif;
+    font-weight: 300;
+    font-style: normal;
+    font-size: xx-large;
+    color: #BFA6A6;
+    text-decoration:none;
+
+}
+
+figure{
+    width:100%;
+}
+

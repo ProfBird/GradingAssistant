@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <!--Written by Tim Russell 8/2/23 for the Final Project of CIS195 Web Authoring-->
+    <title>Tim's Dungeon Master - Dice Roller</title>
+    <link href="scripts/css-final-project.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.typekit.net/xuf6fra.css">
+    <script src="scripts/dice_roller.js"></script>
+    <script src="scripts/headerfooterloader.js"></script>
+    <script src="scripts/backgoundChanger.js"></script>
+</head>
+
+<body>
+    <header>
+        <h1>Dice Roller</h1>
+    </header>
+    <nav>
+
+    </nav>
+    <main>
+        <article>
+            <h2>Dice Roller</h2>
+            <span>This simple dice roller can help you run your game without physical dice. Just choose the type of die to roll, and the quantity, then hit the "Click to Roll" button. Your dice will appear, plus the total of all rolled dice. Note: the color scheme of the die may look a little funny
+                in this design. I chose to model the colors of the dice after those included in the 1977 Basic Dungeons & Dragons set. See image here: <a href="https://waynesbooks.games/2020/09/28/holmes-dd-the-first-basic-set-1977-80/">Dungeons & Dragons Basic Set</a>.
+            </span>
+            <br><br>
+        </article>
+        <section id="dieValueMenu" style="display:flex; width: 550px; justify-content:space-between">
+            <span>Select type of die to roll:</span>
+            <span>
+                <button class="dieValueMenuButtons" id="D4button" onclick="setDieValue(4)">D4</button>
+                <button class="dieValueMenuButtons" id="D6button" onclick="setDieValue(6)">D6</button>
+                <button class="dieValueMenuButtons" id="D8button" onclick="setDieValue(8)">D8</button>
+                <button class="dieValueMenuButtons" id="D10button" onclick="setDieValue(10)">D10</button>
+                <button class="dieValueMenuButtons" id="D12button" onclick="setDieValue(12)">D12</button>
+                <button class="dieValueMenuButtons" id="D20button" onclick="setDieValue(20)">D20</button>
+                <button class="dieValueMenuButtons" id="D100button" onclick="setDieValue(100)">D100</button>
+            </span>
+        </section>
+        <br>
+        <section style="display:flex; width: 550px; justify-content:space-between">
+
+            <span>Select quantity of dice to roll:</span>
+            <span>
+                <button class="dieQuantityMenuButtons" id="Q1button" onclick="setDieQuantity(1)">1</button>
+                <button class="dieQuantityMenuButtons" id="Q2button" onclick="setDieQuantity(2)">2</button>
+                <button class="dieQuantityMenuButtons" id="Q3button" onclick="setDieQuantity(3)">3</button>
+                <button class="dieQuantityMenuButtons" id="Q4button" onclick="setDieQuantity(4)">4</button>
+                <button class="dieQuantityMenuButtons" id="Q5button" onclick="setDieQuantity(5)">5</button>
+                <button class="dieQuantityMenuButtons" id="Q6button" onclick="setDieQuantity(6)">6</button>
+                <button class="dieQuantityMenuButtons" id="Q7button" onclick="setDieQuantity(7)">7</button>
+                <button class="dieQuantityMenuButtons" id="Q8button" onclick="setDieQuantity(8)">8</button>
+                <button class="dieQuantityMenuButtons" id="Q9button" onclick="setDieQuantity(9)">9</button>
+                <button class="dieQuantityMenuButtons" id="Q10button" onclick="setDieQuantity(10)">10</button>
+            </span>
+        </section>
+        <br>
+        <section style="display:flex; width:450px; justify-content: flex-end;">
+        <button style="width:150px; font-size:120%; font-weight: bold;" onclick="doDiceRoll();">Click to Roll</button>
+        </section>
+        <br>
+        <span id="dieDisplay"></span>
+        <span id="dieTotal"></span> <!-- Displays the sum of all the dice rolled-->
+
+
+    </main>
+    <footer>
+
+    </footer>
+
+
+
+
+    <script>
+                /* These scripts load the header, nav, and footer elements, so they do not need to be repeated in each HTML page. */
+        let red = 36;
+        let redUpOrDown = "down";
+        window.setInterval(backgroundChanger, 150);
+        headerLoader();
+        navLoader();
+        footerLoader();
+    </script>
+</body>
+</html>

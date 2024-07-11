@@ -1,0 +1,15 @@
+Checking the AustinFlatt_file directory
+Checking the Page1/Michael.html file
+No errors found in Michael.html
+Checking the Page2/Lebron.html file
+No errors found in Lebron.html
+Checking the Page3/Kobe.html file
+No errors found in Kobe.html
+Checking the Page4/Shaq.html file
+No errors found in Shaq.html
+Checking the Page5/Kevin.html file
+No errors found in Kevin.html
+Checking the sitestyle.css file
+No errors found in sitestyle.css
+All required elements found
+

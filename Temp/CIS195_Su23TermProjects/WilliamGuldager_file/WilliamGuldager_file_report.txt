@@ -1,0 +1,20 @@
+Checking the WilliamGuldager_file directory
+Checking the Episode1/Episode1.html file
+No errors found in Episode1.html
+Checking the Episode2/Episode2.html file
+No errors found in Episode2.html
+Checking the Episode3/Episode3.html file
+No errors found in Episode3.html
+Checking the Episode4/Episode4.html file
+No errors found in Episode4.html
+Checking the Episode5/Episode5.html file
+No errors found in Episode5.html
+Checking the Episode6/Episode6.html file
+No errors found in Episode6.html
+Checking the index.html file
+No errors found in index.html
+Checking the rules.css file
+No errors found in rules.css
+Missing 1 required elements
+Missing section element
+

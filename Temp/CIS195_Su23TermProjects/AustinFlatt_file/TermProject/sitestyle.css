@@ -1,0 +1,31 @@
+table {
+    border-collapse: separate;
+    width: 100%;
+}
+
+td,
+th {
+    border: 1px solid;
+    text-align: left;
+    padding: 8px;
+}
+
+nav a {
+    border: 2px;
+    padding: 10px;
+    margin: 4px;
+    border-style: groove;
+    border-radius: 20px;
+}
+
+nav {
+    text-align: center;
+}
+
+header {
+    text-align: center;
+}
+
+article {
+    text-align: center;
+}

@@ -1,0 +1,95 @@
+/* Made by James Sims */
+
+.dune {
+  display: grid;
+  grid-template-areas:
+    'header header header'
+    'header header header'
+    'nav nav nav'
+    'section aside aside'
+    'section1 aside1 aside1'
+    'banner banner banner'
+    'footer footer footer'
+}
+
+header {
+  grid-area: header;
+  text-align: center;
+  background-color: orange;
+}
+
+nav {
+  grid-area: nav;
+  display: flex;
+  justify-items: center;
+  justify-content: center;
+  justify-content: space-evenly;
+  word-spacing: 20%;
+  outline: solid;
+  background: 100%;
+  background-color: rgb(171, 226, 43);
+}
+
+a:hover {
+  color: purple;
+  text-size-adjust: larger;
+}
+
+footer {
+  grid-area: footer;
+  display: flex;
+  justify-items: center;
+  justify-content: center;
+  justify-content: space-evenly;
+  outline: solid;
+  background: 100%;
+  background-color: rgb(171, 226, 43);
+}
+
+p {
+  grid-area: aside;
+  background-color: green;
+}
+
+.p {
+  grid-area: aside1;
+  background-color: darkolivegreen;
+}
+
+figure {
+  border-radius: 3px;
+  outline: groove;
+  grid-area: section;
+  background-color: aqua;
+}
+
+.figure1 {
+  border-radius: 3px;
+  outline: groove;
+  grid-area: section1;
+  background-color: blue;
+}
+
+#a {
+  text-size-adjust: larger;
+}
+
+a {
+  border-radius: 3px;
+  border: groove;
+  padding: 4px;
+
+}
+
+div {
+  display: flex;
+  background-color: darkcyan;
+  font-size: 75%;
+  grid-area: banner;
+
+}
+
+img {
+
+  width: 100%;
+}

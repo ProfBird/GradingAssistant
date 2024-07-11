@@ -1,0 +1,53 @@
+Checking the MichaelSanchez_file directory
+Checking the index.html file
+error error found on line 124 column 12: The element “footer” must not appear as a descendant of the “footer” element.
+error error found on line 124 column 134: End of file seen and there were open elements.
+error error found on line 122 column 8: Unclosed element “footer”.
+
+Checking the page2/index.html file
+No errors found in index.html
+Checking the page3/index.html file
+error error found on line 95 column 8: The element “footer” must not appear as a descendant of the “footer” element.
+error error found on line 95 column 130: End of file seen and there were open elements.
+error error found on line 93 column 8: Unclosed element “footer”.
+
+Checking the page4/index.html file
+error error found on line 92 column 12: The element “footer” must not appear as a descendant of the “footer” element.
+error error found on line 92 column 134: End of file seen and there were open elements.
+error error found on line 90 column 8: Unclosed element “footer”.
+
+Checking the page5/index.html file
+error error found on line 119 column 87: Duplicate ID “Email”.
+info error found on line 118 column 42: The first occurrence of ID “Email” was here.
+error error found on line 126 column 12: The element “footer” must not appear as a descendant of the “footer” element.
+error error found on line 126 column 134: End of file seen and there were open elements.
+error error found on line 124 column 8: Unclosed element “footer”.
+error error found on line 118 column 42: The value of the “for” attribute of the “label” element must be the ID of a non-hidden form control.
+
+Checking the styles.css file
+styles.css: 1
+                            parse-error
+.fire-text
+                            
+                                unrecognized
+                            
+                            
+                                 ???Open Sans???, sans-serif
+                            
+                            generator.unrecognize
+
+                            
+
+                                Value Error :  font-family (nullfonts.html#propdef-font-family)
+
+                                Parse Error
+styles.css: 1
+                            parse-error
+.fire-text
+                            
+
+                                Parse Error
+
+Missing 1 required elements
+Missing header element
+

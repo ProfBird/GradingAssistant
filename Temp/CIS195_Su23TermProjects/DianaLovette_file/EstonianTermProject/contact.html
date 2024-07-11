@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Contact Us</title>
+        <meta name="description" content="Estonian Language App">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" href="static/images/favicon-16.png" type="image/x-icon">
+        <link rel="stylesheet" href="static/css/main.css">
+        <script src="https://kit.fontawesome.com/7502a195cc.js" crossorigin="anonymous"></script>
+    </head>
+    <body>
+        
+        <header class="hero">
+            <div class="overlay"></div>
+
+            <div class="header-container">
+                <div class="logo-section">
+                    <div>
+                        <div class="flag">
+                            <div class="blue-stripe"></div>
+                            <div class="black-stripe"></div>
+                            <div class="white-stripe"></div>
+                        </div>
+                    </div>
+                    <h1>Estonian Learning Hub</h1>                
+                </div>
+                <nav>
+                    <a href="index.html">Home</a>
+                    <a href="about.html">About</a>
+                    <a href="basics.html">Basics</a>
+                    <a href="vocab-table.html">Vocab</a>
+                    <a href="contact.html" class="active">Contact</a>
+                </nav>                
+            </div>
+
+            <h1 class="subtitle">Have a question or need assistance? Reach out to us!</h1>
+        </header>
+
+        <main>
+            <section class="contact__wrapper">
+                <div class="contact-card">
+                    <div class="form-left__container">
+                        <article>
+                            <h3>Contact Us</h3>
+                            <p>
+                                <i class="fa-solid fa-phone-flip"></i> 000-000-0000
+                                <br><br>
+                                <i class="fa-solid fa-envelope"></i> info@email.com
+                                <br><br>
+                                <i class="fa-solid fa-location-dot"></i> 123 Fake St., Eugene, OR 97401
+                            </p>                            
+                        </article>
+                    </div>
+                    <div class="form__container">
+                        <form action="/submit" method="post">
+                            <div class="input__container">
+                                <label for="name">Name:</label>
+                                <input type="text" id="name" name="name" required autocomplete="off">    
+                            </div>
+                            <div class="input__container">
+                                <label for="email">Email:</label>
+                                <input type="email" id="email" name="email" required autocomplete="off">
+                            </div>
+                            <div class="input__container">
+                                <label for="message">Message:</label>
+                                <textarea id="message" name="message" rows="1" required></textarea>
+                            </div>
+
+                            <div class="button__container">
+                                <button type="submit">Submit</button>
+                            </div>
+                        </form>                       
+                    </div>                    
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <nav class="footer-nav">
+                    <h3>Site Map</h3>
+                    <a href="about.html">About</a>
+                    <a href="vocab-table.html">Vocab</a>
+                    <a href="basics.html">Basics</a>
+                    <a href="contact.html">Contact</a>
+                </nav>
+                <div class="footer-links">
+                    <h3>Resources</h3>
+                    <a href="https://www.keeleklikk.ee/en/coursemap" target="_blank">Keeleklikk</a>
+                    <a href="http://mylanguages.org/estonian_reading.php" target="_blank">Practice Reading</a>
+                    <a href="https://quizlet.com/class/14938049/" target="_blank">Tahela Quizlet</a>
+                    <a href="https://www.visitestonia.com/en" target="_blank">Visit Estonia</a>
+                </div>
+            </div>
+            <div class="footer-copy">
+                &copy; 2023 Diana Lovette. All rights reserved.
+            </div>
+        </footer>
+        
+    </body>
+</html>

@@ -1,0 +1,98 @@
+/* found on w3schools thought it was cool so it creates the glow effect */
+/* class="fire-text"*/
+.fire-text {
+  font-family: “Open Sans”, sans-serif;
+  color: #f5f5f5;
+  text-shadow: 0px -2px 4px #fff, 0px -2px 10px #FF3, 0px -10px 20px #F90, 0px -20px 40px #C33;
+  font-size: 15px;
+}
+
+/* class=ReligousContainer which is the otline for my second page */
+.CultureContainer {
+  display: grid;
+  margin-left: 300px;
+  width: 500px;
+  height: 400px;
+  padding: 50px;
+  gap: 40px;
+  grid-template-areas:
+    'Cultureimage Cultureimage Cultureimage'
+    ' Culture Culture Culture'
+    'CultureDesc CultureDesc CultureDesc';
+}
+
+.CultureImage {
+  grid-area: CultureImage;
+  width: 250px;
+  height: 250px;
+}
+
+/*.Culture {
+   grid-area: Culture;
+}
+
+.CultureDesc {
+   grid-area: CultureDesc;
+}*/
+
+/* creating the background and font colors */
+body {
+  background-image: url('gothic-4746967_1280.jpg');
+  background-repeat: no-repeat;
+  background-size: 2000px 1550px;
+  background-color: black;
+  margin-right: 175px;
+  margin-left: 150px;
+  color:  rgb(232, 233, 177);
+}
+
+/* spreading out links to other pages */
+nav {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  padding: 1%;
+}
+
+/* change links color */
+a {
+  color: #C33;
+  font-size: 25px;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-areas:
+    'menu quote quote'
+    'menu header header'
+    'menu body body'
+    'footer footer foot';
+  grid-gap: 20px;
+}
+h3 {
+  grid-area: header;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  padding: 10px
+}
+
+p {
+  grid-area: body;
+}
+
+ul {
+  grid-area: body;
+}
+
+span {
+  grid-area: footer;
+  display: flex;
+  justify-content: center;
+}
+fieldset {
+  margin-left: 205px;
+  margin-right: 5%;
+  border: none;
+  font-size: larger;
+}

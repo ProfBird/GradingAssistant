@@ -1,0 +1,100 @@
+Checking the KileiaRiley_file directory
+Checking the homestyle.css file
+homestyle.css: 1
+                            parse-error
+
+                            
+                                unrecognized
+                            
+                            
+                                url('https://fonts.googleapis.com/css2?family=Dancing Script:wght@600
+                            
+                            generator.unrecognize
+
+                            
+
+                                Parse Error
+
+Checking the index.html file
+info error found on line 4 column 28: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 6 column 50: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 20 column 12: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 35 column 8: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+error error found on line 55 column 9: End tag for  “body” seen, but there were unclosed elements.
+error error found on line 17 column 23: Unclosed element “div”.
+
+Checking the info.html file
+info error found on line 4 column 28: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 6 column 50: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 21 column 12: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+error error found on line 32 column 75: Bad value “IMG_8147 copy.jpg” for attribute “src” on element “img”: Illegal character in path segment: space is not allowed.
+info error found on line 32 column 75: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 37 column 64: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 38 column 14: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 38 column 31: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 43 column 31: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 44 column 26: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+
+Checking the invitations.html file
+info error found on line 4 column 28: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 6 column 50: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 19 column 12: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 34 column 75: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 36 column 78: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 39 column 59: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 40 column 12: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 42 column 59: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 43 column 12: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 45 column 62: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 46 column 12: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 48 column 66: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 49 column 12: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 51 column 54: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 52 column 12: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 56 column 80: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 58 column 77: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 65 column 10: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 72 column 8: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+
+Checking the registry.html file
+info error found on line 4 column 28: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 6 column 50: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 21 column 12: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+error error found on line 32 column 75: Bad value “IMG_8111 copy.jpg” for attribute “src” on element “img”: Illegal character in path segment: space is not allowed.
+info error found on line 32 column 75: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 69 column 11: A table row was 2 columns wide, which is less than the column count established by the first row (3).
+info error found on line 73 column 11: A table row was 2 columns wide, which is less than the column count established by the first row (3).
+info error found on line 77 column 11: A table row was 2 columns wide, which is less than the column count established by the first row (3).
+info error found on line 81 column 11: A table row was 2 columns wide, which is less than the column count established by the first row (3).
+info error found on line 85 column 11: A table row was 2 columns wide, which is less than the column count established by the first row (3).
+
+Checking the schedule.html file
+info error found on line 4 column 28: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 6 column 50: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 26 column 12: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 40 column 45: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 41 column 45: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 42 column 14: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 43 column 35: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 44 column 47: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 45 column 14: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 46 column 31: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 47 column 50: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 48 column 14: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 49 column 36: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 50 column 47: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 51 column 14: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 52 column 32: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 53 column 63: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 54 column 53: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 55 column 53: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 56 column 58: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+info error found on line 57 column 14: Trailing slash on void elements has no effect and interacts badly with unquoted attribute values.
+
+Missing 5 required elements
+Missing header element
+Missing nav element
+Missing figure element
+Missing section element
+Missing article element
+

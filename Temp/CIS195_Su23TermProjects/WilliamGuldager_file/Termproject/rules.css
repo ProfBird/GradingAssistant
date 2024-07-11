@@ -1,0 +1,45 @@
+body {
+  background-color: tan;
+  color: black;
+  width: 1200px;
+  text-align: center;
+}
+
+strong {
+  font-size: x-large;
+}
+
+#forget {
+  font-weight: lighter;
+  color: grey;
+  font-size: smaller;
+  font-style: italic;
+}
+
+
+#small {
+  font-size: small;
+  font-style: italic;
+}
+
+#spot {
+  color: rgb(193, 193, 16)
+}
+
+nav a {
+  margin: 4px;
+  padding: 5px;
+  border: 2px;
+  border-style: solid;
+  background-color: lightgray;
+  border-radius: 15px 15px 15px 15px;
+  width: 800px;
+}
+
+h1 {
+  font-size: x-large;
+}
+
+h2 {
+  font-size: medium;
+}

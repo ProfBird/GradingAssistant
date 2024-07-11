@@ -1,0 +1,18 @@
+Checking the ChaseKlotter_file directory
+Checking the Home/Pages/elwha.html file
+No errors found in elwha.html
+Checking the Home/Pages/experience.html file
+No errors found in experience.html
+Checking the Home/Pages/history.html file
+No errors found in history.html
+Checking the Home/Pages/oregon.html file
+No errors found in oregon.html
+Checking the Home/Pages/page-style.css file
+No errors found in page-style.css
+Checking the Home/index.html file
+No errors found in index.html
+Checking the Home/main-style.css file
+No errors found in main-style.css
+Missing 1 required elements
+Missing article element
+

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <!--Written by Tim Russell 8/2/23 for the Final Project of CIS195 Web Authoring-->
+    <title>Tim's Dungeon Master Tools - Character Generator</title>
+    <link href="scripts/css-final-project.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.typekit.net/xuf6fra.css">
+    <script src="scripts/Tim_Russell_CharacterCreator_v3.js"></script>
+    <script src="scripts/Tim_Russell_CharacterCreator_Data_Tables.js"></script>
+    <script src="scripts/headerfooterloader.js"></script>
+    <script src="scripts/backgoundChanger.js"></script>
+
+</head>
+<body>
+    <header>
+        <h1>Character Generator</h1>
+    </header>
+    <nav>
+
+    </nav>
+    <main>
+        <article>
+            <h2>Character Generator</h2>
+            <P>Use this program to quickly generate random characters for use in Dungeons & Dragons 5e. All statistics can be randomly generated, or the user can choose specific properties such as class, species, alignment, and level. Character stats will be generated based on these character properties.</P><br>
+        </article>
+        
+        <section>
+            Enter name or leave blank for random name: <input id="characterNameInput"><br><br> <!--Input for custom character name, generates random name if left blank-->
+            
+            Choose character propterties:<br>
+            
+            <Select id="characterClassInput" name="characterClassInput"> 
+                <option value="Random">Random Class</option>
+                <option value="Barbarian">Barbarian</option>
+                <option value="Bard">Bard</option>
+                <option value="Cleric">Cleric</option>
+                <option value="Druid">Druid</option>
+                <option value="Fighter">Fighter</option>
+                <option value="Monk">Monk</option>
+                <option value="Paladin">Paladin</option>
+                <option value="Ranger">Ranger</option>
+                <option value="Rogue">Rogue</option>
+                <option value="Sorcerer">Sorcerer</option>
+                <option value="Warlock">Warlock</option>
+                <option value="Wizard">Wizard</option>
+            </Select>
+            
+            <Select id="characterSpeciesInput" name="characterSpeciesInput">
+                <option value="Random">Random Species</option>
+                <option value="Human">Human</option>
+                <option value="Elf">Elf</option>
+                <option value="Dwarf">Dwarf</option>
+                <option value="Halfling">Halfling</option>
+                <option value="Gnome">Gnome</option>
+                <option value="Tiefling">Tiefling</option>
+                <option value="Half-Elf">Half-Elf</option>
+                <option value="Half-Orc">Half-Orc</option>
+                <option value="Genasi">Genasi</option>
+                <option value="Firbolg">Firbolg</option>
+                <option value="Goliath">Goliath</option>
+                <option value="Arakocra">Arakocra</option>
+                <option value="Yuan-Ti Pureblood">Yuan-Ti Pureblood</option>
+                <option value="Lizardfolk">Lizardfolk</option>
+                <option value="Aasimar">Aasimar</option>
+                <option value="Tabaxi">Tabaxi</option>
+                <option value="Kenku">Kenku</option>
+                <option value="Warforged">Warforged</option>
+            </Select>
+            
+            <Select id="characterLevelInput" name="characterLevelInput">
+            
+                <option value="Random">Random Level</option>
+                <option value=1>1</option>
+                <option value=2>2</option>
+                <option value=3>3</option>
+                <option value=4>4</option>
+                <option value=5>5</option>
+                <option value=6>6</option>
+                <option value=7>7</option>
+                <option value=8>8</option>
+                <option value=9>9</option>
+                <option value=10>10</option>
+                <option value=11>11</option>
+                <option value=12>12</option>
+                <option value=13>13</option>
+                <option value=14>14</option>
+                <option value=15>15</option>
+                <option value=16>16</option>
+            </Select>
+            
+            
+            <Select id="characterAlignmentInput" name="characterAlignmentInput">
+            
+                <option value="Random">Random Alignment</option>
+                <option value="Lawful Good">Lawful Good</option>
+                <option value="Neutral Good">Neutral Good</option>
+                <option value="Chaotic Good">Chaotic Good</option>
+                <option value="Lawful Neutral">Lawful Neutral </option>
+                <option value="True Neutral">True Neutral</option>
+                <option value="Chaotic Neutral">Chaotic Neutral</option>
+                <option value="Lawful Evil">Lawful Evil</option>
+                <option value="Neutral Evil">Neutral Evil</option>
+                <option value="Chaotic Evil">Chaotic Evil</option>
+            </Select>
+            <br>
+            <br>
+            <button style="width:150px; font-size:120%; font-weight: bold;" onclick="doCreateCharacter();">Click to create</button>
+            <br>
+            <br>
+        </section>
+        
+        
+        
+        
+        
+        
+        <script>
+            function doCreateCharacter() 
+            {
+                let characterClassInput = document.getElementById("characterClassInput").value;
+                let characterSpeciesInput = document.getElementById("characterSpeciesInput").value;
+                let characterLevelInput = document.getElementById("characterLevelInput").value;
+                let characterAlignmentInput = document.getElementById("characterAlignmentInput").value;
+                let characterNameInput = document.getElementById("characterNameInput").value;
+                let printToScreen = "";
+                createRandomCharacter(characterNameInput, characterClassInput, characterSpeciesInput, characterLevelInput, characterAlignmentInput);
+        
+                document.getElementById("str").innerHTML = "STR: <strong>" + CHARACTER_ARRAY[0].str + "</strong>";
+                document.getElementById("dex").innerHTML = "DEX:  <strong>" + CHARACTER_ARRAY[0].dex + "</strong>";
+                document.getElementById("con").innerHTML = "CON:  <strong>" + CHARACTER_ARRAY[0].con + "</strong>";
+                document.getElementById("int").innerHTML = "INT:  <strong>" + CHARACTER_ARRAY[0].int + "</strong>";
+                document.getElementById("wis").innerHTML = "WIZ:  <strong>" + CHARACTER_ARRAY[0].wis + "</strong>";
+                document.getElementById("cha").innerHTML = "CHA:  <strong>" + CHARACTER_ARRAY[0].cha + "</strong>";
+                document.getElementById("characterClass").innerHTML = "CLASS:  <strong>" + CHARACTER_ARRAY[0].characterClass + "</strong>";
+                document.getElementById("species").innerHTML = "SPECIES:  <strong>" + CHARACTER_ARRAY[0].species + "</strong>";
+                document.getElementById("level").innerHTML = "LEVEL:  <strong>" + CHARACTER_ARRAY[0].level + "</strong>";
+                document.getElementById("name").innerHTML = "NAME:  <strong>" + CHARACTER_ARRAY[0].name + "</strong>";
+                document.getElementById("alignment").innerHTML = "ALIGNMENT:  <strong>" + CHARACTER_ARRAY[0].alignment + "</strong>";
+                document.getElementById("hitPoints").innerHTML = "HP:  <strong>" + CHARACTER_ARRAY[0].hitPoints + "</strong>";
+                document.getElementById("proficencyBonus").innerHTML = "PB:  <strong>" + CHARACTER_ARRAY[0].proficencyBonus + "</strong>";
+                document.getElementById("speed").innerHTML = "SPEED:  <strong>" + CHARACTER_ARRAY[0].speed + "</strong>";
+                document.getElementById("initiativeBonus").innerHTML = "INIT: <strong>+" + CHARACTER_ARRAY[0].initiativeBonus + "</strong>";
+                document.getElementById("strMod").innerHTML = "STR MOD:  <strong>" + CHARACTER_ARRAY[0].strMod + "</strong>";
+                document.getElementById("dexMod").innerHTML = "DEX MOD:  <strong>" + CHARACTER_ARRAY[0].dexMod + "</strong>";
+                document.getElementById("conMod").innerHTML = "CON MOD:  <strong>" + CHARACTER_ARRAY[0].conMod + "</strong>";
+                document.getElementById("intMod").innerHTML = "INT MOD:  <strong>" + CHARACTER_ARRAY[0].intMod + "</strong>";
+                document.getElementById("wisMod").innerHTML = "WIS MOD:  <strong>" + CHARACTER_ARRAY[0].wisMod + "</strong>";
+                document.getElementById("chaMod").innerHTML = "CHA MOD:  <strong>" + CHARACTER_ARRAY[0].chaMod + "</strong>";
+        
+            }   
+        </script>
+        <section>
+            <table style="width:700px">   <!--This table displays generated character-->     
+                <TR>
+                    <TD style="background-color:#240000 ;color:#bfa6a6;" id="name" colspan="2">NAME: </TD><TD style="background-color:#240000;color:#bfa6a6;" id="species" colspan="2" >SPECIES: </TD><TD style="background-color:#240000;color:#bfa6a6;" id="characterClass" colspan="2">CLASS: </TD>
+                </TR>
+                <TR>
+                    <TD style="background-color:#3D1212;color:#bfa6a6;" id="alignment" colspan="2">ALIGNMENT: </TD><TD style="background-color:#3D1212;color:#bfa6a6;" id="level" >LEVEL: </TD><TD style="background-color:#3D1212;color:#bfa6a6;" id="speed" >SPEED:</TD><TD style="background-color:#3D1212;color:#bfa6a6;" id="proficencyBonus" >PB:</TD><TD style="background-color:#3D1212;color:#bfa6a6;" id="initiativeBonus" >INIT+:</TD>
+                </TR>
+                <tr><td colspan="6"> </td></tr>
+                <tr>
+                    <td style="background-color:#5C1C1C;color:#bfa6a6;" id="str">STR: </td><td style="background-color:#5C1C1C;color:#bfa6a6;" id="dex"> DEX: </td><td style="background-color:#5C1C1C;color:#bfa6a6;" id="con"> CON: </td><td style="background-color:#5C1C1C;color:#bfa6a6;" id="int">INT: </td><td style="background-color:#5C1C1C;color:#bfa6a6;" id="wis">WIS: </td><td style="background-color:#5C1C1C;color:#bfa6a6;" id="cha"> CHA:</td>
+                </tr>
+            
+                <tr>
+                    <td style="background-color:#752323;color:#bfa6a6;" id="strMod">STR MOD: </td><td style="background-color:#752323;color:#bfa6a6;" id="dexMod"> DEX MOD: </td><td style="background-color:#752323;color:#bfa6a6;" id="conMod"> CON MOD: </td><td style="background-color:#752323;color:#bfa6a6;" id="intMod">INT MOD: </td><td style="background-color:#752323;color:#bfa6a6;" id="wisMod">WIS MOD: </td><td style="background-color:#752323;color:#bfa6a6;" id="chaMod"> CHA MOD:</td>
+                </tr>
+                <TR><TD colspan="3" style="background-color:#992E2E;color:#bfa6a6; height:75px;" id="hitPoints" >HP:</TD></TR>
+            </table>
+        </section>
+    </main>
+    <footer>
+
+    </footer>
+
+
+
+
+    <script>
+                /* These scripts load the header, nav, and footer elements, so they do not need to be repeated in each HTML page. */
+        let red = 36;
+        let redUpOrDown = "down";
+        window.setInterval(backgroundChanger, 150);
+        headerLoader();
+        navLoader();
+        footerLoader();
+    </script>
+</body>
+</html>

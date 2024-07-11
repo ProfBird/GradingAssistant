@@ -1,0 +1,30 @@
+Checking the TimothyRussell_file directory
+Checking the custom-treasure-list.html file
+info error found on line 27 column 40: Section lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all sections, or else use a “div” element instead for any cases where no heading is needed.
+info error found on line 35 column 40: Section lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all sections, or else use a “div” element instead for any cases where no heading is needed.
+info error found on line 43 column 40: Section lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all sections, or else use a “div” element instead for any cases where no heading is needed.
+info error found on line 51 column 40: Section lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all sections, or else use a “div” element instead for any cases where no heading is needed.
+info error found on line 25 column 42: Article lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all articles.
+
+Checking the final-character-generator.html file
+info error found on line 29 column 17: Section lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all sections, or else use a “div” element instead for any cases where no heading is needed.
+info error found on line 170 column 126: A table row was 3 columns wide, which is less than the column count established by the first row (6).
+info error found on line 154 column 17: Section lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all sections, or else use a “div” element instead for any cases where no heading is needed.
+
+Checking the final-dice-roller.html file
+info error found on line 30 column 101: Section lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all sections, or else use a “div” element instead for any cases where no heading is needed.
+info error found on line 43 column 83: Section lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all sections, or else use a “div” element instead for any cases where no heading is needed.
+info error found on line 60 column 79: Section lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all sections, or else use a “div” element instead for any cases where no heading is needed.
+
+Checking the index.html file
+info error found on line 21 column 44: Article lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all articles.
+info error found on line 27 column 17: Section lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all sections, or else use a “div” element instead for any cases where no heading is needed.
+
+Checking the random-encounter-charts.html file
+info error found on line 25 column 58: Article lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all articles.
+
+Checking the scripts/css-final-project.css file
+No errors found in css-final-project.css
+Missing 1 required elements
+Missing style element
+

@@ -40,24 +40,26 @@ const requirementsFilePath = process.argv[2]; // absolute path including the fil
 let overwrite = false;
 let quitProgram = false;
 console.log(`param = ${requirementsFilePath}`);
-switch (process.argv[3]) {
-    case '--help':
-        console.log("Usage: node TestAnyLab.mjs requirementsFilePath.csv [options]");
-        console.log("options:");
-        console.log("--help\t\tDisplay this help message");
-        console.log("--overwrite\tOverwrite existing report files");
-        console.log("--html\t\tCheck HTML and CSS files");
-        console.log("--javascript or --js\tCheck JavaScript files");
-        quitProgram = true;  // exit the program after displaying the help message
-        break;
-    case '--overwrite':
-        overwrite = true;
-        console.log("Overwriting report files");
-        break;
-    default:
-        console.log(`Unknown option: ${process.argv[3]}`);
-        quitProgram = true;
-        break;
+if (process.argv.length > 3) {
+    switch (process.argv[3]) {
+        case '--help':
+            console.log("Usage: node TestAnyLab.mjs requirementsFilePath.csv [options]");
+            console.log("options:");
+            console.log("--help\t\tDisplay this help message");
+            console.log("--overwrite\tOverwrite existing report files");
+            console.log("--html\t\tCheck HTML and CSS files");
+            console.log("--javascript or --js\tCheck JavaScript files");
+            quitProgram = true;  // exit the program after displaying the help message
+            break;
+        case '--overwrite':
+            overwrite = true;
+            console.log("Overwriting report files");
+            break;
+        default:
+            console.log(`Unknown option: ${process.argv[3]}`);
+            quitProgram = true;
+            break;
+    }
 }
 
 if (quitProgram != true) {
@@ -86,25 +88,23 @@ if (quitProgram != true) {
         // Loop for each part - if there are sub-parts we consider them to be additional parts
         for (let part = 1; part <= labSettings.numberOfParts; part++) {
             report += "\nPart" + part + "\n";
-            if(labSettings.isHTML)
-            {
+            if (labSettings.isHTML) {
                 // TODO: Rewrite checkSubmision and move some code into HtmlAndCssChecker
                 // report +=  await checkers[0].checkSubmission(studentDirPath, part)
                 // We're still using the old checkSubmission function that also finds the right dirs and files
                 report += await checkSubmission(
-                path.join(labSettings.submissionsPath, studentDir),
-                "",
-                part,
-                labSettings.HtmlAndCssRequirements
-            );
+                    path.join(labSettings.submissionsPath, studentDir),
+                    "",
+                    part,
+                    labSettings.HtmlAndCssRequirements
+                );
             }
-            if(labSettings.isJavaScript)
-            {
-               // Assume the files for all parts are in studentDirPath
-                report +=  await checkers[1].checkSubmission(studentDirPath, part)
+            if (labSettings.isJavaScript) {
+                // Assume the files for all parts are in studentDirPath
+                report += await checkers[1].checkSubmission(studentDirPath, part)
             }
         }
-        
+
         report += "\n";
 
         // Open the report file for writing and get its file descriptor
@@ -156,18 +156,18 @@ function loadSettings(requirementsFilePath) {
             })
             .write(fileBuffer);  // this sends data to the csv parser
 
-            // Copy settings to the labSettings object
-            labSettings.numberOfParts = settings[2];
-            labSettings.areAllInOneDir = (settings[4].toLowerCase() == "true");
-            labSettings.isHTML = (settings[5].toLowerCase() == "true");  // Currenty for HTML & CSS
-            labSettings.isCSS = (settings[6].toLowerCase() == "true");  // Currently not used 3/10/24
-            labSettings.isJavaScript = (settings[7].toLowerCase() == "true");
+        // Copy settings to the labSettings object
+        labSettings.numberOfParts = settings[2];
+        labSettings.areAllInOneDir = (settings[4].toLowerCase() == "true");
+        labSettings.isHTML = (settings[5].toLowerCase() == "true");  // Currenty for HTML & CSS
+        labSettings.isCSS = (settings[6].toLowerCase() == "true");  // Currently not used 3/10/24
+        labSettings.isJavaScript = (settings[7].toLowerCase() == "true");
         // Load requrirements
-        if(labSettings) {
+        if (labSettings) {
             let hcChecker = new HtmlAndCssChecker(fileBuffer);
             checkers.push(hcChecker);
         }
-        if(labSettings) {
+        if (labSettings) {
             let jsChecker = new JsChecker(fileBuffer, path.dirname(requirementsFilePath));
             checkers.push(jsChecker);
         }
@@ -185,7 +185,8 @@ function loadSettings(requirementsFilePath) {
         }
         else  // a relative path is in settings
         {
-            labSettings.submissionsPath = path.join(path.dirname(requirementsFilePath), settings[0]);
+            // labSettings.submissionsPath = path.join(path.dirname(requirementsFilePath), settings[0]);
+            labSettings.submissionsPath = settings[0];
         }
     }
     else if (process.platform === "win32") {

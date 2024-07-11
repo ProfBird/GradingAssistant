@@ -1,0 +1,15 @@
+Checking the LuisAguirreAlvarez_file directory
+Checking the main/about/index.html file
+No errors found in index.html
+Checking the main/event/events.html file
+No errors found in events.html
+Checking the main/event/index.html file
+No errors found in index.html
+Checking the main/history.html file
+No errors found in history.html
+Checking the main/index.html file
+No errors found in index.html
+Missing 2 required elements
+Missing nav element
+Missing section element
+

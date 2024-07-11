@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <!--Written by Tim Russell 8/2/23 for the Final Project of CIS195 Web Authoring-->
+    <title>Tim's Dungeon Master Tools</title>
+    <link href="scripts/css-final-project.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.typekit.net/xuf6fra.css">
+    <script src="scripts/headerfooterloader.js"></script>
+    <script src="scripts/backgoundChanger.js"></script>
+
+</head>
+
+<body>
+    <header>
+    </header>
+    <nav>
+    </nav>
+    <main>
+        <article id="indexButtonsContainer">
+            <section><a href="final-dice-roller.html"><figure class="indexButtons"><img alt="Image of a pile of dice." style="opacity: .25" src="images/dice.jpg"></figure><h4 class="indexButtonText"> Dice Roller</h4></a></section>
+            <section><a href="final-character-generator.html"><figure class="indexButtons"><img alt="Character Sheet image" style="opacity: .25" src="images/charsheet2.jpg"></figure><h4 class="indexButtonText">Character Generator</h4></a></section>
+            <section><a href="random-encounter-charts.html"><figure class="indexButtons"><img alt="Image of a random encounter chart." style="opacity: .25" src="images/randencounter.jpg"></figure><h4 class="indexButtonText">Random Encounter Charts</h4></a></section>
+            <section><a href="custom-treasure-list.html"><figure class="indexButtons"><img alt="Image of fantasy style treasure hoard." style="opacity: .25" src="images/items.jpg"></figure><h4 class="indexButtonText">Custom Treasure</h4></a></section>
+        </article>
+        <section>
+            <p>This is a collection of simple tools I have created or adapted from other sources, for running Dungeons & Dragons 5th Edition games. The code for the Character Generator I created for my JavaScript class final. The Dice Roller I created just for this Web Authoring class.</p>
+            <p> My current To-Do list for the site is:</p>
+            <ul>
+                <li>Add more items to Custom Item page</li>
+                <li>Add more charts to Random Encounter page</li>
+                <li>Add function to select item from random encount chart with a die roll</li>
+
+            </ul>
+        </section>
+    </main>
+    <footer>
+
+    </footer>
+
+
+
+
+    <script>
+        /* These scripts load the header, nav, and footer elements, so they do not need to be repeated in each HTML page. */
+        let red = 36;
+        let redUpOrDown = "down";
+        window.setInterval(backgroundChanger, 150);
+        headerLoader();
+        navLoader();
+        footerLoader();
+
+    </script>
+</body>
+</html>

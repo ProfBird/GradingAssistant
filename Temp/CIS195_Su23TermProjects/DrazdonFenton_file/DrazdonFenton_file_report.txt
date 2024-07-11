@@ -1,0 +1,22 @@
+Checking the DrazdonFenton_file directory
+Checking the Index.html file
+info error found on line 52 column 17: Article lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all articles.
+
+Checking the mystyle.css file
+No errors found in mystyle.css
+Checking the page/equipment.html file
+info error found on line 45 column 17: Article lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all articles.
+
+Checking the page/fieldcycle.html file
+info error found on line 44 column 17: Article lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all articles.
+
+Checking the page/hawaii.html file
+error error found on line 41 column 12: No “p” element in scope but a “p” end tag seen.
+info error found on line 75 column 17: Article lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all articles.
+
+Checking the page/roadcycle.html file
+info error found on line 45 column 17: Article lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all articles.
+
+Missing 1 required elements
+Missing section element
+
