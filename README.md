@@ -13,12 +13,12 @@ Software that automates some of the more tedious aspects of grading computer pro
 
 # Introduction
 
-I initially wrote this software to check web pages containing HTML and CSS for my [CIS 195 Web Authoring](https://github.com/LCC-CIT/CIS195-CourseMaterials) course at Lane Community College. This is my first Node.js project and I'm still learning. In fact, when I first wrote this, I hadn't learned to use ES6 classes yet. 
+I initially wrote this software to check web pages containing HTML and CSS for my [CIS 195 Web Authoring](https://github.com/LCC-CIT/CIS195-CourseMaterials) course at Lane Community College (LCC). This is my first Node.js project and I'm still learning. In fact, when I first wrote this, I hadn't learned to use ES6 classes yet. 
 
 I am currently working on expanding the software to check JavaScript code for my [CS 133JS Beginning JavaScript Programming](https://github.com/LCC-CIT/CS133JS-CourseMaterials) course. I am also refactoring the code to be more modular and use ES6 classes. This work is being done on the *HtmlCssAndJsCheckers* branch.
 
 There are two programs in this repository:
--  [UnzipFiles](#UnzipFiles) which unzips assignment files that were bulk downloaed from Moodle.
+-  [UnzipFiles](#UnzipFiles) which unzips assignment files that were bulk downloaded from [Moodle](https://moodle.com/)&mdash;the LMS we use at LCC.
 -  [TestAnyLab](#TestAnyLab) which is a customizable test runner that checks all the downloaded assignment files for requirements. Requirements are specified in a .csv file for each assignment.
 
 
@@ -66,7 +66,7 @@ This is what UnzipFiles uses to unzip the files:
 
 This is the software that checks the lab assignemnts unzipped by Unzipfiles. This is the expected folder structure:  
 `StudentName_file/LabX/<website files and folders>`  
-Or, if there are two parts:  
+Or, if there are two parts to the lab assignment:  
 `StudentName_file/Part1/<website files and folders>`  
 `                 Part2/<website files and folders>`  
 
@@ -76,7 +76,7 @@ Or, if there are two parts:
 
 - `requirementsFileName`  the absolute path to the requirements file including the file name.
 - Here are the options:  
-  `--help`  displays a help messag  
+  `--help`  displays a help message  
   `--overwrite` overwrites existing report files  
 
 ## Current Capabilities
@@ -102,7 +102,7 @@ The program can currently (as of 12/14/23) check the following kinds of requirem
   - Syntax
 - Number of CSS and number of HTML files
 - Regular expression searches of the HTML or CSS code
-- Existence of special file names, like index.html
+- Existence of special file names, like `index.html`
 
 ## Requirements file
 
@@ -155,6 +155,7 @@ We will follow the [GitHub flow](https://docs.github.com/en/get-started/quicksta
 ## Unit Testing
 
 [Mocha](https://mochajs.org) unit test files are in the test subfolder. Each bug fix or enhancement should include a unit test if one does not already exist.
+4/8/25 Note: There may be good reasons to swich to Jest for unit testing... stay tuned.
 
 ## JSDoc
 
