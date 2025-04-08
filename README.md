@@ -3,7 +3,7 @@
 Software that automates some of the more tedious aspects of grading computer programming homework assignments. Currently it has modules for checking HTML, CSS and JavaScript (in progress). It can check things like:
 
 - Syntax
-- Presense of required features
+- Presence of required features
 - Some aspects of coding style
 - Functionality of the code
 
