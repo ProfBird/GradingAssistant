@@ -4,7 +4,7 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Windows Launch",
+            "name": "CIS195 Windows Launch",
             "skipFiles": [
                 "<node_internals>/**"
             ],
@@ -16,13 +16,47 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "MacOS Launch",
+            "name": "CIS195 MacOS Launch",
             "skipFiles": [
                 "<node_internals>/**"
             ],
             "program": "${workspaceFolder}/TestAnyLab.mjs",
             "args": [
-                "/Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Fall/Labs/CIS195Lab05GradeAssist.csv"
+                "/Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Fall/Labs/Lab5/CIS195Lab05GradeAssist.csv",
+                "--overwrite"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "CS133JS MacOS Launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            /*
+            "program": "${workspaceFolder}/TestAnyLab.mjs",
+            "args": [
+                "/Volumes/GoogleDrive/My Drive/Courses/CS133JS/23F/Labs/CS133JS_Lab01GradeAssist.csv",
+                "--overwrite"
+            ]
+            */
+            "program": "${workspaceFolder}/TestAnyLab.mjs",
+            "args": [
+                "/Volumes/GoogleDrive/My Drive/Courses/CS133JS/24W/CS133JSW24Lab05/CS133JS_Lab05A_GradeAssist.csv",
+                "--overwrite"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "CS133JS Windows Launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/TestAnyLab.mjs",
+            "args": [
+                "G:/My Drive//Courses/CS133JS/24W/CS133JSW24Lab05/CS133JS_Lab05A_GradeAssist.csv",
+                "--overwrite"
             ]
         },
         {
