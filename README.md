@@ -69,7 +69,7 @@ This is the software that checks the lab assignemnts unzipped by Unzipfiles. Thi
 Or, if there are two parts to the lab assignment:  
 `StudentName/Part1/<website files and folders>`  
 `            Part2/<website files and folders>`  
-Every folder in the submissions folder is treated as one student's submission, except hidden folders and folders whose names end in `_onlinetext` (Moodle online-text submissions).  
+Every folder in the submissions folder is treated as one student's submission, except hidden folders and folders whose names end in `onlinetext` (Moodle online-text submissions, with or without an underscore before it).  
 Wrapper folders are skipped automatically: starting at the student's folder, TestAnyLab steps into the single sub-folder while a folder has no files (ignoring `__MACOSX`, hidden files, zip files and `_report.txt` files), so `StudentName/Lab/index.html` and `StudentName/Lab/Site/index.html` both work. If a lab has several parts and the parts are not all in one folder (the "all parts in one folder" setting is FALSE), the sub-folders are used as the parts in name order (`website 1`, `website 2`, ...). The report notes where the submission was found.  
 
  ## Running the program

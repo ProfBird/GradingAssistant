@@ -67,11 +67,12 @@ if (quitProgram != true) {
     // Loop through all student subdirectories at submissionsPath and 
     // call methods to check submissions
     // Every directory is a student submission (Canvas), except hidden directories and
-    // the Moodle "_onlinetext" directories (e.g. TyTitan_onlinetext), which are skipped.
+    // the Moodle online text directories (TyTitan_onlinetext, or TyTitanonlinetext after
+    // UnzipFiles removes underscores), which are skipped.
     for (const studentDir of fs.readdirSync(labSettings.submissionsPath, { withFileTypes: true })
         .filter((dirent) => dirent.isDirectory()
             && !dirent.name.startsWith(".")
-            && !dirent.name.toLowerCase().endsWith("_onlinetext"))
+            && !dirent.name.toLowerCase().endsWith("onlinetext"))
         .map((dirent) => dirent.name)) {
         // skip if studentDir contains a file ending in _report.txt
         if (fs.readdirSync(path.join(labSettings.submissionsPath, studentDir))

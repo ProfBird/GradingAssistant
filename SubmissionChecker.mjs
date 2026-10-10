@@ -102,6 +102,15 @@ async function checkSubmission(
             allSelectors, allProperties,
             foundSelectors, foundProperties, HtmlAndCssRequirements.additionalRequirements, additionalRequirementResults);
     }
+    // A search that never ran (no HTML or CSS files were found) did not find a match
+    while (regExpHtmlResults.length < HtmlAndCssRequirements.regExpForHTML1.length)
+    {
+        regExpHtmlResults.push(false);
+    }
+    while (regExpCssResults.length < HtmlAndCssRequirements.regExpForCSS1.length)
+    {
+        regExpCssResults.push(false);
+    }
     if (HtmlAndCssRequirements.regExpForHTML1.length > 0)
     {
         report += "Regular expression searches in HTML files:\n"
