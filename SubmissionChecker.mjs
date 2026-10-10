@@ -7,9 +7,6 @@ import os from "os";
 import { HtmlAndCssChecker } from "./HtmlAndCssChecker.mjs";
 import { validateHtml, resolveHtmlValidatorSetting } from "./HtmlValidators.mjs";
 
-let countHTMLFiles = 0; // Number of html files found in the lab files
-let countCSSFiles = 0; // Number of css files found in the lab files
-
 /********* This is the central function for this program! **********
 * checkSubmission function                                      
 * checks one part of the lab assignment                         
@@ -48,6 +45,8 @@ async function checkSubmission(
     const allSelectors = [];  // all the selectors found in the css files and embedded css for one part of the lab
     const foundProperties = []; // all the required css properties that were found in the css files and embedded css
     const allProperties = []; // all the properties found in the css files and embedded css for one part of the lab
+    let countHTMLFiles = 0; // Number of html files found in the lab files
+    let countCSSFiles = 0; // Number of css files found in the lab files
     const additionalRequirementResults = [];
     const wrongCaseFileNames = []; // files that match the required special file name except for upper/lower case
     let regExpHtmlResults = [];
@@ -534,7 +533,7 @@ function summarizeAdditionalRequirements(countHTMLFiles, countCSSFiles, allSelec
 
     const requiredNumberOfCSSFiles = parseInt(additionalRequirements[2]);
     // Report if less than the expected number of css files is found
-    if (countHTMLFiles < requiredNumberOfCSSFiles)
+    if (countCSSFiles < requiredNumberOfCSSFiles)
     {
         areAllAdditionalRequirementsMet = false;
         message = `Found ${countCSSFiles} css files. Expected ${requiredNumberOfCSSFiles}`;
@@ -623,4 +622,5 @@ function summarizeRegExpSearches(regExpResults, regExpDescriptions)
     return report;
 }
 
-export { checkSubmission, getEmbeddedCssSelectorsAndProperties, getInlineStyles, checkSpecialFileName };
+export { checkSubmission, getEmbeddedCssSelectorsAndProperties, getInlineStyles, checkSpecialFileName,
+    summarizeAdditionalRequirements };
