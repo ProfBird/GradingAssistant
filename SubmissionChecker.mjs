@@ -4,6 +4,8 @@ import fetch from "node-fetch";
 import { JSDOM } from "jsdom";
 import * as cssTree from "css-tree";
 import os from "os";
+import { HtmlAndCssChecker } from "./HtmlAndCssChecker.mjs";
+import { validateHtml, resolveHtmlValidatorSetting } from "./HtmlValidators.mjs";
 
 let countHTMLFiles = 0; // Number of html files found in the lab files
 let countCSSFiles = 0; // Number of css files found in the lab files
@@ -151,9 +153,10 @@ async function checkSubmission(
             {
                 countHTMLFiles++;
                 // Validate HTML
-                if (HtmlAndCssRequirements.additionalRequirements[3].toLowerCase() === "true")
+                const htmlValidator = resolveHtmlValidatorSetting(HtmlAndCssRequirements.additionalRequirements[3]);
+                if (htmlValidator !== null)
                 {
-                    report += await validateHTML(fileContents, fileName);
+                    report += await validateHtml(fileContents, fileName, htmlValidator);
                 }
 
                 // Get any required html elements from fileContents, put in foundElements
@@ -194,7 +197,8 @@ async function checkSubmission(
                 const inlineStyles = getInlineStyles(elements, HtmlAndCssRequirements.requiredCssProperties);
                 foundProperties.push(...inlineStyles.foundProperties);
 
-                regExpHtmlResults = checkFileWithRegExp(HtmlAndCssRequirements.regExpForHTML1, fileContents);
+                regExpHtmlResults = orRegExpResults(regExpHtmlResults,
+                    checkFileWithRegExp(HtmlAndCssRequirements.regExpForHTML1, fileContents));
 
                 // Render the html page and check for required output
                 // TODO: Load required output from csv file
@@ -218,7 +222,7 @@ async function checkSubmission(
                 allProperties.push(...fileContents.match(cssPropertyRegExp));
 
                 // Validate CSS
-                report += await validateCSS(fileContents, fileName);
+                report += await HtmlAndCssChecker.validateCSS(fileContents, fileName);
                 // TODO: check for embedded css styles in the html pages. 
                 // 11/16/23, already getting them in foundSelectors and foundProperties, but the syntax might not be checked.
 
@@ -244,7 +248,8 @@ async function checkSubmission(
                 } // end looping through requiredProperties
 
                 // Do regular expression searches of the CSS file contents
-                regExpHtmlResults = checkFileWithRegExp(HtmlAndCssRequirements.regExpForCSS1, fileContents);
+                regExpCssResults = orRegExpResults(regExpCssResults,
+                    checkFileWithRegExp(HtmlAndCssRequirements.regExpForCSS1, fileContents));
 
             } // end of processing .css files
 
@@ -269,6 +274,15 @@ async function checkSubmission(
         }
         return report;
     } // End of checkFile inner function
+
+    /*********** inner function ***********/
+    /* OR the regular expression results of one file with the results of the */
+    /* files checked so far: one match in any file is enough to pass.        */
+    /**************************************/
+    function orRegExpResults(resultsSoFar, newResults)
+    {
+        return newResults.map((result, i) => (resultsSoFar[i] === true) || result === true);
+    }
 
     /************************** inner function ***********************/
     /*     ----- Check a file using regular expressions ------       */

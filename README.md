@@ -59,10 +59,12 @@ This is what UnzipFiles uses to unzip the files:
 # TestAnyLab Program
 
 This is the software that checks the lab assignemnts unzipped by Unzipfiles. This is the expected folder structure:  
-`StudentName_file/LabX/<website files and folders>`  
+`StudentName/LabX/<website files and folders>`  
 Or, if there are two parts:  
-`StudentName_file/Part1/<website files and folders>`  
-`                 Part2/<website files and folders>`  
+`StudentName/Part1/<website files and folders>`  
+`            Part2/<website files and folders>`  
+Every folder in the submissions folder is treated as one student's submission, except hidden folders and folders whose names end in `_onlinetext` (Moodle online-text submissions).  
+Wrapper folders are skipped automatically: starting at the student's folder, TestAnyLab steps into the single sub-folder while a folder has no files (ignoring `__MACOSX`, hidden files, zip files and `_report.txt` files), so `StudentName/Lab/index.html` and `StudentName/Lab/Site/index.html` both work. If a lab has several parts and the parts are not all in one folder (the "all parts in one folder" setting is FALSE), the sub-folders are used as the parts in name order (`website 1`, `website 2`, ...). The report notes where the submission was found.  
 
  ## Running the program
  Use this command to run the program:  
@@ -85,7 +87,7 @@ The program can currently (as of 12/14/23) check the following kinds of requirem
   - Attributes  
     Check for specific required attributes in particular elements
   - Syntax  
-    Check using the W3C HTML validator web service
+    Check HTML syntax with a choice of validators (see [HTML validators](#html-validators))
 - CSS  
   This works for external, embedded and inline CSS. 
   - Selectors  
@@ -102,11 +104,24 @@ A requirements file is used to configure the program to test a particular lab as
 
 See the Docs folder for example requirements files.
 
+### HTML validators
+
+The HTML syntax check is chosen by the "Validate HTML" value in the `moreRequirements` column of the requirements file (the 4th value in that column; the first is the special file name, then the number of HTML files, then the number of CSS files):
+
+| Value | Validator |
+|---|---|
+| `false` | HTML is not validated |
+| `true` or `html-validate` | [html-validate](https://html-validate.org/) npm package (default). Runs locally, is fast, and needs no network or Java. Uses its `standard` rules, so messages differ from the W3C validator's. |
+| `w3c` | The W3C validator web service. Needs a network connection, and the service may reject bulk checks of many files. |
+| `vnu` | The W3C Nu validator (`vnu.jar`, from the `vnu-jar` npm package) run locally. Gives the same results as the W3C service. Needs Java 17 or newer installed. |
+
+If a validator can't run, the report says `Could not validate <file>` and the reason, and the rest of the checks continue. Validators are in `HtmlValidators.mjs`; add a function to its `validators` table to add another.
+
 ## Output
 A text file with a summary report is saved in the lab assignment folder for each student's submission. Here is an example of a summary report:
 
 ```
-Checking the TyTitan_file directory
+Checking the TyTitan directory
 Checking the about.html file
 error error found on line 28 column 39: Bad value “contact us.html” for attribute “href” on element “a”: Illegal character in path segment: space is not allowed.
 info error found on line 15 column 25: Section lacks heading. Consider using “h2”-“h6” elements to add identifying headings to all sections, or else use a “div” element instead for any cases where no heading is needed.

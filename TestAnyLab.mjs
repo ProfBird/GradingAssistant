@@ -5,6 +5,7 @@ import { Checker } from "./Checker.mjs";
 import { HtmlAndCssChecker } from './HtmlAndCssChecker.mjs';
 import { JsChecker } from './JsChecker.mjs';
 import { checkSubmission } from "./SubmissionChecker.mjs";
+import { getPartDirs } from "./SubmissionFolders.mjs";
 import Mocha from 'mocha';
 
 /* Location of the files downloaded from Moodle and unzipped on dev machines */
@@ -87,29 +88,40 @@ if (quitProgram != true) {
         let report = message + "\n"; // Report of the checks of the files for this student
         let studentDirPath = path.join(labSettings.submissionsPath, studentDir)
 
+        // Find the folders holding the submission. Unzipped submissions often have wrapper
+        // folders (StudentName/Lab/index.html) and the parts may be in separate sub-folders.
+        const { root: submissionRoot, partDirs } =
+            getPartDirs(studentDirPath, labSettings.numberOfParts, labSettings.areAllInOneDir);
+        if (submissionRoot !== studentDirPath) {
+            report += `Submission found in ${path.relative(studentDirPath, submissionRoot)}\n`;
+        }
+
         // Loop for each part - if there are sub-parts we consider them to be additional parts
         for (let part = 1; part <= labSettings.numberOfParts; part++) {
             report += "\nPart" + part + "\n";
+            const partDirPath = partDirs[part - 1];
+            if (partDirPath === null) {
+                report += `No folder found for part ${part}\n`;
+                continue;
+            }
             if(labSettings.isHTML)
             {
                 // TODO: Rewrite checkSubmision and move some code into HtmlAndCssChecker
-                // report +=  await checkers[0].checkSubmission(studentDirPath, part)
+                // report +=  await checkers[0].checkSubmission(partDirPath, part)
                 // We're still using the old checkSubmission function that also finds the right dirs and files
                 report += await checkSubmission(
-                path.join(labSettings.submissionsPath, studentDir),
-                "",
-                part,
-                labSettings.HtmlAndCssRequirements
-            );
+                    partDirPath,
+                    "",
+                    part,
+                    labSettings,
+                    checkers[0].requirements
+                );
             }
             if(labSettings.isJavaScript)
             {
-               // Assume the files for all parts are in studentDirPath
-                report +=  await checkers[1].checkSubmission(studentDirPath, part)
+                report +=  await checkers[1].checkSubmission(partDirPath, part)
             }
         }
-        
-        report += "\n";
 
         // Open the report file for writing and get its file descriptor
         const fd = fs.openSync(
@@ -158,7 +170,7 @@ function loadSettings(requirementsFilePath) {
             .on("error", (error) => {
                 console.error(error);
             })
-            .write(fileBuffer);  // this sends data to the csv parser
+            .write(Buffer.from(fileBuffer));  // this sends data to the csv parser. csv-parser modifies the buffer it is given, so give it a copy
 
             // Copy settings to the labSettings object, using defaults for any missing values
             const parts = parseInt(settings[2], 10);
@@ -169,11 +181,11 @@ function loadSettings(requirementsFilePath) {
             labSettings.isJavaScript = parseBoolean(settings[7], false);
         // Load requrirements
         if(labSettings) {
-            let hcChecker = new HtmlAndCssChecker(fileBuffer);
+            let hcChecker = new HtmlAndCssChecker(Buffer.from(fileBuffer));
             checkers.push(hcChecker);
         }
         if(labSettings) {
-            let jsChecker = new JsChecker(fileBuffer, path.dirname(requirementsFilePath));
+            let jsChecker = new JsChecker(Buffer.from(fileBuffer), path.dirname(requirementsFilePath));
             checkers.push(jsChecker);
         }
     }

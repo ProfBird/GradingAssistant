@@ -1,6 +1,9 @@
 import fs from "fs";
 import path from "path";
 import csv from "csv-parser";
+import os from "os";
+import fetch from "node-fetch";
+import { JSDOM } from "jsdom";
 import {Checker} from "./Checker.mjs";
 
 /** HtmlAndCssChecker class
@@ -47,7 +50,7 @@ export class HtmlAndCssChecker extends Checker {
     // 0 Required special file name, like index.html
     // 1 Number of html files expected in the lab submission
     // 2 Number of css files expected in the lab submission
-    // 3 Validate the html files, true or false
+    // 3 Validate the html files: false, true (default validator), or a validator name (html-validate, w3c, vnu)
     // 4 Validate the css files, true or false
 
     // Methods
@@ -96,54 +99,13 @@ export class HtmlAndCssChecker extends Checker {
                 .write(fileBuffer);  // this sends data to the csv parser
     } // End of loadRequirements method
 
-   /**
-    * Validate the HTML syntax using the W3C validator.
-    * @param {*} fileContents 
-    * @param {*} fileName 
-    * @returns 
-    */
-    async validateHTML(fileContents, fileName) {
-        let message = ""; // Individual message
-        let report = ""; // All messages for the files in this lab submission
-        try {
-            const response = await fetch("https://validator.w3.org/nu/?out=json", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "text/html; charset=utf-8",
-                },
-                body: fileContents,
-            });
-
-            // The response from the validator will be "deconstructed" into two variable validationMessages
-            const { messages: validationMessages } = await response.json();
-
-            // Check for any errors
-            if (validationMessages.length > 0) {
-                // Loop through all the errors and log them
-                for (const validationMessage of validationMessages) {
-                    message = `${validationMessage.type} error found on line ${validationMessage.lastLine} column ${validationMessage.lastColumn}: ${validationMessage.message}`;
-                    console.log(message);
-                    report += message + `\n`;
-                }
-                report += os.EOL; // add a blank line after the errors
-            } else {
-                message = `No errors found in ${fileName}`;
-                //console.log(message);
-                report += message + `\n`;
-            }
-        } catch (error) {
-            console.error(error);
-        }
-        return report;
-    } // End of validateHTML method
-
     /**
      * Validate the CSS syntax using the W3C validator.
      * @param {*} fileContents
      * @param {*} fileName
      * @returns
      */
-    async validateCSS(fileContents, fileName) {
+    static async validateCSS(fileContents, fileName) {
         let message = ""; // Individual message
         let report = ""; // All messages for the files in this lab submission
 
