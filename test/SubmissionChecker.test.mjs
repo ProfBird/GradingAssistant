@@ -1,9 +1,28 @@
 import { getEmbeddedCssSelectorsAndProperties,
-    getInlineStyles } from '../SubmissionChecker.mjs';
+    getInlineStyles,
+    checkSpecialFileName } from '../SubmissionChecker.mjs';
 import { expect } from 'chai';
 import jsdom from 'jsdom';
 
 describe('SubmissionChecker', () => {
+
+    // Test the checkSpecialFileName() function
+    describe('#checkSpecialFileName()', () => {
+        it('accepts a name with the right case', () => {
+            expect(checkSpecialFileName('index.html', 'index')).to.equal('ok');
+            expect(checkSpecialFileName('Lab1/index.htm', 'index')).to.equal('ok');
+        });
+        it('reports a name with the wrong case', () => {
+            expect(checkSpecialFileName('Index.html', 'index')).to.equal('wrong-case');
+            expect(checkSpecialFileName('site/INDEX.HTML', 'index')).to.equal('wrong-case');
+        });
+        it('reports other names as not matching', () => {
+            expect(checkSpecialFileName('about.html', 'index')).to.equal('no');
+        });
+        it('only looks at the file name, not the folders', () => {
+            expect(checkSpecialFileName('index/about.html', 'index')).to.equal('no');
+        });
+    });
 
     // Test the getEmbeddedCssSelectorsAndProperties() function
     describe('#getEmbeddedCssSelectorsAndProperties()', () => {

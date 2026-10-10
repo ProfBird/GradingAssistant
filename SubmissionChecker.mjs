@@ -49,6 +49,7 @@ async function checkSubmission(
     const foundProperties = []; // all the required css properties that were found in the css files and embedded css
     const allProperties = []; // all the properties found in the css files and embedded css for one part of the lab
     const additionalRequirementResults = [];
+    const wrongCaseFileNames = []; // files that match the required special file name except for upper/lower case
     let regExpHtmlResults = [];
     let regExpCssResults = [];
     // initialize all elements to false
@@ -100,7 +101,8 @@ async function checkSubmission(
         report += "Additional requirements:\n"
         report += summarizeAdditionalRequirements(countHTMLFiles, countCSSFiles,
             allSelectors, allProperties,
-            foundSelectors, foundProperties, HtmlAndCssRequirements.additionalRequirements, additionalRequirementResults);
+            foundSelectors, foundProperties, HtmlAndCssRequirements.additionalRequirements, additionalRequirementResults,
+            wrongCaseFileNames);
     }
     // A search that never ran (no HTML or CSS files were found) did not find a match
     while (regExpHtmlResults.length < HtmlAndCssRequirements.regExpForHTML1.length)
@@ -273,7 +275,14 @@ async function checkSubmission(
             else
             {
                 // if any file name has the special file name, set the results to true. Partial match for .htm an .html
-                additionalRequirementResults[0] ||= (specialFileName === "" || fileName.includes(specialFileName));
+                const nameCheck = checkSpecialFileName(fileName, specialFileName);
+                if (nameCheck === "ok")
+                {
+                    additionalRequirementResults[0] = true;
+                } else if (nameCheck === "wrong-case")
+                {
+                    wrongCaseFileNames.push(path.basename(fileName));
+                }
             }
         } else
         {
@@ -478,12 +487,35 @@ function summarizeForRequiredProperties(foundProperties, requiredProperties, rep
     return report;
 }
 
+/***************************************************************************************
+ * Check one file name against the required special file name (like index).
+ * The case of the file name must match exactly, because web servers are case sensitive.
+ * Only the file name is checked, not the folders in its path.
+ * @param {string} fileName - File name or relative path of the file being checked.
+ * @param {string} specialFileName - The required file name, or part of it, like "index".
+ * @returns {"ok"|"wrong-case"|"no"} "ok" if the name matches, "wrong-case" if it matches
+ *   except for upper/lower case, otherwise "no".
+ */
+function checkSpecialFileName(fileName, specialFileName)
+{
+    const baseName = path.basename(fileName);
+    if (baseName.includes(specialFileName))
+    {
+        return "ok";
+    }
+    if (baseName.toLowerCase().includes(specialFileName.toLowerCase()))
+    {
+        return "wrong-case";
+    }
+    return "no";
+}
+
 /**************************************************/
 /* Summarize results for additional requirements  */
 /* Summary of results of checking in all files    */
 /**************************************************/
 function summarizeAdditionalRequirements(countHTMLFiles, countCSSFiles, allSelectors, allProperties,
-    foundSelectors, foundProperties, additionalRequirements, additionalRequirementResults)
+    foundSelectors, foundProperties, additionalRequirements, additionalRequirementResults, wrongCaseFileNames = [])
 {
     let areAllAdditionalRequirementsMet = true;
     let message = "";
@@ -513,7 +545,14 @@ function summarizeAdditionalRequirements(countHTMLFiles, countCSSFiles, allSelec
     if (additionalRequirementResults[0] === false)
     {
         areAllAdditionalRequirementsMet = false;
-        message = `Missing ${additionalRequirements[0]} file`;
+        if (wrongCaseFileNames.length > 0)
+        {
+            // The file exists, but the case of its name is wrong
+            message = `File name has the wrong upper/lower case: ${[...new Set(wrongCaseFileNames)].join(", ")}. The name must contain "${additionalRequirements[0]}" exactly as written`;
+        } else
+        {
+            message = `Missing ${additionalRequirements[0]} file`;
+        }
         console.log(message);
         report += message + `\n`;
     }
@@ -584,4 +623,4 @@ function summarizeRegExpSearches(regExpResults, regExpDescriptions)
     return report;
 }
 
-export { checkSubmission, getEmbeddedCssSelectorsAndProperties, getInlineStyles };
+export { checkSubmission, getEmbeddedCssSelectorsAndProperties, getInlineStyles, checkSpecialFileName };
