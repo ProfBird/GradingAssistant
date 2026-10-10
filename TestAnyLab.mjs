@@ -13,9 +13,9 @@ import Mocha from 'mocha';
 // Alt Mac OS path: /Users/admin/Documents/CIS195/Lab05/CIS195_Su23Lab5Submissions
 
 /* Expected folder structure */
-// StudentName_file/LabX/<website files and folders>
+// StudentName/LabX/<website files and folders>
 // Or, if there are two parts and they are in separate folders:
-// StudentName_file/Part1/<website files and folders>
+// StudentName/Part1/<website files and folders>
 //                  Part2/<website files and folders>
 
 /* global (ugh) object containing the settings used when checking the files for this lab */
@@ -65,9 +65,13 @@ if (quitProgram != true) {
 
     // Loop through all student subdirectories at submissionsPath and 
     // call methods to check submissions
-    // studentDir will have a name like TyTitan_file
-    for (const studentDir of fs.readdirSync(labSettings.submissionsPath)
-        .filter((dir) => !dir.startsWith(".") && dir.endsWith("_file"))) {
+    // Every directory is a student submission (Canvas), except hidden directories and
+    // the Moodle "_onlinetext" directories (e.g. TyTitan_onlinetext), which are skipped.
+    for (const studentDir of fs.readdirSync(labSettings.submissionsPath, { withFileTypes: true })
+        .filter((dirent) => dirent.isDirectory()
+            && !dirent.name.startsWith(".")
+            && !dirent.name.toLowerCase().endsWith("_onlinetext"))
+        .map((dirent) => dirent.name)) {
         // skip if studentDir contains a file ending in _report.txt
         if (fs.readdirSync(path.join(labSettings.submissionsPath, studentDir))
             .find((file) => file.endsWith("_report.txt"))
@@ -156,12 +160,13 @@ function loadSettings(requirementsFilePath) {
             })
             .write(fileBuffer);  // this sends data to the csv parser
 
-            // Copy settings to the labSettings object
-            labSettings.numberOfParts = settings[2];
-            labSettings.areAllInOneDir = (settings[4].toLowerCase() == "true");
-            labSettings.isHTML = (settings[5].toLowerCase() == "true");  // Currenty for HTML & CSS
-            labSettings.isCSS = (settings[6].toLowerCase() == "true");  // Currently not used 3/10/24
-            labSettings.isJavaScript = (settings[7].toLowerCase() == "true");
+            // Copy settings to the labSettings object, using defaults for any missing values
+            const parts = parseInt(settings[2], 10);
+            labSettings.numberOfParts = Number.isNaN(parts) ? 1 : parts;
+            labSettings.areAllInOneDir = parseBoolean(settings[4], true);
+            labSettings.isHTML = parseBoolean(settings[5], false);  // Currenty for HTML & CSS
+            labSettings.isCSS = parseBoolean(settings[6], false);  // Currently not used 3/10/24
+            labSettings.isJavaScript = parseBoolean(settings[7], false);
         // Load requrirements
         if(labSettings) {
             let hcChecker = new HtmlAndCssChecker(fileBuffer);
@@ -174,6 +179,17 @@ function loadSettings(requirementsFilePath) {
     }
     catch (error) {
         console.error(`Error processing requirements file ${requirementsFilePath}: ${error.message}`);
+        process.exit(1);
+    }
+
+    if (settings.length < 8) {
+        console.warn(`Warning: ${requirementsFilePath} has ${settings.length} of the 8 expected values in its settings column. Defaults will be used for the missing ones.`);
+    }
+
+    const pathSetting = process.platform === "win32" ? settings[1] : settings[0];
+    if (!pathSetting) {
+        console.error(`Error: the settings column of ${requirementsFilePath} does not contain a submissions path for this platform.`);
+        process.exit(1);
     }
 
     // Determine path to submissions folder
@@ -201,6 +217,15 @@ function loadSettings(requirementsFilePath) {
     }
 } // End of loadSettings function
 
-
-
-
+/** parseBoolean function
+ * Convert a "true"/"false" string from the settings column to a boolean
+ * @param {string|undefined} value - The text from the csv file (case-insensitive)
+ * @param {boolean} defaultValue - Returned if value is missing or empty
+ * @returns {boolean}
+ */
+function parseBoolean(value, defaultValue) {
+    if (value === undefined || value === null || String(value).trim() === "") {
+        return defaultValue;
+    }
+    return String(value).trim().toLowerCase() === "true";
+}

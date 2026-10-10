@@ -31,9 +31,9 @@ To run the program use the following CLI command:
 - file path  
   If the file path contains spaces, enclose it in quotes. For example:
 
-  - Windows path: "G:/My Drive/Courses/CS133JS/23F/Labs"
+  - Windows path: "G:/My Drive/Courses/CS133JS/23F/Labs/Lab01.zip"
     
-  - Mac OS path: "/Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Fall/Labs"
+  - Mac OS path: "/Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Fall/Labs/Lab01.zip"
 
 
 - options
@@ -42,7 +42,7 @@ To run the program use the following CLI command:
 
 ## Downloaded Zip File Expectations
 
-The downloaded submissions are expected to be in a file with a name like: `CS 133JS Sp23 (Bird 41334)-Lab 6 Production Version-3803210.zip`  
+The downloaded submissions are expected to be in a zip file.  
 The zip file is expected to contain one or more .zip archives, one or two for each student. Each zip archive may contain one or more sub-folders.  
 
 This is what UnzipFiles uses to unzip the files:  
