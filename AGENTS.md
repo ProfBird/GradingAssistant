@@ -44,7 +44,7 @@ Each `.csv` row is one line, and each column holds a list of values. Empty cells
 ## Gotchas
 
 - **`csv-parser` modifies the buffer you give it** (when it un-escapes `""`). Pass `Buffer.from(buffer)` to each parser. Several parsers share one file buffer in `TestAnyLab.mjs`.
-- The special file name check is case sensitive on purpose (`index.html` must be lower case). A wrong-case name is reported separately from a missing file.
+- The special file name check is strict on purpose. `index` accepts only `index.html` or `index.htm`; a name with an extension (`styles.css`) must match exactly. Names that merely contain it (`reindex.html`, `index.html.html`) fail. The case must match (`Index.html` fails), and a wrong-case name is reported separately from a missing file.
 - The W3C validator service rejects bulk requests (HTTP errors with an HTML body). That is why `html-validate` is the default. `vnu-jar` 26.x needs Java 17 or newer, and the user's machine has Java 11. `vnu-jar@23.4.11` works on Java 11.
 - Regex and element results are combined across a student's files. One match in any file passes.
 

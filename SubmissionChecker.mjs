@@ -487,22 +487,39 @@ function summarizeForRequiredProperties(foundProperties, requiredProperties, rep
 }
 
 /***************************************************************************************
+ * The file names that satisfy a required special file name.
+ * A name with an extension (styles.css) must match exactly. A name without one (index)
+ * can be an .html or .htm file (index.html, index.htm).
+ * @param {string} specialFileName - The required file name from the requirements file.
+ * @returns {Array<string>} The accepted file names.
+ */
+function getSpecialFileNames(specialFileName)
+{
+    if (/\.[A-Za-z0-9]+$/.test(specialFileName))
+    {
+        return [specialFileName];
+    }
+    return [`${specialFileName}.html`, `${specialFileName}.htm`];
+}
+
+/***************************************************************************************
  * Check one file name against the required special file name (like index).
- * The case of the file name must match exactly, because web servers are case sensitive.
- * Only the file name is checked, not the folders in its path.
+ * The whole file name must match, including the case, because web servers are case
+ * sensitive. Only the file name is checked, not the folders in its path.
  * @param {string} fileName - File name or relative path of the file being checked.
- * @param {string} specialFileName - The required file name, or part of it, like "index".
+ * @param {string} specialFileName - The required file name, like "index" or "styles.css".
  * @returns {"ok"|"wrong-case"|"no"} "ok" if the name matches, "wrong-case" if it matches
  *   except for upper/lower case, otherwise "no".
  */
 function checkSpecialFileName(fileName, specialFileName)
 {
     const baseName = path.basename(fileName);
-    if (baseName.includes(specialFileName))
+    const acceptedNames = getSpecialFileNames(specialFileName);
+    if (acceptedNames.includes(baseName))
     {
         return "ok";
     }
-    if (baseName.toLowerCase().includes(specialFileName.toLowerCase()))
+    if (acceptedNames.some((name) => name.toLowerCase() === baseName.toLowerCase()))
     {
         return "wrong-case";
     }
@@ -547,10 +564,10 @@ function summarizeAdditionalRequirements(countHTMLFiles, countCSSFiles, allSelec
         if (wrongCaseFileNames.length > 0)
         {
             // The file exists, but the case of its name is wrong
-            message = `File name has the wrong upper/lower case: ${[...new Set(wrongCaseFileNames)].join(", ")}. The name must contain "${additionalRequirements[0]}" exactly as written`;
+            message = `File name has the wrong upper/lower case: ${[...new Set(wrongCaseFileNames)].join(", ")}. It must be named ${getSpecialFileNames(additionalRequirements[0]).join(" or ")}`;
         } else
         {
-            message = `Missing ${additionalRequirements[0]} file`;
+            message = `Missing ${additionalRequirements[0]} file (${getSpecialFileNames(additionalRequirements[0]).join(" or ")})`;
         }
         console.log(message);
         report += message + `\n`;

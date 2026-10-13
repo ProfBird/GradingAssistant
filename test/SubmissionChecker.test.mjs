@@ -13,13 +13,29 @@ describe('SubmissionChecker', () => {
 
     // Test the checkSpecialFileName() function
     describe('#checkSpecialFileName()', () => {
-        it('accepts a name with the right case', () => {
+        it('accepts index.html and index.htm for the name index', () => {
             expect(checkSpecialFileName('index.html', 'index')).to.equal('ok');
             expect(checkSpecialFileName('Lab1/index.htm', 'index')).to.equal('ok');
         });
         it('reports a name with the wrong case', () => {
             expect(checkSpecialFileName('Index.html', 'index')).to.equal('wrong-case');
             expect(checkSpecialFileName('site/INDEX.HTML', 'index')).to.equal('wrong-case');
+            expect(checkSpecialFileName('index.HTML', 'index')).to.equal('wrong-case');
+        });
+        it('does not accept names that only contain the special name', () => {
+            expect(checkSpecialFileName('reindex.html', 'index')).to.equal('no');
+            expect(checkSpecialFileName('index_old.html', 'index')).to.equal('no');
+            expect(checkSpecialFileName('myindex.html', 'index')).to.equal('no');
+            expect(checkSpecialFileName('Indexhtml.html', 'index')).to.equal('no');
+            expect(checkSpecialFileName('index.html.txt', 'index')).to.equal('no');
+        });
+        it('does not accept a different extension for the name index', () => {
+            expect(checkSpecialFileName('index.css', 'index')).to.equal('no');
+        });
+        it('requires an exact match when the special name has an extension', () => {
+            expect(checkSpecialFileName('css/styles.css', 'styles.css')).to.equal('ok');
+            expect(checkSpecialFileName('Styles.css', 'styles.css')).to.equal('wrong-case');
+            expect(checkSpecialFileName('mystyles.css', 'styles.css')).to.equal('no');
         });
         it('reports other names as not matching', () => {
             expect(checkSpecialFileName('about.html', 'index')).to.equal('no');

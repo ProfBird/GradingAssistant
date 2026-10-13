@@ -104,7 +104,7 @@ The program can currently (as of 12/14/23) check the following kinds of requirem
   - Syntax
 - Number of CSS and number of HTML files
 - Regular expression searches of the HTML or CSS code
-- Existence of special file names, like `index.html`
+- Existence of special file names, like `index.html`. The name must match exactly, including upper/lower case. A name without an extension, like `index`, accepts `index.html` or `index.htm`. A file with the wrong case, like `Index.html`, is reported separately from a missing file.
 
 ## Requirements file
 
