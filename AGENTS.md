@@ -11,7 +11,7 @@ node UnzipFiles.mjs <path-to-downloaded.zip>         # unzip a bulk download (Mo
 npm run docs                               # JSDoc into docs/
 ```
 
-`TestAnyLab.mjs` requires an option as its 2nd argument. Without one it prints "Unknown option" and quits. Requirements files normally live in the CIS195-CourseMaterials repo (`LabAutoGrading/`), not in this repo. Each one has a path to the submissions folder in its `settings` column.
+`TestAnyLab.mjs` takes an optional 2nd argument (`--help` or `--overwrite`). Without one it checks the lab and skips students who already have a report; an unrecognized option prints "Unknown option" and quits. Requirements files normally live in the CIS195-CourseMaterials repo (`LabAutoGrading/`), not in this repo. Each one has a path to the submissions folder in its `settings` column.
 
 ## Layout
 

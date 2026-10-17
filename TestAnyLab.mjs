@@ -41,15 +41,18 @@ const requirementsFilePath = process.argv[2]; // absolute path including the fil
 let overwrite = false;
 let quitProgram = false;
 console.log(`param = ${requirementsFilePath}`);
-switch (process.argv[3]) {
+// The option is optional. Without one, existing report files are not overwritten.
+// A missing requirements file path, or --help in its place, also shows the help message.
+switch (requirementsFilePath === undefined || requirementsFilePath === '--help'
+    ? '--help' : process.argv[3]) {
     case '--help':
         console.log("Usage: node TestAnyLab.mjs requirementsFilePath.csv [options]");
         console.log("options:");
         console.log("--help\t\tDisplay this help message");
         console.log("--overwrite\tOverwrite existing report files");
-        console.log("--html\t\tCheck HTML and CSS files");
-        console.log("--javascript or --js\tCheck JavaScript files");
         quitProgram = true;  // exit the program after displaying the help message
+        break;
+    case undefined:  // no option given, run with the defaults
         break;
     case '--overwrite':
         overwrite = true;
