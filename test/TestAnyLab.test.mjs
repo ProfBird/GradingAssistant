@@ -170,6 +170,28 @@ describe('TestAnyLab', () => {
             expect(fs.readFileSync(reportPath, 'utf8')).to.include('Checking the Ann directory');
         });
 
+        it('keeps checking the other students when a report cannot be saved', async function () {
+            if (process.getuid?.() === 0) {
+                this.skip();  // root can write to a read-only folder
+            }
+            const { subs, requirements } = makeLab();
+            const annDir = path.join(subs, 'Ann');
+            fs.chmodSync(annDir, 0o555);  // read-only, like a folder unzipped from some zip files
+            const errors = [];
+            console.error = (message) => errors.push(message);
+            try {
+                await main([requirements]);
+            } finally {
+                fs.chmodSync(annDir, 0o755);
+            }
+
+            expect(fs.existsSync(path.join(annDir, 'Ann_report.txt'))).to.equal(false);
+            expect(fs.existsSync(path.join(subs, 'Bob', 'Bob_report.txt'))).to.equal(true);
+            expect(errors.join('\n')).to.include('Could not save the report for Ann');
+            expect(errors.join('\n')).to.include('Ann (the folder is read-only)');
+            expect(process.exitCode).to.equal(1);
+        });
+
         it('sets a failing exit code when the requirements file is missing', async () => {
             await main([path.join(baseDir, 'missing.csv')]);
             expect(process.exitCode).to.equal(1);

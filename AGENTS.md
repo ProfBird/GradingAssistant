@@ -27,7 +27,7 @@ npm run docs                               # JSDoc into docs/
 | `HtmlAndCssChecker.mjs` | Holds the parsed requirements for the HTML/CSS checks. `validateCSS` is here. |
 | `HtmlValidators.mjs` | Pluggable HTML validators: `html-validate` (default), `w3c`, `vnu`. |
 | `JsChecker.mjs`, `Checker.mjs` | JS checker (runs Mocha tests on student JS) and the base class. In progress. |
-| `UnzipFiles.mjs` | Unzips Moodle bulk downloads. Renames folders by stripping digits, spaces and underscores. |
+| `UnzipFiles.mjs` | Unzips Moodle bulk downloads. Renames folders by stripping digits, spaces and underscores. `makeWritable()` adds owner write permission to everything it unzips (some zips store read-only folders, which blocked unzipping and saving reports). The main program runs only when started with node, so tests can import it. |
 | `Menu.mjs` | `npm start`. Arrow-key menu (`@inquirer/prompts`, `inquirer-file-selector`) that builds and runs the TestAnyLab/UnzipFiles command lines as child processes. Recent choices are in `.gradingassistant.json` (gitignored); `loadConfig()` falls back to defaults for a missing or bad file. If a program gets a new option, add a prompt for it here. |
 
 ## Requirements file layout
@@ -51,6 +51,7 @@ Each `.csv` row is one line, and each column holds a list of values. Empty cells
 ## Gotchas
 
 - **`csv-parser` modifies the buffer you give it** (when it un-escapes `""`), and it keeps a leading byte order mark in the first column name. `parseCsv()` in `Requirements.mjs` handles both; only it and the deprecated `JsChecker` use `csv-parser`.
+- A student folder can be read-only (from the zip, or copied from Drive). TestAnyLab prints that student's report, keeps going, and lists the folders it couldn't save at the end with exit code 1.
 - The special file name check is strict on purpose. `index` accepts only `index.html` or `index.htm`; a name with an extension (`styles.css`) must match exactly. Names that merely contain it (`reindex.html`, `index.html.html`) fail. The case must match (`Index.html` fails), and a wrong-case name is reported separately from a missing file.
 - The W3C validator service rejects bulk requests (HTTP errors with an HTML body). That is why `html-validate` is the default. `vnu-jar` 26.x needs Java 17 or newer, and the user's machine has Java 11. `vnu-jar@23.4.11` works on Java 11.
 - Regex and element results are combined across a student's files. One match in any file passes.

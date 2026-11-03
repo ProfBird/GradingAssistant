@@ -63,6 +63,7 @@ export async function main(args) {
         return;
     }
     const { labSettings } = settings;
+    const unwrittenReports = [];  // reports that could not be saved, so they can be listed at the end
 
     // Loop through all student subdirectories at submissionsPath and 
     // call methods to check submissions
@@ -86,12 +87,29 @@ export async function main(args) {
         }
         console.log(`Checking the ${studentDir} directory`);
         const report = await checkStudent(studentDir, settings);
-
-        fs.writeFileSync(
-            path.join(labSettings.submissionsPath, studentDir, `${studentDir}_report.txt`), report);
-
         console.log(report);
+
+        // A folder that can't be written to (like a read-only folder from a zip file) must not
+        // stop the checks of the other students
+        const reportPath = path.join(labSettings.submissionsPath, studentDir, `${studentDir}_report.txt`);
+        try {
+            fs.writeFileSync(reportPath, report);
+        } catch (error) {
+            console.error(`Could not save the report for ${studentDir}: ${error.message}`);
+            unwrittenReports.push({ studentDir, reason: error.code === "EACCES" || error.code === "EPERM"
+                ? "the folder is read-only" : error.message });
+        }
     }  // End of for loop through student directories
+
+    if (unwrittenReports.length > 0) {
+        const count = unwrittenReports.length;
+        console.error(`\nThe report${count === 1 ? "" : "s"} for ${count} student folder${count === 1 ? "" : "s"} could not be saved:`);
+        for (const { studentDir, reason } of unwrittenReports) {
+            console.error(`  ${studentDir} (${reason})`);
+        }
+        console.error("The reports are shown above. To save them, make the folders writable and run again with --overwrite.");
+        process.exitCode = 1;
+    }
 }  // End of main function
 
 /***************************/

@@ -1,4 +1,8 @@
-# GradingAssistant
+<h1>GradingAssistant</h1>
+
+<h2>Contents</h2>
+
+[TOC]
 
 Software that automates some of the more tedious aspects of grading web-development homework. It checks each student's submission against a requirements file and writes a text report into the student's folder. It does not assign grades; it handles the repetitive checks so the instructor can concentrate on the parts that need judgement.
 
@@ -72,6 +76,8 @@ UnzipFiles renames the student folders by stripping digits, spaces and underscor
 - On Mac OS: `unzip` (built in)
 
   If you want to use 7-Zip on Mac OS, it can be installed using Homebrew: `brew install p7zip`
+
+Some zip files store folders or files as read-only. UnzipFiles makes everything it unzips writable, so it can unzip the students' zip files inside them and TestAnyLab can save its reports.
 
 -----------
 

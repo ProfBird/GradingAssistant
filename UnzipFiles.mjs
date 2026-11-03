@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
+import { pathToFileURL } from 'url';
 // using 7zip to u nzip files on Windows, official web site: https://www.7-zip.org/
 // 7Zip docs here: https://documentation.help/7-Zip/start.htm
 // using unzip to unzip files on Mac OS
@@ -23,10 +24,15 @@ let submissionsPath = "/Volumes/GoogleDrive/My Drive/Courses/CS133JS/23F/Labs";
 /****************/
 const param = process.argv[2];
 let overwrite = false;
-if (param === "--help" || param === undefined)
+// Run the program only when this file is started with node, not when a test imports it
+const isMainProgram = process.argv[1] && import.meta.url === pathToFileURL(fs.realpathSync(process.argv[1])).href;
+if (!isMainProgram)
 {
-    console.log("Usage: node UnzipFiles.mjs filePath [options]");
-    console.log("Note: if the file path contains spaces, enclose it in quotes");
+    // Nothing to do: a test is using makeWritable
+} else if (param === "--help" || param === undefined)
+{
+    console.log("Usage: node UnzipFiles.mjs folderPath [options]");
+    console.log("folderPath is the folder that holds the downloaded zip file. If it contains spaces, enclose it in quotes");
     console.log('Example Windows path: \"G:/My Drive/Courses/CS133JS/23F/Labs\"');
     console.log('Example Mac OS path: \"/Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Fall/Labs\"');
     console.log("options:");
@@ -115,6 +121,10 @@ function unzipFiles(submissionsPath)
                 console.log(`Error unzipping ${fileName}: ${error.message}`);
             }
 
+            // Some zip files store folders as read-only, which would stop the renaming below,
+            // the unzipping of the students' zip files, and TestAnyLab from saving its reports
+            makeWritable(allSubmissionsFolderPath);
+
             // Rename the unzipped student submission folders so they are like: TyTitan_file
             fs.readdirSync(allSubmissionsFolderPath).forEach((studentFolder) =>
             {
@@ -168,6 +178,8 @@ function unzipFiles(submissionsPath)
                         fs.unlinkSync(filePath);
                     }
                 });
+                // The students' zip files can have read-only folders too
+                makeWritable(studentFolderPath);
             });
         }
     }
@@ -187,5 +199,44 @@ function unzipFiles(submissionsPath)
         // remove the number following the word Submission and add s to the end
         folderName = folderName.replace(/\d+$/, 's');
         return folderName;
+    }
+}
+
+/** makeWritable function
+ * Give the owner permission to change every folder and file in a folder (and the folder itself),
+ * like chmod -R u+rwX. Symbolic links are not followed. Problems are reported, not thrown.
+ * @param {string} dirPath
+ */
+export function makeWritable(dirPath)
+{
+    const addPermissions = (entryPath, isDirectory) =>
+    {
+        try
+        {
+            const { mode } = fs.statSync(entryPath);
+            // read and write for the owner, and for a folder also permission to open it
+            const wanted = mode | (isDirectory ? 0o700 : 0o600);
+            if (wanted !== mode)
+            {
+                fs.chmodSync(entryPath, wanted);
+            }
+        }
+        catch (error)
+        {
+            console.log(`Could not make ${entryPath} writable: ${error.message}`);
+        }
+    };
+    addPermissions(dirPath, true);
+    for (const dirent of fs.readdirSync(dirPath, { withFileTypes: true }))
+    {
+        const entryPath = path.join(dirPath, dirent.name);
+        if (dirent.isDirectory())
+        {
+            makeWritable(entryPath);
+        }
+        else if (dirent.isFile())
+        {
+            addPermissions(entryPath, false);
+        }
     }
 }
