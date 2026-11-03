@@ -116,7 +116,7 @@ The program can currently check for these lab assignment requirements being fulf
   - Attributes: check for specific required attributes in particular elements
   - Syntax: check HTML syntax with a choice of validators (see [HTML validators](#html-validators))
 - CSS
-  This works for external, embedded and inline CSS.
+  This works for external, embedded and inline CSS, which are all read the same way (comments are ignored).
   - Selectors, including complex selectors
   - Properties
   - Syntax: check CSS syntax with the W3C CSS validator service (see [CSS validation](#css-validation))
@@ -163,7 +163,10 @@ Missing values get defaults, and a file with fewer than 8 settings values prints
 Other columns used for HTML and CSS checks are:
 
 - `requiredElements1` and `requiredElements2`, the required elements (CSS selectors) for part 1 and part 2. Each can have an optional `number1` / `number2` column giving the minimum number of that element, added up over all of a student's files. The number is read from the same row as its element, and blank means 1. For example, `h1, h2, h3, h4, h5, h6` with `2` in `number1` needs at least two headings of any level.
-- `requiredCssSelectors` and `requiredCssProperties`.
+- `requiredCssSelectors` and `requiredCssProperties`, checked against all of a student's external, embedded and inline CSS. Comments are ignored.
+  - A required selector is found when it is a whole part of a selector in some rule. For example `nav` is found in `nav a`, `header nav`, `nav.main` and `header, nav`, but not in `.navbar`. A selector with combinators, like `nav > a`, must appear with the same combinators. A list, like `header, footer`, needs each of its selectors. Spaces and the case of element names don't matter; the case of class and id names does.
+  - A required property with a value, like `display: grid`, needs a declaration of that property with that value. Case, spaces and `!important` don't matter.
+  - A required property name on its own, like `border`, is found when that property or a longer property starting with it (`border-top`, `border-collapse`) is declared. So `text` is found by `text-align`, but `color` is not found by `background-color`.
 - `regExpForHTML1` / `regExpForHTML1Description` and `regExpForCSS1` / `regExpForCSS1Description`. Each description goes on the same row as its regular expression; a regular expression with no description is shown as the pattern itself. The CSS expressions are matched against the CSS exactly as the student wrote it, including white space.
 
 The deprecated JavaScript checker uses the `unitTests` and `filesToTest` columns.
@@ -229,6 +232,7 @@ Missing Comment in head in files
 | `TestAnyLab.mjs` | Main program. `main()` loops over student folders and writes the reports; it runs only when the file is started with node, so tests can import the other functions (`parseArguments`, `loadSettings`, ...). |
 | `SubmissionFolders.mjs` | Finds the folder that holds a submission (skipping wrapper folders and junk) and splits it into parts. |
 | `SubmissionChecker.mjs` | Old-style `checkSubmission()` that does the HTML and CSS checks. Being moved into `HtmlAndCssChecker`. |
+| `CssParser.mjs` | Reads external, embedded and inline CSS with the css-tree parser, and finds the required selectors and properties in it. |
 | `Requirements.mjs` | Reads the requirements csv file into named fields, and warns about problems such as column names the program doesn't use. All other code uses these fields instead of reading the csv. |
 | `HtmlAndCssChecker.mjs` | Holds the requirements for the HTML and CSS checks. CSS validation (`validateCSS`) is here. |
 | `HtmlValidators.mjs` | Pluggable HTML validators: `html-validate`, `w3c`, `vnu`. |

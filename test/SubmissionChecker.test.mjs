@@ -1,12 +1,8 @@
-import { getEmbeddedCssSelectorsAndProperties,
-    getInlineStyles,
-    checkSpecialFileName,
+import { checkSpecialFileName,
     summarizeAdditionalRequirements,
-    getCssRulesAndPropertyNames,
     checkSubmission } from '../SubmissionChecker.mjs';
 import { makeRequirements, parseRequirements } from '../Requirements.mjs';
 import { expect } from 'chai';
-import jsdom from 'jsdom';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -44,70 +40,6 @@ describe('SubmissionChecker', () => {
         });
         it('only looks at the file name, not the folders', () => {
             expect(checkSpecialFileName('index/about.html', 'index')).to.equal('no');
-        });
-    });
-
-    // Test the getEmbeddedCssSelectorsAndProperties() function
-    describe('#getEmbeddedCssSelectorsAndProperties()', () => {
-        it('should return correct selectors and properties', () => {
-            // Arrange
-            const styleElement = {
-                textContent: '.test { color: red; } #id { background-color: blue; }'
-            };
-            const requiredSelectors = ['.test', '#id'];
-            // Note the required property value, red is included, 
-            // and a property that won't be found, float: left
-            const requiredProperties = ['color: red', 'background-color', 'float: left'];
-
-            // Act
-            const result = getEmbeddedCssSelectorsAndProperties(styleElement, requiredSelectors, requiredProperties);
-
-            // Assert
-            expect(result).to.deep.equal({
-                allSelectors: ['.test', '#id'],
-                foundSelectors: ['.test', '#id'],
-                allProperties: ['color: red', 'background-color: blue'],
-                foundProperties: ['color: red', 'background-color']
-            });
-        });
-    });
-
-    // Test the getInlineStyles() function
-    const { JSDOM } = jsdom;
-    describe('SubmissionChecker', () => {
-        describe('#getInlineStyles()', () => {
-            it('should return correct properties and values', () => {
-                // Arrange
-                const dom = new JSDOM(`
-                <div style="color: red; background-color: white;"></div>
-                <div style="color: blue;"></div>
-            `);
-            const requiredProperties = ['color: blue', 'background-color', 'float: left'];
-                const elements = [...dom.window.document.querySelectorAll('div')];
-
-                // Act
-                const result = getInlineStyles(elements, requiredProperties);
-
-                // Assert
-                expect(result).to.deep.equal({
- 
-                        allProperties: ['color: red', 'background-color: white', 'color: blue'],
-                        foundProperties: ['background-color', 'color: blue']
-                });
-            });
-        });
-    });
-
-    // Test the counts of HTML and CSS files
-    describe('#getCssRulesAndPropertyNames()', () => {
-        it('returns the selector of each rule, including rules inside @media, and the property names', () => {
-            const css = 'body { Color: red; margin: 0 }\n@media (min-width: 600px) { .nav > a, h1 { color: blue } }\n/* p { x: y } */';
-            const result = getCssRulesAndPropertyNames(css);
-            expect(result.selectors).to.deep.equal(['body', '.nav>a,h1']);
-            expect(result.propertyNames).to.deep.equal(['color', 'margin', 'color']);
-        });
-        it('returns empty arrays when there are no rules', () => {
-            expect(getCssRulesAndPropertyNames('/* 123 */ 456')).to.deep.equal({ selectors: [], propertyNames: [] });
         });
     });
 
@@ -287,6 +219,24 @@ describe('SubmissionChecker', () => {
                 const report = await checkSubmission(student, "", 2, {}, elementRequirements);
 
                 expect(report).to.include('Found 1 p elements. Expected at least 2');
+            });
+        });
+
+        describe('required css selectors and properties in external, embedded and inline css', () => {
+            it('matches them the same way in all three, using requirements from the csv loader', async () => {
+                const loaded = parseRequirements('requiredCssSelectors,requiredCssProperties\n' +
+                    'nav,text\n"header, footer",display: grid\n.menu,color\n,border');
+                const student = makeStudentDir('v', []);
+                // .navbar and the comment must not count as .menu, and background-color must not count as color
+                fs.writeFileSync(path.join(student, 'styles.css'), 'body > nav a { text-align: center } .navbar { } /* .menu { color: red } */');
+                fs.writeFileSync(path.join(student, 'index.html'),
+                    '<!DOCTYPE html><html><head><title>T</title><style>header, footer { Display: GRID }</style></head>' +
+                    '<body><table style="border-collapse: collapse; background-color: red"></table></body></html>');
+
+                const report = await checkSubmission(student, "", 1, {}, loaded);
+
+                expect(report).to.include('Missing 1 required selectors\nMissing .menu selector');
+                expect(report).to.include('Missing 1 required properties\nMissing color property');
             });
         });
 

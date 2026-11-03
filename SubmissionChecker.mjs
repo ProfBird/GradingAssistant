@@ -1,10 +1,10 @@
 import fs from "fs";
 import path from "path";
 import { JSDOM } from "jsdom";
-import * as cssTree from "css-tree";
 import { HtmlAndCssChecker } from "./HtmlAndCssChecker.mjs";
 import { validateHtml } from "./HtmlValidators.mjs";
 import { isJunk } from "./SubmissionFolders.mjs";
+import { parseStylesheet, parseInlineStyle, findRequiredSelectors, findRequiredProperties } from "./CssParser.mjs";
 
 /********* This is the central function for this program! **********
 * checkSubmission function                                      
@@ -34,11 +34,9 @@ async function checkSubmission(
     const requiredElements = (LabPart === 1) ? HtmlAndCssRequirements.requiredElements1 : HtmlAndCssRequirements.requiredElements2;
     // How many times each required element was found in all the lab files (same order as requiredElements)
     const elementCounts = requiredElements.map(() => 0);
-    // TODO: make this a paramenter and define it in the main
-    const foundSelectors = []; // all the required css slectors that were found in the css files and embedded css
-    const allSelectors = [];  // the selector of every rule found in the css files and embedded css for one part of the lab
-    const foundProperties = []; // all the required css properties that were found in the css files and embedded css
-    const allProperties = []; // the name of every property declared in the css files and embedded css for one part of the lab
+    // Every css rule and property declaration in the external, embedded and inline css of all the lab files
+    const cssRules = [];
+    const cssDeclarations = [];
     let countHTMLFiles = 0; // Number of html files found in the lab files
     let countCSSFiles = 0; // Number of css files found in the lab files
     // true when the required special file name is found (or none is required)
@@ -79,10 +77,12 @@ async function checkSubmission(
     // TODO: combine the following two functions into one and check for properties in specific selectors.
     if (HtmlAndCssRequirements.requiredCssSelectors.length > 0)
     {
+        const foundSelectors = findRequiredSelectors(HtmlAndCssRequirements.requiredCssSelectors, cssRules);
         report = summarizeForRequiredSelectors(foundSelectors, HtmlAndCssRequirements.requiredCssSelectors, report);
     }
     if (HtmlAndCssRequirements.requiredCssProperties.length > 0)
     {
+        const foundProperties = findRequiredProperties(HtmlAndCssRequirements.requiredCssProperties, cssDeclarations);
         report = summarizeForRequiredProperties(foundProperties, HtmlAndCssRequirements.requiredCssProperties, report);
     }
     if (moreRequirements.valueCount > 0)
@@ -91,8 +91,9 @@ async function checkSubmission(
         report += summarizeAdditionalRequirements({
             htmlFileCount: countHTMLFiles,
             cssFileCount: countCSSFiles,
-            ruleSelectors: allSelectors,
-            propertyNames: allProperties,
+            // The counts are of the external and embedded css. Inline styles have no rules.
+            ruleSelectors: cssRules.map((rule) => rule.selectors.join(", ")),
+            propertyNames: cssDeclarations.filter((d) => d.source !== "inline").map((d) => d.property),
             specialFileFound,
             wrongCaseFileNames,
         }, moreRequirements);
@@ -180,24 +181,16 @@ async function checkSubmission(
                     elementCounts[i] += elements.length;
                 } // end looping through requiredElements
 
-                // Get embedded css out of the html file (there can be more than one style element)
+                // Get the embedded css out of the html file (there can be more than one style element)
                 for (const styleElement of dom.window.document.querySelectorAll("style"))
                 {
-                    let foundSelectorsAndProperties = 
-                         getEmbeddedCssSelectorsAndProperties(styleElement, HtmlAndCssRequirements.requiredCssSelectors, HtmlAndCssRequirements.requiredCssProperties);
-                    foundSelectors.push(...foundSelectorsAndProperties.foundSelectors);
-                    foundProperties.push(...foundSelectorsAndProperties.foundProperties);
-                    // Count the rules and properties of the embedded css
-                    const embeddedCss = getCssRulesAndPropertyNames(styleElement.textContent);
-                    allSelectors.push(...embeddedCss.selectors);
-                    allProperties.push(...embeddedCss.propertyNames);
+                    addCss(parseStylesheet(styleElement.textContent, "embedded"));
                 }
-
-                // Get elements with inline styles from the html file
-                const elements = dom.window.document.querySelectorAll("[style]");
-                // Get the CSS property names and values from each of the element's inline styles
-                const inlineStyles = getInlineStyles(elements, HtmlAndCssRequirements.requiredCssProperties);
-                foundProperties.push(...inlineStyles.foundProperties);
+                // Get the inline styles
+                for (const element of dom.window.document.querySelectorAll("[style]"))
+                {
+                    addCss(parseInlineStyle(element.getAttribute("style")));
+                }
 
                 regExpHtmlResults = orRegExpResults(regExpHtmlResults,
                     checkFileWithRegExp(HtmlAndCssRequirements.htmlRegExps, fileContents));
@@ -213,40 +206,14 @@ async function checkSubmission(
             else // File is a css file
             {
                 countCSSFiles++;
-                // Get the css rules and property names from the css file
-                const externalCss = getCssRulesAndPropertyNames(fileContents);
-                allSelectors.push(...externalCss.selectors);
-                allProperties.push(...externalCss.propertyNames);
+                // Get the css rules and declarations from the css file
+                addCss(parseStylesheet(fileContents, "external"));
 
                 // Validate CSS if the requirements file asks for it
                 if (moreRequirements.validateCss)
                 {
                     report += await HtmlAndCssChecker.validateCSS(fileContents, fileName);
                 }
-                // TODO: check for embedded css styles in the html pages. 
-                // 11/16/23, already getting them in foundSelectors and foundProperties, but the syntax might not be checked.
-
-                // Get any required css selectors from fileContents, put in foundSelectors
-
-                for (const selector of HtmlAndCssRequirements.requiredCssSelectors)
-                {
-                    if (fileContents.includes(selector))
-                    {
-                        foundSelectors.push(selector);
-                    }
-                }
-                // Get any required css properties from fileContents, put in foundProperties
-                // TODO: Use cssTree to get the properties
-                // remove all whitespace from the fileContents, this was already done to the requiredProperties
-                const contentsWithoutWhitespace = fileContents.replace(/\s/g, '');
-                for (let property of HtmlAndCssRequirements.requiredCssProperties)
-                {
-                    if (contentsWithoutWhitespace.includes(property))
-                    {
-                        foundProperties.push(property);
-                    }
-                } // end looping through requiredProperties
-
                 // Do regular expression searches of the CSS file contents
                 regExpCssResults = orRegExpResults(regExpCssResults,
                     checkFileWithRegExp(HtmlAndCssRequirements.cssRegExps, fileContents));
@@ -275,6 +242,15 @@ async function checkSubmission(
         }
         return report;
     } // End of checkFile inner function
+
+    /*********** inner function ***********/
+    /* Add the rules and declarations from one stylesheet or inline style */
+    /**************************************/
+    function addCss({ rules, declarations })
+    {
+        cssRules.push(...rules);
+        cssDeclarations.push(...declarations);
+    }
 
     /*********** inner function ***********/
     /* OR the regular expression results of one file with the results of the */
@@ -309,116 +285,6 @@ async function checkSubmission(
 /* All the following functions are called by checkSubmission     */
 /*****************************************************************/
 
-
-/***************************************************************************************
-/* Get the css selectors and properties from embedded css in an html file              
- * Returns an object with both the required selectors and properties that were found,  
- * as well as all the embedded selectors and properties.     
- * @param {Object} styleElement - The style element containing the CSS.
- * @param {Array<string>} requiredSelectors - The CSS selectors that are required.
- * @param {Array<string>} requiredProperties - The CSS properties that are required.
- * @returns {Object} An object containing the found and all selectors and properties.
- */
-function getEmbeddedCssSelectorsAndProperties(styleElement, requiredSelectors, requiredProperties) {
-    const allSelectors = [];
-    const foundSelectors = [];
-    const allProperties = [];
-    const foundProperties = [];
-
-    const cssText = styleElement.textContent;
-    const ast = cssTree.parse(cssText);
-
-    cssTree.walk(ast, (node) => {
-        if (node.type === "Rule") {
-            const selector = cssTree.generate(node.prelude);
-            allSelectors.push(selector);
-            if (requiredSelectors.includes(selector)) {
-                foundSelectors.push(selector);
-            }
-        }
-    });
-
-    cssTree.walk(ast, (node) => {
-        if (node.type === "Declaration") {
-            const property = node.property;
-            const value = cssTree.generate(node.value).trim();
-            allProperties.push(`${property}: ${value}`);
-            foundProperties.push(...matchRequiredProperties(property, value, requiredProperties));
-        }
-    });
-
-    return {
-        allSelectors,
-        foundSelectors,
-        allProperties,
-        foundProperties
-    };
-}
-
-/***************************************************************************************
- * The required properties that one CSS declaration satisfies.
- * A requirement is either a property name (color) or a name and value (color: red).
- * White space is ignored when comparing, because parseRequirements removes it from the
- * requirements and the student may or may not have it in the CSS.
- * Used for embedded and inline CSS.
- * @param {string} property - The declared property name
- * @param {string} value - The declared value
- * @param {Array<string>} requiredProperties - The required properties
- * @returns {Array<string>} The requirements that match, as written in requiredProperties
- */
-function matchRequiredProperties(property, value, requiredProperties) {
-    const removeWhitespace = (text) => text.replace(/\s/g, "");
-    const nameAndValue = removeWhitespace(`${property}:${value}`);
-    return requiredProperties.filter((required) => {
-        const normalized = removeWhitespace(required);
-        return normalized === nameAndValue || normalized === removeWhitespace(property);
-    });
-}
-
-/***************************************************************************************
- * Get the rules and property names in some CSS text, using the css-tree parser.
- * Used to count the rules and properties in external and embedded CSS.
- * @param {string} cssText - The contents of a css file or style element.
- * @returns {{selectors: Array<string>, propertyNames: Array<string>}} The selector of each
- *   rule (including rules inside @media), and the name of each property declared, in lower case.
- *   A name appears once for each declaration, so use a Set to get the distinct ones.
- */
-function getCssRulesAndPropertyNames(cssText) {
-    const selectors = [];
-    const propertyNames = [];
-    cssTree.walk(cssTree.parse(cssText), (node) => {
-        if (node.type === "Rule") {
-            selectors.push(cssTree.generate(node.prelude));
-        } else if (node.type === "Declaration") {
-            propertyNames.push(node.property.toLowerCase());
-        }
-    });
-    return { selectors, propertyNames };
-}
-
-/*************************************************/
-/* Get the css properties and values from the    */
-/* inline styles in an html file                 */
-/*************************************************/
-function getInlineStyles(elements, requiredProperties) {
-    const allProperties = [];
-    const foundProperties = [];
-    for (const element of elements) {
-        const inlineStyle = element.getAttribute("style");
-        if (inlineStyle !== null) {
-            // Extract all property names and values from the inline style rule using a regular expression
-            const propertyRegex = /([\w-]+)\s*:\s*([^;]+)/g;
-            let match; // array with capture groups of matched property name and value
-            while ((match = propertyRegex.exec(inlineStyle)) !== null) {
-                const property = match[1];
-                const value = match[2].trim();
-                allProperties.push(`${property}: ${value}`);
-                foundProperties.push(...matchRequiredProperties(property, value, requiredProperties));
-            }
-        }
-    }
-    return { allProperties, foundProperties };
-}
 
 /********************************************************************
  * Check results for required html elements
@@ -676,5 +542,5 @@ function summarizeRegExpSearches(regExpResults, regExpSearches)
     return report;
 }
 
-export { checkSubmission, getEmbeddedCssSelectorsAndProperties, getCssRulesAndPropertyNames, getInlineStyles, checkSpecialFileName,
+export { checkSubmission, checkSpecialFileName,
     summarizeAdditionalRequirements };

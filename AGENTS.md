@@ -21,6 +21,7 @@ npm run docs                               # JSDoc into docs/
 | `Requirements.mjs` | **The only reader of the requirements csv** (except the deprecated `JsChecker`). `parseRequirements()` / `readRequirementsFile()` return named fields (`settings`, `moreRequirements`, `requiredElements1` as `{selector, minimum}`, `htmlRegExps` as `{pattern, description}`, ...) plus `warnings` (unknown columns, too few settings, non-numeric counts, unknown validator). `makeRequirements()` builds requirements for tests. |
 | `SubmissionFolders.mjs` | Finds the folder that holds a submission (skips wrapper folders and junk) and splits it into parts. |
 | `SubmissionChecker.mjs` | Old-style `checkSubmission()` that does the HTML/CSS checks. Being moved into `HtmlAndCssChecker`. |
+| `CssParser.mjs` | The only CSS reader. `parseStylesheet()` (external files, `<style>`) and `parseInlineStyle()` return `{rules, declarations}` tagged with their source. `findRequiredSelectors()` and `findRequiredProperties()` hold the matching rules. |
 | `HtmlAndCssChecker.mjs` | Holds the parsed requirements for the HTML/CSS checks. `validateCSS` is here. |
 | `HtmlValidators.mjs` | Pluggable HTML validators: `html-validate` (default), `w3c`, `vnu`. |
 | `JsChecker.mjs`, `Checker.mjs` | JS checker (runs Mocha tests on student JS) and the base class. In progress. |
@@ -49,6 +50,7 @@ Each `.csv` row is one line, and each column holds a list of values. Empty cells
 - The special file name check is strict on purpose. `index` accepts only `index.html` or `index.htm`; a name with an extension (`styles.css`) must match exactly. Names that merely contain it (`reindex.html`, `index.html.html`) fail. The case must match (`Index.html` fails), and a wrong-case name is reported separately from a missing file.
 - The W3C validator service rejects bulk requests (HTTP errors with an HTML body). That is why `html-validate` is the default. `vnu-jar` 26.x needs Java 17 or newer, and the user's machine has Java 11. `vnu-jar@23.4.11` works on Java 11.
 - Regex and element results are combined across a student's files. One match in any file passes.
+- CSS selector and property matching is deliberately lenient in two ways, both kept from the old substring checks, which real requirement files rely on. A required selector matches as a whole part of a rule's selector (`nav` matches `nav a`, `body > header`). A required property name matches longhands that start with it (`border` matches `border-collapse`; Lab 7 requires `text`, which only `text-align` and similar can satisfy). It no longer matches inside other names (`.nav` vs `.navbar`, `color` vs `background-color`), in values, or in comments. Change `CssParser.mjs` to make it stricter.
 
 ## Code style
 
