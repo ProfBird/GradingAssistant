@@ -63,6 +63,8 @@ export async function main(args) {
         return;
     }
     const { labSettings } = settings;
+    const startTime = new Date();
+    const checkedStudents = [];  // for the run log
     const unwrittenReports = [];  // reports that could not be saved, so they can be listed at the end
 
     // Loop through all student subdirectories at submissionsPath and 
@@ -86,6 +88,7 @@ export async function main(args) {
             continue;
         }
         console.log(`Checking the ${studentDir} directory`);
+        checkedStudents.push(studentDir);
         const report = await checkStudent(studentDir, settings);
         console.log(report);
 
@@ -105,6 +108,15 @@ export async function main(args) {
                 ? "the folder is read-only" : error.message });
         }
     }  // End of for loop through student directories
+
+    // A record of this run, in the submissions folder
+    const logPath = path.join(labSettings.submissionsPath, `TestAnyLab_${formatTimestamp(startTime)}.log`);
+    try {
+        fs.writeFileSync(logPath, makeRunLog(startTime, requirementsFilePath, checkedStudents));
+        console.log(`Saved the run log as ${logPath}`);
+    } catch (error) {
+        console.error(`Could not save the run log ${logPath}: ${error.message}`);
+    }
 
     if (unwrittenReports.length > 0) {
         const count = unwrittenReports.length;
@@ -144,11 +156,7 @@ export function backupReport(reportPath, newReport) {
     if (oldReport === newReport) {
         return null;
     }
-    const savedAt = fs.statSync(reportPath).mtime;
-    const pad = (number) => String(number).padStart(2, "0");
-    const stamp = `${savedAt.getFullYear()}-${pad(savedAt.getMonth() + 1)}-${pad(savedAt.getDate())}_` +
-        `${pad(savedAt.getHours())}-${pad(savedAt.getMinutes())}-${pad(savedAt.getSeconds())}`;
-    const base = reportPath.replace(/\.txt$/, "") + "_backup_" + stamp;
+    const base = reportPath.replace(/\.txt$/, "") + "_backup_" + formatTimestamp(fs.statSync(reportPath).mtime);
     // Add a number if a backup with this time already exists
     let backupPath = base + ".txt";
     for (let n = 2; fs.existsSync(backupPath); n++) {
@@ -157,6 +165,34 @@ export function backupReport(reportPath, newReport) {
     // COPYFILE_EXCL: never replace an existing file
     fs.copyFileSync(reportPath, backupPath, fs.constants.COPYFILE_EXCL);
     return backupPath;
+}
+
+/** makeRunLog function
+ * The text of the run log: when the run started, the requirements file, and the students checked.
+ * @param {Date} startTime
+ * @param {string} requirementsFilePath
+ * @param {Array<string>} checkedStudents - The student folders that were checked (not the skipped ones)
+ * @returns {string}
+ */
+export function makeRunLog(startTime, requirementsFilePath, checkedStudents) {
+    const [date, time] = formatTimestamp(startTime).split("_");
+    return [
+        `Date and time: ${date} ${time.replace(/-/g, ":")}`,
+        `Requirements file: ${path.resolve(requirementsFilePath)}`,
+        `Submissions checked: ${checkedStudents.length}`,
+        "Students:",
+        ...checkedStudents.map((student) => `  ${student}`),
+    ].join("\n") + "\n";
+}
+
+/** formatTimestamp function
+ * @param {Date} date
+ * @returns {string} The local date and time, like 2026-11-02_21-30-05, for use in file names
+ */
+function formatTimestamp(date) {
+    const pad = (number) => String(number).padStart(2, "0");
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}_` +
+        `${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}`;
 }
 
 /** parseArguments function

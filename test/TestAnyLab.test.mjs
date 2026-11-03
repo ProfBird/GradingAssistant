@@ -1,4 +1,4 @@
-import { main, parseArguments, loadSettings, getSubmissionsPath, parseBoolean, backupReport } from '../TestAnyLab.mjs';
+import { main, parseArguments, loadSettings, getSubmissionsPath, parseBoolean, backupReport, makeRunLog } from '../TestAnyLab.mjs';
 import { expect } from 'chai';
 import fs from 'fs';
 import os from 'os';
@@ -113,6 +113,24 @@ describe('TestAnyLab', () => {
         it('throws a message naming the file if it cannot be read', () => {
             const missing = path.join(baseDir, 'missing.csv');
             expect(() => loadSettings(missing, 'darwin')).to.throw(`Error processing requirements file ${missing}`);
+        });
+    });
+
+    describe('#makeRunLog()', () => {
+        it('has the date and time, the full path of the requirements file, the count and the students', () => {
+            const log = makeRunLog(new Date(2026, 10, 2, 9, 5, 7), 'labs/Lab1.csv', ['Ann', 'Bob']);
+            expect(log).to.equal([
+                'Date and time: 2026-11-02 09:05:07',
+                `Requirements file: ${path.resolve('labs/Lab1.csv')}`,
+                'Submissions checked: 2',
+                'Students:',
+                '  Ann',
+                '  Bob',
+            ].join('\n') + '\n');
+        });
+
+        it('says 0 when every student was skipped', () => {
+            expect(makeRunLog(new Date(2026, 0, 1), '/x.csv', [])).to.include('Submissions checked: 0\nStudents:\n');
         });
     });
 
@@ -247,6 +265,21 @@ describe('TestAnyLab', () => {
             expect(errors.join('\n')).to.include('Could not save the report for Ann');
             expect(errors.join('\n')).to.include('Ann (the folder is read-only)');
             expect(process.exitCode).to.equal(1);
+        });
+
+        it('saves a run log in the submissions folder listing the students checked', async () => {
+            const { subs, requirements } = makeLab();
+            fs.writeFileSync(path.join(subs, 'Bob', 'Bob_report.txt'), 'old report');  // Bob is skipped
+
+            await main([requirements]);
+
+            const logs = fs.readdirSync(subs).filter((name) => /^TestAnyLab_\d{4}-\d\d-\d\d_\d\d-\d\d-\d\d\.log$/.test(name));
+            expect(logs).to.have.length(1);
+            const log = fs.readFileSync(path.join(subs, logs[0]), 'utf8');
+            expect(log).to.match(/^Date and time: \d{4}-\d\d-\d\d \d\d:\d\d:\d\d\n/);
+            expect(log).to.include(`Requirements file: ${requirements}\n`);
+            expect(log).to.include('Submissions checked: 1\nStudents:\n  Ann\n');
+            expect(log).to.not.include('Bob');
         });
 
         it('sets a failing exit code when the requirements file is missing', async () => {

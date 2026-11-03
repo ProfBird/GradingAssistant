@@ -12,7 +12,7 @@ node UnzipFiles.mjs <folder-holding-the-download.zip> # unzip every .zip in the 
 npm run docs                               # JSDoc into docs/
 ```
 
-`TestAnyLab.mjs` takes an optional 2nd argument (`--help` or `--overwrite`). Without one it checks the lab and skips students who already have a report; an unrecognized option prints "Unknown option" and quits. With `--overwrite`, `backupReport()` first copies a changed report to `<studentDir>_report_backup_<date>_<time>.txt` (the old report's save time); if the backup fails, the report is not overwritten. `isJunk()` ignores both report and backup files. Requirements files normally live in the CIS195-CourseMaterials repo (`LabAutoGrading/`), not in this repo. Each one has a path to the submissions folder in its `settings` column.
+`TestAnyLab.mjs` takes an optional 2nd argument (`--help` or `--overwrite`). Without one it checks the lab and skips students who already have a report; an unrecognized option prints "Unknown option" and quits. With `--overwrite`, `backupReport()` first copies a changed report to `<studentDir>_report_backup_<date>_<time>.txt` (the old report's save time); if the backup fails, the report is not overwritten. `isJunk()` ignores both report and backup files. Each run writes `TestAnyLab_<date>_<time>.log` (made by `makeRunLog()`: start time, requirements file, count and list of students checked, not skipped ones) in the submissions folder; it's a file, so it's never mistaken for a student folder. Requirements files normally live in the CIS195-CourseMaterials repo (`LabAutoGrading/`), not in this repo. Each one has a path to the submissions folder in its `settings` column.
 
 ## Layout
 

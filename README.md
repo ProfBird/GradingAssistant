@@ -217,6 +217,17 @@ CSS files are validated with the [W3C CSS validator](https://jigsaw.w3.org/css-v
 
 ### Output
 
+Each run also saves a log in the submissions folder, named with the date and time it started, like `TestAnyLab_2026-11-02_21-52-02.log`. It records the date and time, the full path of the requirements file, the number of submissions checked, and the students whose labs were checked (students skipped because they already had a report aren't listed):
+
+```
+Date and time: 2026-11-02 21:52:02
+Requirements file: /…/LabAutoGrading/Lab1Requirements.csv
+Submissions checked: 2
+Students:
+  brownlayne
+  titanty
+```
+
 A text file with a summary report is saved in each student's folder. Here is an example of a summary report:
 
 ```
