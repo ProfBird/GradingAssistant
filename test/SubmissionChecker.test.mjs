@@ -152,6 +152,27 @@ describe('SubmissionChecker', () => {
             // Student B has only one file, even though the earlier student had two
             expect(reportB).to.include('Found 1 html files. Expected 2');
         });
+
+        it('treats a file name with an upper case extension as an HTML file', async () => {
+            const student = makeStudentDir('c', ['index.html', 'About.HTML']);
+
+            const report = await checkSubmission(student, "", 1, {}, requirements);
+
+            expect(report).to.include('Checking the About.HTML file');
+            expect(report).to.include('All additional requirements met');
+        });
+
+        it('ignores __MACOSX and hidden files', async () => {
+            const student = makeStudentDir('d', ['index.html']);
+            fs.mkdirSync(path.join(student, '__MACOSX'));
+            fs.writeFileSync(path.join(student, '__MACOSX', '._index.html'), 'junk');
+            fs.writeFileSync(path.join(student, '.hidden.html'), '<html></html>');
+
+            const report = await checkSubmission(student, "", 1, {}, requirements);
+
+            expect(report).to.not.include('._index.html');
+            expect(report).to.include('Found 1 html files. Expected 2');
+        });
     });
 
 });

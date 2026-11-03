@@ -92,39 +92,47 @@ if (quitProgram != true) {
         let report = message + "\n"; // Report of the checks of the files for this student
         let studentDirPath = path.join(labSettings.submissionsPath, studentDir)
 
-        // Find the folders holding the submission. Unzipped submissions often have wrapper
-        // folders (StudentName/Lab/index.html) and the parts may be in separate sub-folders.
-        const { root: submissionRoot, partDirs } =
-            getPartDirs(studentDirPath, labSettings.numberOfParts, labSettings.areAllInOneDir);
-        if (submissionRoot !== studentDirPath) {
-            report += `Submission found in ${path.relative(studentDirPath, submissionRoot)}\n`;
-        }
+        // A problem with one student's files must not stop the checks of the other students,
+        // so an error is written into that student's report instead.
+        try {
+            // Find the folders holding the submission. Unzipped submissions often have wrapper
+            // folders (StudentName/Lab/index.html) and the parts may be in separate sub-folders.
+            const { root: submissionRoot, partDirs } =
+                getPartDirs(studentDirPath, labSettings.numberOfParts, labSettings.areAllInOneDir);
+            if (submissionRoot !== studentDirPath) {
+                report += `Submission found in ${path.relative(studentDirPath, submissionRoot)}\n`;
+            }
 
-        // Loop for each part - if there are sub-parts we consider them to be additional parts
-        for (let part = 1; part <= labSettings.numberOfParts; part++) {
-            report += "\nPart" + part + "\n";
-            const partDirPath = partDirs[part - 1];
-            if (partDirPath === null) {
-                report += `No folder found for part ${part}\n`;
-                continue;
+            // Loop for each part - if there are sub-parts we consider them to be additional parts
+            for (let part = 1; part <= labSettings.numberOfParts; part++) {
+                report += "\nPart" + part + "\n";
+                const partDirPath = partDirs[part - 1];
+                if (partDirPath === null) {
+                    report += `No folder found for part ${part}\n`;
+                    continue;
+                }
+                if(labSettings.isHTML)
+                {
+                    // TODO: Rewrite checkSubmision and move some code into HtmlAndCssChecker
+                    // report +=  await checkers[0].checkSubmission(partDirPath, part)
+                    // We're still using the old checkSubmission function that also finds the right dirs and files
+                    report += await checkSubmission(
+                        partDirPath,
+                        "",
+                        part,
+                        labSettings,
+                        checkers[0].requirements
+                    );
+                }
+                if(labSettings.isJavaScript)
+                {
+                    report +=  await checkers[1].checkSubmission(partDirPath, part)
+                }
             }
-            if(labSettings.isHTML)
-            {
-                // TODO: Rewrite checkSubmision and move some code into HtmlAndCssChecker
-                // report +=  await checkers[0].checkSubmission(partDirPath, part)
-                // We're still using the old checkSubmission function that also finds the right dirs and files
-                report += await checkSubmission(
-                    partDirPath,
-                    "",
-                    part,
-                    labSettings,
-                    checkers[0].requirements
-                );
-            }
-            if(labSettings.isJavaScript)
-            {
-                report +=  await checkers[1].checkSubmission(partDirPath, part)
-            }
+        } catch (error) {
+            const errorMessage = `Error checking ${studentDir}: ${error.message}`;
+            console.error(errorMessage);
+            report += `\n${errorMessage}\nThis submission was not fully checked.\n`;
         }
 
         // Open the report file for writing and get its file descriptor
@@ -174,7 +182,7 @@ function loadSettings(requirementsFilePath) {
             .on("error", (error) => {
                 console.error(error);
             })
-            .write(Buffer.from(fileBuffer));  // this sends data to the csv parser. csv-parser modifies the buffer it is given, so give it a copy
+            .end(Buffer.from(fileBuffer));  // this sends data to the csv parser. csv-parser modifies the buffer it is given, so give it a copy. end() also parses a last row that has no trailing newline
 
             // Copy settings to the labSettings object, using defaults for any missing values
             const parts = parseInt(settings[2], 10);

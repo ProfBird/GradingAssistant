@@ -6,6 +6,7 @@ import * as cssTree from "css-tree";
 import os from "os";
 import { HtmlAndCssChecker } from "./HtmlAndCssChecker.mjs";
 import { validateHtml, resolveHtmlValidatorSetting } from "./HtmlValidators.mjs";
+import { isJunk } from "./SubmissionFolders.mjs";
 
 /********* This is the central function for this program! **********
 * checkSubmission function                                      
@@ -132,10 +133,11 @@ async function checkSubmission(
     /************************************/
     function traverseDir(dir, files)
     {
-        fs.readdirSync(dir).forEach((file) =>
+        // Skip junk like __MACOSX, ._index.html and .git, which are not the student's work
+        fs.readdirSync(dir, { withFileTypes: true }).filter((dirent) => !isJunk(dirent)).forEach((dirent) =>
         {
-            let fullPath = path.join(dir, file);
-            if (fs.lstatSync(fullPath).isDirectory())
+            let fullPath = path.join(dir, dirent.name);
+            if (dirent.isDirectory())
             {
                 // console.log(fullPath);
                 files = traverseDir(fullPath, files); // <-- recursive call!
@@ -159,7 +161,7 @@ async function checkSubmission(
         // Do all the file checks if the fil is not empty
         if (fileContents != "")
         {
-            if (/\.html?$/.test(fileName))
+            if (/\.html?$/i.test(fileName))
             {
                 countHTMLFiles++;
                 // Validate HTML
@@ -223,13 +225,13 @@ async function checkSubmission(
                 countCSSFiles++;
                 // Get the css selectors from the css file
                 const cssSelectorRegExp = /([.#]?[a-zA-Z_-][\w-]*(\s*[>~+]\s*)?)+/gi;  // TODO: bug--this gets proeprties and values too
-                let tempSelectors = fileContents.match(cssSelectorRegExp);
+                let tempSelectors = fileContents.match(cssSelectorRegExp) ?? [];  // match returns null when nothing matches
                 // using the spread operator to push the elements onto the allSelectors array
                 allSelectors.push(...tempSelectors);
 
                 // Get the css properties from the css file
                 const cssPropertyRegExp = /([a-zA-Z_-][\w-]*)(?=\s*:)/gi;
-                allProperties.push(...fileContents.match(cssPropertyRegExp));
+                allProperties.push(...(fileContents.match(cssPropertyRegExp) ?? []));
 
                 // Validate CSS
                 report += await HtmlAndCssChecker.validateCSS(fileContents, fileName);

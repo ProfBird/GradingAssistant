@@ -27,6 +27,9 @@ export class JsChecker extends Checker {
         FilesToTest: []
     };
 
+    /** Number of times unit tests were loaded, used to load a fresh copy for each student */
+    loadCount = 0;
+
     // Methods
 
     /** loadRequirements method
@@ -50,7 +53,7 @@ export class JsChecker extends Checker {
             .on("error", (error) => {
                 console.error(error);
             })
-            .write(requirementsFileBuffer);  // this sends data to the csv parser function above
+            .end(requirementsFileBuffer);  // this sends data to the csv parser function above. end() also parses a last row that has no trailing newline
     } // End of loadRequirements function
 
 
@@ -87,11 +90,26 @@ export class JsChecker extends Checker {
             const mocha = new Mocha();
             mocha.addFile(unitTestFilePath); // Add the file containing the unit tests
             process.env.TESTED_FILE = fileToTestPath; // set the environment variable to the file to be tested
+            // Node caches loaded modules, and a cached unit test file would not register its tests
+            // (or read TESTED_FILE) again for the next student. A new query string on the url gets
+            // a fresh copy of an ES module, and unloadFiles (below) clears the cache for CommonJS.
+            const loadId = ++this.loadCount;
+            await mocha.loadFilesAsync({
+                esmDecorator: (fileUrl) => {
+                    const freshUrl = new URL(fileUrl);
+                    freshUrl.searchParams.set("run", loadId);
+                    return freshUrl.href;
+                }
+            });
             // Create a promise that resolves when all tests have finished
             const testsFinished = new Promise((resolve, reject) => {
                 const runner = mocha.run(failures => {
+                    mocha.unloadFiles();
                     if (failures) {
                         reject(new Error(`${failures} tests failed.`));
+                    } else if (runner.total === 0) {
+                        // A run that checked nothing must not look like a pass
+                        reject(new Error("no tests ran."));
                     } else {
                         resolve();
                     }

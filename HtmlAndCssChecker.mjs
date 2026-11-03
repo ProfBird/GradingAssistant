@@ -96,7 +96,7 @@ export class HtmlAndCssChecker extends Checker {
                 .on("error", (error) => {
                     console.error(error);
                 })
-                .write(fileBuffer);  // this sends data to the csv parser
+                .end(fileBuffer);  // this sends data to the csv parser. end() also parses a last row that has no trailing newline
     } // End of loadRequirements method
 
     /**

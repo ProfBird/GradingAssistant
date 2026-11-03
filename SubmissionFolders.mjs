@@ -13,7 +13,7 @@ const archiveExtensions = /\.(zip|7z|rar|tar|gz)$/i;
  * @param {fs.Dirent} dirent - Directory entry
  * @returns {boolean}
  */
-function isJunk(dirent) {
+export function isJunk(dirent) {
     const name = dirent.name;
     return name.startsWith(".")                 // .DS_Store, .git, etc.
         || /^_*MACOSX$/i.test(name)             // __MACOSX, or MACOSX after UnzipFiles removes underscores
