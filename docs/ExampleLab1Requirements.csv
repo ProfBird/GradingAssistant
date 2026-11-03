@@ -1,0 +1,10 @@
+line,settings,settingsDescription,requiredElements1,number1,regExpForHTML1,regExpForHTML1Description,moreRequirements,moreReqsDescription
+1,Lab01-Submissions,Mac OS submissions path,title,1,"<a\s*href\s*=\s*[""']http",an external link (href starting with http),index,Special file name
+2,Lab01-Submissions,Windows submissions path,"h1, h2, h3, h4, h5, h6",2,"<a\s*href\s*=\s*[""'](?!http)",a relative link (href not starting with http),2,Number of HTML files
+3,1,Number of parts,a[href],2,<head>[\s\S]*<!--,an HTML comment after the <head> tag,0,Number of CSS files
+4,Lab01,Lab name,img[alt],1,,,TRUE,Validate HTML
+5,TRUE,All parts in one folder,br,1,,,FALSE,Validate CSS
+6,TRUE,Check HTML,ol > li,2,,,,
+7,FALSE,Check CSS,ul > li,1,,,,
+8,FALSE,Check JavaScript,"b, strong",1,,,,
+9,,,"i, em",1,,,,

@@ -168,7 +168,13 @@ Other columns used for HTML and CSS checks are:
 
 The deprecated JavaScript checker uses the `unitTests` and `filesToTest` columns.
 
-Older requirements files use earlier layouts and are not compatible. The most recent requirements files are in the `LabAutoGrading` folder of the CIS195-CourseMaterials repo; `Lab1Requirements.csv` there uses the layout described above. The files in the `docs` folder ([Lab 6](docs/CIS195Lab06GradeAssist.csv), [term project](docs/CIS195TermProjectGradeAssist.csv)) are examples of earlier layouts, and [ExampleJsRequirementsTable.md](docs/ExampleJsRequirementsTable.md) also describes an older one.
+Older requirements files use earlier layouts and are not compatible. The files in the `docs` folder use the layout described above and are kept up to date by a unit test, so you can copy one and edit it:
+
+- [ExampleLab1Requirements.csv](docs/ExampleLab1Requirements.csv): an HTML-only lab with minimum element counts, regular expression searches and HTML validation.
+- [CIS195Lab06GradeAssist.csv](docs/CIS195Lab06GradeAssist.csv): an HTML and CSS lab with required CSS selectors and properties, CSS validation, and minimum numbers of CSS rules and properties.
+- [CIS195TermProjectGradeAssist.csv](docs/CIS195TermProjectGradeAssist.csv): a larger HTML and CSS example.
+
+In these examples the `...Description` columns are just notes for the reader; the program ignores them. [ExampleJsRequirementsTable.md](docs/ExampleJsRequirementsTable.md) describes an older layout for the deprecated JavaScript checker.
 
 ### HTML validators
 

@@ -1,18 +1,18 @@
-line,settings,settingsDescription,requiredElements1,requiredCssSelectors,requiredCssSelectorsDescription,regExpForHTML1,regExpForHTML1Description,moreRequirements,moreReqsDescription,Notes
-1,CIS195_F23TermProjects,MacOS path,head,footer,optional,<head>[\s\S]*<!--,Comment in head,index,File name,
-2,CIS195_F23TermProjects,Windows path,title,nav,optional,\\u00A9|&#169;|&#x000A9;|&copy;,,5,Total HTML files,
-3,1,Num of part folders,link[href][rel='stylesheet'],header,optional,,,1,Total CSS files,
-4,TermProject,Lab name,style,,,,,TRUE,Validate HTML,
-5,TRUE,Parts in one dir,body,,,,,TRUE,Validate CSS,
-6,TRUE,Check HTML & CSS,header,,,,,,,
-7,,,h1,,,,,,,
-8,,,nav,,,,,,,
-9,,,a,,,,,,,
-10,,,figure,,,,,,,
-11,,,img,,,,,,,
-12,,,img[alt],,,,,,,
-13,,,table,,,,,,,
-14,,,table th,,,,,,,
-15,,,section,,,,,,,
-16,,,article,,,,,,,
-17,,,footer,,,,,,,
+line,settings,settingsDescription,requiredElements1,number1,requiredCssSelectors,regExpForHTML1,regExpForHTML1Description,moreRequirements,moreReqsDescription
+1,TermProject-Submissions,Mac OS submissions path,head,1,footer,<head>[\s\S]*<!--,an HTML comment after the <head> tag,index,Special file name
+2,TermProject-Submissions,Windows submissions path,title,1,nav,\u00A9|&#169;|&#x0*A9;|&copy;,a copyright symbol,5,Number of HTML files
+3,1,Number of parts,link[href][rel='stylesheet'],1,header,,,1,Number of CSS files
+4,TermProject,Lab name,style,1,,,,TRUE,Validate HTML
+5,TRUE,All parts in one folder,body,1,,,,TRUE,Validate CSS
+6,TRUE,Check HTML,header,1,,,,10,Minimum number of CSS rules
+7,TRUE,Check CSS,h1,1,,,,8,Minimum number of distinct CSS properties
+8,FALSE,Check JavaScript,nav,1,,,,,
+9,,,a,5,,,,,
+10,,,figure,1,,,,,
+11,,,img,3,,,,,
+12,,,img[alt],3,,,,,
+13,,,table,1,,,,,
+14,,,table th,2,,,,,
+15,,,section,1,,,,,
+16,,,article,1,,,,,
+17,,,footer,1,,,,,

@@ -1,8 +1,9 @@
-line,settings,settingsDescription,requiredElements1,requiredCssSelectors,requiredCssSelectorsDescription,requiredCssProperties,requiredCssPropertiesDescription,regExpForHTML1,regExpForHTML1Description,moreRequirements,moreReqsDescription,Notes
-1,CIS195_F23Lab6Submissions,MacOS path,header,footer,optional,grid-template-areas,,<head>[\s\S]*<!--,Comment in head,index,File name,
-2,CIS195_F23Lab6Submissions,Windows path,footer,nav,optional,grid-area,,,,4,Total HTML files,
-3,1,Num of part folders,title,header,optional,display: grid,,,,2,Total CSS files,
-4,Lab06,Lab name,a,,,display: flex,,,,,,
-5,FALSE,Parts in subfolders,link[href][rel='stylesheet'],,,flex-direction,,,,,,
-,,,,,,align-items,optional,,,,,
-,,,,,,justify-content,optional,,,,,
+line,settings,settingsDescription,requiredElements1,number1,requiredCssSelectors,requiredCssProperties,regExpForHTML1,regExpForHTML1Description,moreRequirements,moreReqsDescription
+1,Lab06-Submissions,Mac OS submissions path,header,1,header,grid-template-areas,<head>[\s\S]*<!--,an HTML comment after the <head> tag,index,Special file name
+2,Lab06-Submissions,Windows submissions path,footer,1,footer,grid-area,,,4,Number of HTML files
+3,1,Number of parts,title,1,nav,display: grid,,,2,Number of CSS files
+4,Lab06,Lab name,a,3,,display: flex,,,TRUE,Validate HTML
+5,TRUE,All parts in one folder,link[href][rel='stylesheet'],1,,flex-direction,,,TRUE,Validate CSS
+6,TRUE,Check HTML,,,,,,,6,Minimum number of CSS rules
+7,TRUE,Check CSS,,,,,,,5,Minimum number of distinct CSS properties
+8,FALSE,Check JavaScript,,,,,,,,
