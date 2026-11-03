@@ -55,6 +55,8 @@ export class HtmlAndCssChecker extends Checker {
     // 2 Number of css files expected in the lab submission
     // 3 Validate the html files: false, true (default validator), or a validator name (html-validate, w3c, vnu)
     // 4 Validate the css files, true or false
+    // 5 Minimum number of css rules in the external and embedded css (optional)
+    // 6 Minimum number of distinct css properties in the external and embedded css (optional). Blank cells are skipped, so use 0 in 5 to set only 6
 
     // Methods
 

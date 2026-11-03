@@ -2,6 +2,7 @@ import { getEmbeddedCssSelectorsAndProperties,
     getInlineStyles,
     checkSpecialFileName,
     summarizeAdditionalRequirements,
+    getCssRulesAndPropertyNames,
     checkSubmission } from '../SubmissionChecker.mjs';
 import { expect } from 'chai';
 import jsdom from 'jsdom';
@@ -97,6 +98,18 @@ describe('SubmissionChecker', () => {
     });
 
     // Test the counts of HTML and CSS files
+    describe('#getCssRulesAndPropertyNames()', () => {
+        it('returns the selector of each rule, including rules inside @media, and the property names', () => {
+            const css = 'body { Color: red; margin: 0 }\n@media (min-width: 600px) { .nav > a, h1 { color: blue } }\n/* p { x: y } */';
+            const result = getCssRulesAndPropertyNames(css);
+            expect(result.selectors).to.deep.equal(['body', '.nav>a,h1']);
+            expect(result.propertyNames).to.deep.equal(['color', 'margin', 'color']);
+        });
+        it('returns empty arrays when there are no rules', () => {
+            expect(getCssRulesAndPropertyNames('/* 123 */ 456')).to.deep.equal({ selectors: [], propertyNames: [] });
+        });
+    });
+
     describe('#summarizeAdditionalRequirements()', () => {
         // additionalRequirements: special file name, # of html files, # of css files, validate html
         const requirements = ["", "1", "2", "false"];
@@ -115,6 +128,33 @@ describe('SubmissionChecker', () => {
         it('reports too few HTML files', () => {
             const report = summarizeAdditionalRequirements(0, 3, [], [], [], [], requirements, [true]);
             expect(report).to.include('Found 0 html files. Expected 1');
+        });
+
+        describe('minimum numbers of css rules and distinct properties', () => {
+            // ... validate html, validate css, minimum rules, minimum distinct properties
+            const withMinimums = ["", "0", "0", "false", "false", "3", "2"];
+
+            it('reports too few css rules', () => {
+                const report = summarizeAdditionalRequirements(0, 0, ['p', 'h1'], ['color', 'margin'], [], [], withMinimums, [true]);
+                expect(report).to.include('Found 2 css rules. Expected 3');
+                expect(report).to.not.include('properties');
+            });
+
+            it('counts distinct properties, not every declaration', () => {
+                const report = summarizeAdditionalRequirements(0, 0, ['p', 'h1', 'h2'], ['color', 'color', 'color'], [], [], withMinimums, [true]);
+                expect(report).to.include('Found 1 distinct css properties. Expected 2');
+                expect(report).to.not.include('css rules');
+            });
+
+            it('passes when the minimums are met', () => {
+                const report = summarizeAdditionalRequirements(0, 0, ['p', 'h1', 'h2'], ['color', 'margin', 'color'], [], [], withMinimums, [true]);
+                expect(report).to.include('All additional requirements met');
+            });
+
+            it('has no minimums when the values are missing, and the validate flags are not read as numbers', () => {
+                const report = summarizeAdditionalRequirements(0, 0, [], [], [], [], ["", "0", "0", "true", "true"], [true]);
+                expect(report).to.include('All additional requirements met');
+            });
         });
     });
 
@@ -188,6 +228,37 @@ describe('SubmissionChecker', () => {
 
                 expect(report).to.include('Checking the styles.css file');
                 expect(report).to.not.include('W3C');
+            });
+        });
+
+        describe('counting css rules and properties', () => {
+            const countRequirements = {
+                ...requirements,
+                // no special file name, no html or css file counts, no validation, at least 3 rules and 3 distinct properties
+                additionalRequirements: ["", "0", "0", "false", "false", "3", "3"],
+            };
+            const page = (styles) => `<!DOCTYPE html><html><head><title>T</title>${styles}</head><body></body></html>`;
+
+            it('counts rules and properties in external css and in every style element', async () => {
+                const student = makeStudentDir('g', []);
+                fs.writeFileSync(path.join(student, 'styles.css'), 'p { color: red }');
+                fs.writeFileSync(path.join(student, 'index.html'),
+                    page('<style>h1 { margin: 0 }</style><style>h2 { padding: 0; color: blue }</style>'));
+
+                const report = await checkSubmission(student, "", 1, {}, countRequirements);
+
+                // 4 rules, and color + margin + padding
+                expect(report).to.include('All additional requirements met');
+            });
+
+            it('reports too few rules and properties', async () => {
+                const student = makeStudentDir('h', []);
+                fs.writeFileSync(path.join(student, 'styles.css'), 'p { color: red }\nh1 { color: blue }');
+
+                const report = await checkSubmission(student, "", 1, {}, countRequirements);
+
+                expect(report).to.include('Found 2 css rules. Expected 3');
+                expect(report).to.include('Found 1 distinct css properties. Expected 3');
             });
         });
 

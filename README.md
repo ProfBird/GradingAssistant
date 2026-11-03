@@ -157,7 +157,9 @@ Missing values get defaults, and a file with fewer than 8 settings values prints
 | 1 | Number of HTML files |
 | 2 | Number of CSS files |
 | 3 | Validate HTML (`false`, `true`, or `html-validate` / `w3c` / `vnu`) |
-| 4 | Validate CSS |
+| 4 | Validate CSS (`true` or `false`; blank means false) |
+| 5 | Minimum number of CSS rules in the external and embedded CSS (optional) |
+| 6 | Minimum number of distinct CSS properties in the external and embedded CSS (optional; to set only this one, put `0` in position 5 because empty cells are skipped) |
 
 Other columns used for HTML and CSS checks are `requiredElements1` and `requiredElements2`, `requiredCssSelectors`, `requiredCssProperties`, and the parallel lists `regExpForHTML1` / `regExpForHTML1Description` and `regExpForCSS1` / `regExpForCSS1Description`. The JavaScript columns are `unitTests` and `filesToTest`.
 

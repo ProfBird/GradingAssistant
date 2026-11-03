@@ -31,7 +31,7 @@ npm run docs                               # JSDoc into docs/
 Each `.csv` row is one line, and each column holds a list of values. Empty cells are ignored.
 
 - `settings` column, **by position**: 0 Mac submissions path, 1 Windows path, 2 number of parts, 3 lab name, 4 all parts in one folder?, 5 check HTML, 6 check CSS, 7 check JS. Missing values get defaults (`loadSettings`), and a file with fewer than 8 values prints a warning.
-- `moreRequirements` column, **by position**: 0 special file name (e.g. `index`), 1 number of HTML files, 2 number of CSS files, 3 validate HTML (`false`, `true`, or `html-validate`/`w3c`/`vnu`), 4 validate CSS.
+- `moreRequirements` column, **by position**: 0 special file name (e.g. `index`), 1 number of HTML files, 2 number of CSS files, 3 validate HTML (`false`, `true`, or `html-validate`/`w3c`/`vnu`), 4 validate CSS, 5 minimum number of CSS rules, 6 minimum number of distinct CSS properties (5 and 6 count external and embedded CSS, not inline styles; both optional; to set only 6, put 0 in 5 because empty cells are skipped).
 - Regex checks use the `regExpForHTML1`, `regExpForHTML1Description`, `regExpForCSS1` and `regExpForCSS1Description` columns (parallel lists).
 - Older requirements files use earlier layouts and are not compatible.
 
