@@ -20,7 +20,7 @@ I started expanding the software to check JavaScript code for my [CS 133JS Begin
 
 There are two programs in this repository:
 
-- [UnzipFiles](#unzipfiles-program) unzips assignment files that were bulk downloaded from [Moodle](https://moodle.com/), the LMS we use at LCC.
+- [UnzipFiles](#unzipfiles-program) unzips assignment files that were bulk downloaded from the LMS ([Canvas](https://www.instructure.com/canvas), or [Moodle](https://moodle.com/), which LCC used before) and puts each student's work in a folder of its own.
 - [TestAnyLab](#testanylab-program) is a customizable test runner that checks all the unzipped assignment files against the requirements. The requirements for each assignment are specified in a `.csv` file.
 
 ## Getting started
@@ -37,7 +37,7 @@ The easiest way to run the programs is the menu:
 npm start
 ```
 
-It asks what you want to do (check a lab or unzip a Moodle download), lets you pick the requirements file or download folder from a list of recent choices or with a file picker, asks about overwriting, then shows and runs the command. Use the arrow keys and Enter to choose; in the file picker, → opens a folder, ← goes up, and Esc goes back to the menu. The recent choices are saved in `.gradingassistant.json` in this folder (it isn't committed to git). You can still run the programs directly with the commands below.
+It asks what you want to do (check a lab or unzip an LMS download), lets you pick the requirements file or download folder from a list of recent choices or with a file picker, asks about overwriting, then shows and runs the command. Use the arrow keys and Enter to choose; in the file picker, → opens a folder, ← goes up, and Esc goes back to the menu. The recent choices are saved in `.gradingassistant.json` in this folder (it isn't committed to git). You can still run the programs directly with the commands below.
 
 Other commands:
 
@@ -50,7 +50,7 @@ npm run docs    # generate JSDoc documentation into docs/
 
 ## UnzipFiles Program
 
-A Node program for unzipping files that have been bulk downloaded from the Moodle Learning Management System.
+A Node program for unzipping files that have been bulk downloaded from the LMS (Canvas or Moodle).
 
 ### Usage
 
@@ -68,9 +68,14 @@ node UnzipFiles.mjs folderPath [options]
 
 ### Downloaded zip file expectations
 
-The downloaded submissions are expected to be in a zip file. That zip file is expected to contain one or more .zip archives, one or two for each student. Each archive may contain one or more sub-folders.
+UnzipFiles unzips each `.zip` file in the folder into a new folder next to it, puts each student's files in a folder of their own, then unzips the students' own `.zip` files in their folders. It recognizes the two LMS layouts:
 
-UnzipFiles renames the student folders by stripping digits, spaces and underscores from the names Moodle gives them (for example `TyTitan_file`), and it unzips with:
+- **Canvas**: the download (`submissions.zip`) holds each student's files directly, named like `titanty_123_4567_Lab1.zip` (or `titanty_LATE_123_4567_Lab1.zip` when late). UnzipFiles moves them into a folder named after the student, without the Canvas part of the name: `titanty/Lab1.zip`. A late student's folder ends in `_LATE` (`bearbo_LATE`). If two students have the same name, their Canvas ids are added (`smithjo_11`, `smithjo_22`). A file whose name isn't like a Canvas submission is left where it is, with a message.
+- **Moodle**: the download holds a folder for each student, named like `Ty Titan_123_assignsubmission_file_`. UnzipFiles renames them by stripping digits, spaces and underscores (`TyTitan_file`).
+
+Running UnzipFiles again on the same download is safe: files that are already there are kept, unless you use `--overwrite`. A student's `.zip` file is deleted after it is unzipped, but kept if it couldn't be unzipped.
+
+It unzips with:
 
 - On Windows: [7-Zip](https://www.7-zip.org/) (`7z` must be on the path)
 - On Mac OS: `unzip` (built in)
@@ -252,7 +257,7 @@ Missing Comment in head in files
 | `HtmlAndCssChecker.mjs` | Holds the requirements for the HTML and CSS checks. CSS validation (`validateCSS`) is here. |
 | `HtmlValidators.mjs` | Pluggable HTML validators: `html-validate`, `w3c`, `vnu`. |
 | `JsChecker.mjs`, `Checker.mjs` | The deprecated JavaScript checker (runs Mocha tests on student JS), which will be removed, and the base class. |
-| `UnzipFiles.mjs` | Unzips Moodle bulk downloads. |
+| `UnzipFiles.mjs` | Unzips Canvas and Moodle bulk downloads into a folder for each student. |
 | `Menu.mjs` | The arrow-key menu (`npm start`) that runs TestAnyLab and UnzipFiles and remembers recent choices. |
 
 More notes are in [docs/CodeExplanation.md](docs/CodeExplanation.md).

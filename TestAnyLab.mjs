@@ -9,7 +9,7 @@ import { readRequirementsFile, parseBoolean } from "./Requirements.mjs";
 
 export { parseBoolean };
 
-/* Location of the files downloaded from Moodle and unzipped on dev machines */
+/* Location of the files downloaded from the LMS and unzipped on dev machines */
 // Windows path:  G:/My Drive/Courses/CIS195/2023-Summer/LabXX/CIS195_Su23LabXSubmissions
 // Mac OS path: /Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Summer/LabX/CIS195_Su23LabXSubmissions
 // Alt Mac OS path: /Users/admin/Documents/CIS195/Lab05/CIS195_Su23Lab5Submissions

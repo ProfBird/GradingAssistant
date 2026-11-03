@@ -21,7 +21,7 @@ const maxRecent = 8;
 
 /** @typedef {Object} MenuConfig - The recent choices
  * @property {Array<string>} recentRequirementsFiles - Most recent first
- * @property {Array<string>} recentSubmissionsFolders - Folders holding Moodle downloads to unzip, most recent first
+ * @property {Array<string>} recentSubmissionsFolders - Folders holding LMS downloads to unzip, most recent first
  * @property {boolean} overwriteReports - The last answer to "Overwrite existing report files?"
  * @property {boolean} overwriteUnzipped - The last answer to "Overwrite existing unzipped files?"
  * @property {string} lastAction - "check" or "unzip"
@@ -55,7 +55,7 @@ async function runMenu() {
             default: config.lastAction,
             choices: [
                 { name: "Check a lab", value: "check", description: "TestAnyLab: check the submissions against a requirements file" },
-                { name: "Unzip a Moodle download", value: "unzip", description: "UnzipFiles: unzip the bulk download in a folder" },
+                { name: "Unzip an LMS download", value: "unzip", description: "UnzipFiles: unzip a Canvas or Moodle bulk download in a folder" },
                 { name: "Quit", value: "quit" },
             ],
         });
@@ -100,7 +100,7 @@ async function checkLab(config) {
 }
 
 /** unzipDownload function
- * Ask for the folder holding the Moodle download and the overwrite option, then run UnzipFiles.
+ * Ask for the folder holding the LMS download and the overwrite option, then run UnzipFiles.
  * @param {MenuConfig} config
  */
 async function unzipDownload(config) {

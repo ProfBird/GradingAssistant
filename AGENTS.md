@@ -8,7 +8,7 @@ Node.js (ES modules, `.mjs`) tools that help grade student web-development labs.
 npm start                                  # arrow-key menu (Menu.mjs) that runs the two programs below
 npm test                                   # Mocha unit tests (test/*.test.mjs)
 node TestAnyLab.mjs <requirements.csv> --overwrite   # check a lab; --help lists options
-node UnzipFiles.mjs <folder-holding-the-download.zip> # unzip every .zip in the folder (Moodle style)
+node UnzipFiles.mjs <folder-holding-the-download.zip> # unzip every .zip in the folder (Canvas or Moodle)
 npm run docs                               # JSDoc into docs/
 ```
 
@@ -27,7 +27,7 @@ npm run docs                               # JSDoc into docs/
 | `HtmlAndCssChecker.mjs` | Holds the parsed requirements for the HTML/CSS checks. `validateCSS` is here. |
 | `HtmlValidators.mjs` | Pluggable HTML validators: `html-validate` (default), `w3c`, `vnu`. |
 | `JsChecker.mjs`, `Checker.mjs` | JS checker (runs Mocha tests on student JS) and the base class. In progress. |
-| `UnzipFiles.mjs` | Unzips Moodle bulk downloads. Renames folders by stripping digits, spaces and underscores. `makeWritable()` adds owner write permission to everything it unzips (some zips store read-only folders, which blocked unzipping and saving reports). The main program runs only when started with node, so tests can import it. |
+| `UnzipFiles.mjs` | Unzips LMS bulk downloads. Canvas (top-level files named `name_[LATE_]userid_submissionid_file`, see `parseCanvasFileName()`): `organizeCanvasDownload()` moves them into `name/` (`name_LATE`, `name_userid` for duplicate names). Moodle (a folder per student, `..._assignsubmission_file_`): `renameMoodleFolders()` strips digits, spaces and underscores, and merges into an existing folder on a rerun. Runs `unzip`/`7z` with `execFileSync` and an argument list, never a shell string, because file names come from students. `makeWritable()` adds owner write permission to everything it unzips (some zips store read-only folders, which blocked unzipping and saving reports). The main program runs only when started with node, so tests can import it. |
 | `Menu.mjs` | `npm start`. Arrow-key menu (`@inquirer/prompts`, `inquirer-file-selector`) that builds and runs the TestAnyLab/UnzipFiles command lines as child processes. Recent choices are in `.gradingassistant.json` (gitignored); `loadConfig()` falls back to defaults for a missing or bad file. If a program gets a new option, add a prompt for it here. |
 
 ## Requirements file layout
