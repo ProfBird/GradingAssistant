@@ -1,9 +1,7 @@
 import fs from "fs";
 import path from "path";
-import fetch from "node-fetch";
 import { JSDOM } from "jsdom";
 import * as cssTree from "css-tree";
-import os from "os";
 import { HtmlAndCssChecker } from "./HtmlAndCssChecker.mjs";
 import { validateHtml, resolveHtmlValidatorSetting } from "./HtmlValidators.mjs";
 import { isJunk } from "./SubmissionFolders.mjs";

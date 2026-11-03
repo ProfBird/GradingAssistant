@@ -231,6 +231,55 @@ describe('SubmissionChecker', () => {
             });
         });
 
+        describe('regular expression searches', () => {
+            const regExRequirements = {
+                ...requirements,
+                additionalRequirements: ["", "0", "0", "false", "false"],
+                regExpForHTML1: ["<h1>\\s*Welcome", "<img\\b[^>]*\\balt="],
+                regExpForHTML1Description: ["a Welcome heading", "an img with alt text"],
+            };
+            const page = (body) => `<!DOCTYPE html><html><head><title>T</title></head><body>${body}</body></html>`;
+
+            it('passes a search that matches in any one of the files', async () => {
+                const student = makeStudentDir('i', []);
+                fs.writeFileSync(path.join(student, 'index.html'), page('<h1>Welcome</h1>'));
+                fs.writeFileSync(path.join(student, 'about.html'), page('<img src="a.png" alt="A">'));
+
+                const report = await checkSubmission(student, "", 1, {}, regExRequirements);
+
+                expect(report).to.include('All regular expression searches passed');
+            });
+
+            it('names each search that matched in none of the files', async () => {
+                const student = makeStudentDir('j', []);
+                fs.writeFileSync(path.join(student, 'index.html'), page('<h1>Welcome</h1><img src="a.png">'));
+
+                const report = await checkSubmission(student, "", 1, {}, regExRequirements);
+
+                expect(report).to.include('Missing an img with alt text in files');
+                expect(report).to.not.include('Missing a Welcome heading');
+                expect(report).to.not.include('All regular expression searches passed');
+            });
+
+            it('fails every search when there are no HTML files', async () => {
+                const student = makeStudentDir('k', []);
+
+                const report = await checkSubmission(student, "", 1, {}, regExRequirements);
+
+                expect(report).to.include('Missing a Welcome heading in files');
+                expect(report).to.include('Missing an img with alt text in files');
+            });
+
+            it('ignores case and matches across lines', async () => {
+                const student = makeStudentDir('l', []);
+                fs.writeFileSync(path.join(student, 'index.html'), page('<H1>\n  WELCOME</H1><IMG\nSRC="a" ALT="x">'));
+
+                const report = await checkSubmission(student, "", 1, {}, regExRequirements);
+
+                expect(report).to.include('All regular expression searches passed');
+            });
+        });
+
         describe('counting css rules and properties', () => {
             const countRequirements = {
                 ...requirements,

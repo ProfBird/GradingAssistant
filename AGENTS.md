@@ -17,14 +17,13 @@ npm run docs                               # JSDoc into docs/
 
 | File | Role |
 |---|---|
-| `TestAnyLab.mjs` | Main program. `loadSettings()` reads the `settings` column. Loops over student folders. Writes reports. |
+| `TestAnyLab.mjs` | Main program. `main()` runs only when the file is started with node (tests import it). `parseArguments()`, `loadSettings()` (reads the `settings` column) and `getSubmissionsPath()` are exported. Loops over student folders. Writes reports. |
 | `SubmissionFolders.mjs` | Finds the folder that holds a submission (skips wrapper folders and junk) and splits it into parts. |
 | `SubmissionChecker.mjs` | Old-style `checkSubmission()` that does the HTML/CSS checks. Being moved into `HtmlAndCssChecker`. |
 | `HtmlAndCssChecker.mjs` | Loads HTML/CSS requirements from the csv. `validateCSS` is still here. |
 | `HtmlValidators.mjs` | Pluggable HTML validators: `html-validate` (default), `w3c`, `vnu`. |
 | `JsChecker.mjs`, `Checker.mjs` | JS checker (runs Mocha tests on student JS) and the base class. In progress. |
 | `UnzipFiles.mjs` | Unzips Moodle bulk downloads. Renames folders by stripping digits, spaces and underscores. |
-| `TestAnyLabOld.mjs` | Old version, kept for reference only. |
 
 ## Requirements file layout
 

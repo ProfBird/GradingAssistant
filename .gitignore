@@ -1,3 +1,6 @@
+# IDE state
+.idea/workspace.xml
+
 # Logs
 logs
 *.log

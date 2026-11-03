@@ -1,11 +1,10 @@
-import fs from "fs";
-import path from "path";
 import csv from "csv-parser";
 import os from "os";
 import fetch, { FormData } from "node-fetch";
 import { JSDOM } from "jsdom";
 import {Checker} from "./Checker.mjs";
 
+const cssValidatorUrl = "https://jigsaw.w3.org/css-validator/validator";
 const minMsBetweenCssRequests = 1000;  // the CSS validator service rejects bursts of requests
 let lastCssRequest = 0;
 
@@ -118,9 +117,10 @@ export class HtmlAndCssChecker extends Checker {
      * The CSS is sent in the body of a POST request, so characters like # & + % and long files are fine.
      * @param {string} fileContents - The CSS
      * @param {string} fileName - Name of the file, used in the report
+     * @param {string} [validatorUrl] - Address of the validator service (a different one is used by the tests)
      * @returns {Promise<string>} A report. Never throws; problems running the validator are reported.
      */
-    static async validateCSS(fileContents, fileName) {
+    static async validateCSS(fileContents, fileName, validatorUrl = cssValidatorUrl) {
         let report = ""; // All messages for this file
 
         try {
@@ -135,7 +135,7 @@ export class HtmlAndCssChecker extends Checker {
             form.set("profile", "css3");
             form.set("output", "soap12");
             form.set("text", fileContents);
-            const response = await fetch("https://jigsaw.w3.org/css-validator/validator", {
+            const response = await fetch(validatorUrl, {
                 method: "POST",
                 body: form,
             });

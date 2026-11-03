@@ -217,7 +217,6 @@ Missing Comment in head in files
 | `HtmlValidators.mjs` | Pluggable HTML validators: `html-validate`, `w3c`, `vnu`. |
 | `JsChecker.mjs`, `Checker.mjs` | The JavaScript checker (runs Mocha tests on student JS) and the base class. In progress. |
 | `UnzipFiles.mjs` | Unzips Moodle bulk downloads. |
-| `TestAnyLabOld.mjs` | The original version, kept for reference only. |
 
 More notes are in [docs/CodeExplanation.md](docs/CodeExplanation.md).
 

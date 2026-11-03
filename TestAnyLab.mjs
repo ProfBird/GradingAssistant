@@ -1,12 +1,11 @@
 import fs from "fs";
 import csv from "csv-parser";
 import path from "path";
-import { Checker } from "./Checker.mjs";
+import { pathToFileURL } from "url";
 import { HtmlAndCssChecker } from './HtmlAndCssChecker.mjs';
 import { JsChecker } from './JsChecker.mjs';
 import { checkSubmission } from "./SubmissionChecker.mjs";
 import { getPartDirs } from "./SubmissionFolders.mjs";
-import Mocha from 'mocha';
 
 /* Location of the files downloaded from Moodle and unzipped on dev machines */
 // Windows path:  G:/My Drive/Courses/CIS195/2023-Summer/LabXX/CIS195_Su23LabXSubmissions
@@ -19,53 +18,49 @@ import Mocha from 'mocha';
 // StudentName/Part1/<website files and folders>
 //                  Part2/<website files and folders>
 
-/* global (ugh) object containing the settings used when checking the files for this lab */
-let labSettings = {
-    submissionsPath: "", // Path to the folder containing the student submissions
-    numberOfParts: 1, // Number of parts in this lab assignment, set later in loadRequirements
-    areAllInOneDir: true, // true if all lab parts are in one folder
-    isHTML: false, // true if this is an HTML and CSS lab
-    isCSS: false, // true if this is a CSS lab (not used yet)
-    isJavaScript: false, // true if this is a JavaScript lab
-};
-
-/** Array of checker class objects--added in loadSettings
- * @type {Array<Checker>}
+/** The settings used when checking the files for one lab, from the settings column of the requirements file
+ * @typedef {Object} LabSettings
+ * @property {string} submissionsPath - Path to the folder containing the student submissions
+ * @property {number} numberOfParts - Number of parts in this lab assignment
+ * @property {boolean} areAllInOneDir - true if all lab parts are in one folder
+ * @property {boolean} isHTML - true if this is an HTML and CSS lab
+ * @property {boolean} isCSS - true if this is a CSS lab (not used yet)
+ * @property {boolean} isJavaScript - true if this is a JavaScript lab
  */
-const checkers = [];
 
 /****************/
 /* Main program */
 /****************/
-const requirementsFilePath = process.argv[2]; // absolute path including the file name
-let overwrite = false;
-let quitProgram = false;
-console.log(`param = ${requirementsFilePath}`);
-// The option is optional. Without one, existing report files are not overwritten.
-// A missing requirements file path, or --help in its place, also shows the help message.
-switch (requirementsFilePath === undefined || requirementsFilePath === '--help'
-    ? '--help' : process.argv[3]) {
-    case '--help':
-        console.log("Usage: node TestAnyLab.mjs requirementsFilePath.csv [options]");
-        console.log("options:");
-        console.log("--help\t\tDisplay this help message");
-        console.log("--overwrite\tOverwrite existing report files");
-        quitProgram = true;  // exit the program after displaying the help message
-        break;
-    case undefined:  // no option given, run with the defaults
-        break;
-    case '--overwrite':
-        overwrite = true;
-        console.log("Overwriting report files");
-        break;
-    default:
-        console.log(`Unknown option: ${process.argv[3]}`);
-        quitProgram = true;
-        break;
+
+// Run the program only when this file is started with node, not when a test imports it
+if (process.argv[1] && import.meta.url === pathToFileURL(fs.realpathSync(process.argv[1])).href) {
+    await main(process.argv.slice(2));
 }
 
-if (quitProgram != true) {
-    loadSettings(requirementsFilePath);
+/** main function
+ * Check all the student submissions for a lab and write a report in each student's folder.
+ * @param {Array<string>} args - Command line arguments after the program name:
+ *   the requirements file path, then an optional option
+ */
+export async function main(args) {
+    const { requirementsFilePath, overwrite, message, quitProgram } = parseArguments(args);
+    console.log(`param = ${requirementsFilePath}`);
+    if (message) {
+        console.log(message);
+    }
+    if (quitProgram) {
+        return;
+    }
+
+    let settings;
+    try {
+        settings = loadSettings(requirementsFilePath);
+    } catch (error) {
+        console.error(error.message);
+        process.exitCode = 1;
+        return;
+    }
+    const { labSettings } = settings;
 
     // Loop through all student subdirectories at submissionsPath and 
     // call methods to check submissions
@@ -87,78 +82,124 @@ if (quitProgram != true) {
             );
             continue;
         }
-        let message = `Checking the ${studentDir} directory`;
-        console.log(message);
-        let report = message + "\n"; // Report of the checks of the files for this student
-        let studentDirPath = path.join(labSettings.submissionsPath, studentDir)
+        console.log(`Checking the ${studentDir} directory`);
+        const report = await checkStudent(studentDir, settings);
 
-        // A problem with one student's files must not stop the checks of the other students,
-        // so an error is written into that student's report instead.
-        try {
-            // Find the folders holding the submission. Unzipped submissions often have wrapper
-            // folders (StudentName/Lab/index.html) and the parts may be in separate sub-folders.
-            const { root: submissionRoot, partDirs } =
-                getPartDirs(studentDirPath, labSettings.numberOfParts, labSettings.areAllInOneDir);
-            if (submissionRoot !== studentDirPath) {
-                report += `Submission found in ${path.relative(studentDirPath, submissionRoot)}\n`;
-            }
-
-            // Loop for each part - if there are sub-parts we consider them to be additional parts
-            for (let part = 1; part <= labSettings.numberOfParts; part++) {
-                report += "\nPart" + part + "\n";
-                const partDirPath = partDirs[part - 1];
-                if (partDirPath === null) {
-                    report += `No folder found for part ${part}\n`;
-                    continue;
-                }
-                if(labSettings.isHTML)
-                {
-                    // TODO: Rewrite checkSubmision and move some code into HtmlAndCssChecker
-                    // report +=  await checkers[0].checkSubmission(partDirPath, part)
-                    // We're still using the old checkSubmission function that also finds the right dirs and files
-                    report += await checkSubmission(
-                        partDirPath,
-                        "",
-                        part,
-                        labSettings,
-                        checkers[0].requirements
-                    );
-                }
-                if(labSettings.isJavaScript)
-                {
-                    report +=  await checkers[1].checkSubmission(partDirPath, part)
-                }
-            }
-        } catch (error) {
-            const errorMessage = `Error checking ${studentDir}: ${error.message}`;
-            console.error(errorMessage);
-            report += `\n${errorMessage}\nThis submission was not fully checked.\n`;
-        }
-
-        // Open the report file for writing and get its file descriptor
-        const fd = fs.openSync(
-            path.join(labSettings.submissionsPath, studentDir, `${studentDir}_report.txt`), 'w');
-        // Write the report to the file
-        fs.writeFileSync(fd, report);
-        // Close the file using its file descriptor
-        fs.closeSync(fd);
+        fs.writeFileSync(
+            path.join(labSettings.submissionsPath, studentDir, `${studentDir}_report.txt`), report);
 
         console.log(report);
     }  // End of for loop through student directories
-}  // if param was not --help or undefined
+}  // End of main function
 
 /***************************/
 /* End of the main program */
 /***************************/
 
+/** parseArguments function
+ * Interpret the command line arguments.
+ * The option is optional. Without one, existing report files are not overwritten.
+ * A missing requirements file path, or --help in its place, shows the help message.
+ * @param {Array<string>} args - Command line arguments after the program name
+ * @returns {{requirementsFilePath: (string|undefined), overwrite: boolean,
+ *   message: (string|undefined), quitProgram: boolean}} message is text to display, if any.
+ *   quitProgram is true if the program should not check any submissions.
+ */
+export function parseArguments(args) {
+    const requirementsFilePath = args[0];  // absolute path including the file name
+    const result = { requirementsFilePath, overwrite: false, message: undefined, quitProgram: false };
+    switch (requirementsFilePath === undefined || requirementsFilePath === '--help'
+        ? '--help' : args[1]) {
+        case '--help':
+            result.message = [
+                "Usage: node TestAnyLab.mjs requirementsFilePath.csv [options]",
+                "options:",
+                "--help\t\tDisplay this help message",
+                "--overwrite\tOverwrite existing report files",
+            ].join("\n");
+            result.quitProgram = true;  // exit the program after displaying the help message
+            break;
+        case undefined:  // no option given, run with the defaults
+            break;
+        case '--overwrite':
+            result.overwrite = true;
+            result.message = "Overwriting report files";
+            break;
+        default:
+            result.message = `Unknown option: ${args[1]}`;
+            result.quitProgram = true;
+            break;
+    }
+    return result;
+}
+
+/** checkStudent function
+ * Check one student's submission and make the report.
+ * A problem with one student's files must not stop the checks of the other students,
+ * so an error is written into that student's report instead of being thrown.
+ * @param {string} studentDir - Name of the student's folder in the submissions folder
+ * @param {{labSettings: LabSettings, htmlAndCssChecker: HtmlAndCssChecker, jsChecker: (JsChecker|null)}} settings
+ *   Returned by loadSettings
+ * @returns {Promise<string>} The report
+ */
+async function checkStudent(studentDir, { labSettings, htmlAndCssChecker, jsChecker }) {
+    let report = `Checking the ${studentDir} directory\n`; // Report of the checks of the files for this student
+    const studentDirPath = path.join(labSettings.submissionsPath, studentDir);
+
+    try {
+        // Find the folders holding the submission. Unzipped submissions often have wrapper
+        // folders (StudentName/Lab/index.html) and the parts may be in separate sub-folders.
+        const { root: submissionRoot, partDirs } =
+            getPartDirs(studentDirPath, labSettings.numberOfParts, labSettings.areAllInOneDir);
+        if (submissionRoot !== studentDirPath) {
+            report += `Submission found in ${path.relative(studentDirPath, submissionRoot)}\n`;
+        }
+
+        // Loop for each part - if there are sub-parts we consider them to be additional parts
+        for (let part = 1; part <= labSettings.numberOfParts; part++) {
+            report += "\nPart" + part + "\n";
+            const partDirPath = partDirs[part - 1];
+            if (partDirPath === null) {
+                report += `No folder found for part ${part}\n`;
+                continue;
+            }
+            if(labSettings.isHTML)
+            {
+                // TODO: Rewrite checkSubmision and move some code into HtmlAndCssChecker
+                // report +=  await htmlAndCssChecker.checkSubmission(partDirPath, part)
+                // We're still using the old checkSubmission function that also finds the right dirs and files
+                report += await checkSubmission(
+                    partDirPath,
+                    "",
+                    part,
+                    labSettings,
+                    htmlAndCssChecker.requirements
+                );
+            }
+            if(labSettings.isJavaScript)
+            {
+                report +=  await jsChecker.checkSubmission(partDirPath, part)
+            }
+        }
+    } catch (error) {
+        const errorMessage = `Error checking ${studentDir}: ${error.message}`;
+        console.error(errorMessage);
+        report += `\n${errorMessage}\nThis submission was not fully checked.\n`;
+    }
+    return report;
+}  // End of checkStudent function
 
 /** loadSettings function
 * Load general settings from a csv requirements file
 * (Specific requiremnts for HTML, CSS, JS, etc. loaded
 * by a method in the classes that check those files.) 
 * @param {string} requirementsFilePath - The csv requirements file name
+* @param {string} [platform] - The operating system, like process.platform. Chooses which submissions path to use.
+* @returns {{labSettings: LabSettings, htmlAndCssChecker: HtmlAndCssChecker, jsChecker: (JsChecker|null)}}
+*   jsChecker is null unless this is a JavaScript lab.
+* @throws {Error} If the file can't be read or has no submissions path for this platform
 */
-function loadSettings(requirementsFilePath) {
+export function loadSettings(requirementsFilePath, platform = process.platform) {
     const settings = [];
     /* settings array elements will hold these settings values:
         0: MacOsSubmissionPath (can be relative or absolute)
@@ -170,8 +211,10 @@ function loadSettings(requirementsFilePath) {
         6. Check CSS files - TRUE or FALSE
         7: Check JavaScript files - TRUE or FALSE
     */
+    let fileBuffer;
+    let htmlAndCssChecker;
     try {
-        const fileBuffer = fs.readFileSync(requirementsFilePath);
+        fileBuffer = fs.readFileSync(requirementsFilePath);
         csv()  // the .on function sets up lisetners
             .on("data", (row) =>    // row is an object containing the data from one row of the csv file
             {
@@ -184,62 +227,57 @@ function loadSettings(requirementsFilePath) {
             })
             .end(Buffer.from(fileBuffer));  // this sends data to the csv parser. csv-parser modifies the buffer it is given, so give it a copy. end() also parses a last row that has no trailing newline
 
-            // Copy settings to the labSettings object, using defaults for any missing values
-            const parts = parseInt(settings[2], 10);
-            labSettings.numberOfParts = Number.isNaN(parts) ? 1 : parts;
-            labSettings.areAllInOneDir = parseBoolean(settings[4], true);
-            labSettings.isHTML = parseBoolean(settings[5], false);  // Currenty for HTML & CSS
-            labSettings.isCSS = parseBoolean(settings[6], false);  // Currently not used 3/10/24
-            labSettings.isJavaScript = parseBoolean(settings[7], false);
         // Load requrirements
-        if(labSettings) {
-            let hcChecker = new HtmlAndCssChecker(Buffer.from(fileBuffer));
-            checkers.push(hcChecker);
-        }
-        if(labSettings) {
-            let jsChecker = new JsChecker(Buffer.from(fileBuffer), path.dirname(requirementsFilePath));
-            checkers.push(jsChecker);
-        }
+        htmlAndCssChecker = new HtmlAndCssChecker(Buffer.from(fileBuffer));
     }
     catch (error) {
-        console.error(`Error processing requirements file ${requirementsFilePath}: ${error.message}`);
-        process.exit(1);
+        throw new Error(`Error processing requirements file ${requirementsFilePath}: ${error.message}`);
     }
 
     if (settings.length < 8) {
         console.warn(`Warning: ${requirementsFilePath} has ${settings.length} of the 8 expected values in its settings column. Defaults will be used for the missing ones.`);
     }
 
-    const pathSetting = process.platform === "win32" ? settings[1] : settings[0];
-    if (!pathSetting) {
-        console.error(`Error: the settings column of ${requirementsFilePath} does not contain a submissions path for this platform.`);
-        process.exit(1);
-    }
-
-    // Determine path to submissions folder
-    if (process.platform === "darwin") {
-        // if settings[0] has a relative path in it, append it to the path to the requirements file
-        if (settings[0].startsWith("/"))  // an aboslute path is in settings
-        {
-            labSettings.submissionsPath = settings[0];
-        }
-        else  // a relative path is in settings
-        {
-            labSettings.submissionsPath = path.join(path.dirname(requirementsFilePath), settings[0]);
-        }
-    }
-    else if (process.platform === "win32") {
-        // if settings[1] has a relative path in it, append it to the path of the requirements file
-        if (/^[a-zA-Z]:/.test(settings[1]) || settings[1] == "/" || settings[1] == "\\")  // absolute path in settings
-        {
-            labSettings.submissionsPath = settings[1];
-        }
-        else  // relative path in settings
-        {
-            labSettings.submissionsPath = path.join(path.dirname(requirementsFilePath), settings[1]);
-        }
-    }
+    // Copy settings to the labSettings object, using defaults for any missing values
+    const parts = parseInt(settings[2], 10);
+    /** @type {LabSettings} */
+    const labSettings = {
+        submissionsPath: getSubmissionsPath(settings, requirementsFilePath, platform),
+        numberOfParts: Number.isNaN(parts) ? 1 : parts,
+        areAllInOneDir: parseBoolean(settings[4], true),
+        isHTML: parseBoolean(settings[5], false),  // Currenty for HTML & CSS
+        isCSS: parseBoolean(settings[6], false),  // Currently not used 3/10/24
+        isJavaScript: parseBoolean(settings[7], false),
+    };
+    // The JavaScript checker is deprecated, so only load it for a JavaScript lab
+    const jsChecker = labSettings.isJavaScript
+        ? new JsChecker(Buffer.from(fileBuffer), path.dirname(requirementsFilePath))
+        : null;
+    return { labSettings, htmlAndCssChecker, jsChecker };
 } // End of loadSettings function
+
+/** getSubmissionsPath function
+ * Get the path to the folder holding the student submissions from the settings column.
+ * A relative path is relative to the folder holding the requirements file.
+ * @param {Array<string>} settings - Values from the settings column
+ * @param {string} requirementsFilePath - The csv requirements file name
+ * @param {string} platform - The operating system, like process.platform
+ * @returns {string}
+ * @throws {Error} If the settings have no submissions path for this platform
+ */
+export function getSubmissionsPath(settings, requirementsFilePath, platform) {
+    // Windows uses settings[1]. Mac OS and other systems use settings[0].
+    const pathSetting = platform === "win32" ? settings[1] : settings[0];
+    if (!pathSetting) {
+        throw new Error(`Error: the settings column of ${requirementsFilePath} does not contain a submissions path for this platform.`);
+    }
+    const pathModule = platform === "win32" ? path.win32 : path.posix;
+    // if the setting is a relative path, append it to the path of the requirements file
+    if (pathModule.isAbsolute(pathSetting) || (platform === "win32" && /^[a-zA-Z]:/.test(pathSetting))) {
+        return pathSetting;
+    }
+    return pathModule.join(pathModule.dirname(requirementsFilePath), pathSetting);
+}
 
 /** parseBoolean function
  * Convert a "true"/"false" string from the settings column to a boolean
@@ -247,7 +285,7 @@ function loadSettings(requirementsFilePath) {
  * @param {boolean} defaultValue - Returned if value is missing or empty
  * @returns {boolean}
  */
-function parseBoolean(value, defaultValue) {
+export function parseBoolean(value, defaultValue) {
     if (value === undefined || value === null || String(value).trim() === "") {
         return defaultValue;
     }
