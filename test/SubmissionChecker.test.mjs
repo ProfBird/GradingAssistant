@@ -4,7 +4,7 @@ import { getEmbeddedCssSelectorsAndProperties,
     summarizeAdditionalRequirements,
     getCssRulesAndPropertyNames,
     checkSubmission } from '../SubmissionChecker.mjs';
-import { HtmlAndCssChecker } from '../HtmlAndCssChecker.mjs';
+import { makeRequirements, parseRequirements } from '../Requirements.mjs';
 import { expect } from 'chai';
 import jsdom from 'jsdom';
 import fs from 'fs';
@@ -112,48 +112,53 @@ describe('SubmissionChecker', () => {
     });
 
     describe('#summarizeAdditionalRequirements()', () => {
-        // additionalRequirements: special file name, # of html files, # of css files, validate html
-        const requirements = ["", "1", "2", "false"];
+        // no special file name, 1 html file, 2 css files, don't validate
+        const { moreRequirements } = makeRequirements({ moreRequirements: { htmlFileCount: 1, cssFileCount: 2, valueCount: 4 } });
 
         it('reports too few CSS files using the CSS count', () => {
-            const report = summarizeAdditionalRequirements(5, 1, [], [], [], [], requirements, [true]);
+            const report = summarizeAdditionalRequirements({ htmlFileCount: 5, cssFileCount: 1 }, moreRequirements);
             expect(report).to.include('Found 1 css files. Expected 2');
             expect(report).to.not.include('html files');
         });
 
         it('does not report CSS files as missing when there are enough, even if there are few HTML files', () => {
-            const report = summarizeAdditionalRequirements(1, 3, [], [], [], [], requirements, [true]);
+            const report = summarizeAdditionalRequirements({ htmlFileCount: 1, cssFileCount: 3 }, moreRequirements);
             expect(report).to.include('All additional requirements met');
         });
 
         it('reports too few HTML files', () => {
-            const report = summarizeAdditionalRequirements(0, 3, [], [], [], [], requirements, [true]);
+            const report = summarizeAdditionalRequirements({ htmlFileCount: 0, cssFileCount: 3 }, moreRequirements);
             expect(report).to.include('Found 0 html files. Expected 1');
         });
 
         describe('minimum numbers of css rules and distinct properties', () => {
-            // ... validate html, validate css, minimum rules, minimum distinct properties
-            const withMinimums = ["", "0", "0", "false", "false", "3", "2"];
+            // at least 3 css rules and 2 distinct properties
+            const withMinimums = makeRequirements({ moreRequirements: {
+                htmlFileCount: 0, cssFileCount: 0, minCssRules: 3, minCssProperties: 2, valueCount: 7 } }).moreRequirements;
 
             it('reports too few css rules', () => {
-                const report = summarizeAdditionalRequirements(0, 0, ['p', 'h1'], ['color', 'margin'], [], [], withMinimums, [true]);
+                const report = summarizeAdditionalRequirements(
+                    { htmlFileCount: 0, cssFileCount: 0, ruleSelectors: ['p', 'h1'], propertyNames: ['color', 'margin'] }, withMinimums);
                 expect(report).to.include('Found 2 css rules. Expected 3');
                 expect(report).to.not.include('properties');
             });
 
             it('counts distinct properties, not every declaration', () => {
-                const report = summarizeAdditionalRequirements(0, 0, ['p', 'h1', 'h2'], ['color', 'color', 'color'], [], [], withMinimums, [true]);
+                const report = summarizeAdditionalRequirements(
+                    { htmlFileCount: 0, cssFileCount: 0, ruleSelectors: ['p', 'h1', 'h2'], propertyNames: ['color', 'color', 'color'] }, withMinimums);
                 expect(report).to.include('Found 1 distinct css properties. Expected 2');
                 expect(report).to.not.include('css rules');
             });
 
             it('passes when the minimums are met', () => {
-                const report = summarizeAdditionalRequirements(0, 0, ['p', 'h1', 'h2'], ['color', 'margin', 'color'], [], [], withMinimums, [true]);
+                const report = summarizeAdditionalRequirements(
+                    { htmlFileCount: 0, cssFileCount: 0, ruleSelectors: ['p', 'h1', 'h2'], propertyNames: ['color', 'margin', 'color'] }, withMinimums);
                 expect(report).to.include('All additional requirements met');
             });
 
-            it('has no minimums when the values are missing, and the validate flags are not read as numbers', () => {
-                const report = summarizeAdditionalRequirements(0, 0, [], [], [], [], ["", "0", "0", "true", "true"], [true]);
+            it('has no minimums when the values are missing', () => {
+                const { moreRequirements: noMinimums } = parseRequirements('moreRequirements\n""""""\n0\n0\ntrue\ntrue');
+                const report = summarizeAdditionalRequirements({ htmlFileCount: 0, cssFileCount: 0 }, noMinimums);
                 expect(report).to.include('All additional requirements met');
             });
         });
@@ -161,14 +166,8 @@ describe('SubmissionChecker', () => {
 
     describe('#checkSubmission() file counts', () => {
         let baseDir;
-        const requirements = {
-            requiredElements1: [], requiredElements2: [],
-            requiredCssSelectors: [], requiredCssProperties: [],
-            // special file name (none), 2 html files, 0 css files, don't validate html
-            additionalRequirements: ["", "2", "0", "false"],
-            regExpForHTML1: [], regExpForHTML1Description: [],
-            regExpForCSS1: [], regExpForCSS1Description: [],
-        };
+        // no special file name, 2 html files, 0 css files, don't validate
+        const requirements = makeRequirements({ moreRequirements: { htmlFileCount: 2, cssFileCount: 0, valueCount: 4 } });
 
         function makeStudentDir(name, htmlFileNames) {
             const dir = path.join(baseDir, name);
@@ -204,13 +203,11 @@ describe('SubmissionChecker', () => {
         });
 
         describe('with CSS files (CSS validation turned off, so no network is used)', () => {
-            const cssRequirements = {
-                ...requirements,
+            const cssRequirements = makeRequirements({
                 // no special file name, 0 html files, 1 css file, don't validate html or css
-                additionalRequirements: ["", "0", "1", "false", "false"],
-                regExpForCSS1: ["color:\\s+red"],
-                regExpForCSS1Description: ["red color"],
-            };
+                moreRequirements: { htmlFileCount: 0, cssFileCount: 1, valueCount: 5 },
+                cssRegExps: [{ pattern: "color:\\s+red", description: "red color" }],
+            });
 
             it('matches CSS regular expressions against the original text, with whitespace', async () => {
                 const student = makeStudentDir('e', []);
@@ -233,14 +230,12 @@ describe('SubmissionChecker', () => {
         });
 
         describe('minimum numbers of required elements', () => {
-            const elementRequirements = {
-                ...requirements,
-                requiredElements1: ["h1, h2, h3", "a[href]", "img[alt]"],
-                minElements1: [2, 2, 1],
-                requiredElements2: ["p"],
-                minElements2: [2],
-                additionalRequirements: ["", "0", "0", "false", "false"],
-            };
+            const elementRequirements = makeRequirements({
+                requiredElements1: [{ selector: "h1, h2, h3", minimum: 2 }, { selector: "a[href]", minimum: 2 },
+                    { selector: "img[alt]", minimum: 1 }],
+                requiredElements2: [{ selector: "p", minimum: 2 }],
+                moreRequirements: { htmlFileCount: 0, cssFileCount: 0, valueCount: 5 },
+            });
             const page = (body) => `<!DOCTYPE html><html><head><title>T</title></head><body>${body}</body></html>`;
 
             it('adds up the matching elements from all of the files', async () => {
@@ -275,10 +270,10 @@ describe('SubmissionChecker', () => {
                 expect(report).to.include('Missing img[alt] element');
             });
 
-            it('requires 1 of each element when there are no minimums', async () => {
+            it('requires 1 of each element when there is no number1 column', async () => {
                 const student = makeStudentDir('p', []);
                 fs.writeFileSync(path.join(student, 'index.html'), page('<h1>A</h1><a href="x">x</a><img src="a" alt="a">'));
-                const { minElements1, minElements2, ...withoutMinimums } = elementRequirements;
+                const withoutMinimums = parseRequirements('requiredElements1\n"h1, h2, h3"\na[href]\nimg[alt]');
 
                 const report = await checkSubmission(student, "", 1, {}, withoutMinimums);
 
@@ -298,39 +293,35 @@ describe('SubmissionChecker', () => {
         describe('required css properties in embedded and inline css', () => {
             it('finds a property and value, written with or without spaces, using requirements from the csv loader', async () => {
                 // Load the requirements the way the program does, which removes the spaces
-                const { requirements: loaded } = new HtmlAndCssChecker(Buffer.from(
-                    'requiredCssProperties\ndisplay: grid\ndisplay: flex\ncolor\nmargin: 0 auto'));
+                const loaded = parseRequirements('requiredCssProperties\ndisplay: grid\ndisplay: flex\ncolor\nmargin: 0 auto');
                 const student = makeStudentDir('r', []);
                 fs.writeFileSync(path.join(student, 'index.html'),
                     '<!DOCTYPE html><html><head><title>T</title><style>body { display: grid; color: red }' +
                     ' main { margin:0  auto }</style></head><body><p style="display:  flex">x</p></body></html>');
 
-                const report = await checkSubmission(student, "", 1, {}, { ...requirements, ...loaded,
-                    additionalRequirements: [] });
+                const report = await checkSubmission(student, "", 1, {}, loaded);
 
                 expect(report).to.include('All required properties found');
             });
 
             it('reports a property whose value is different', async () => {
-                const { requirements: loaded } = new HtmlAndCssChecker(Buffer.from('requiredCssProperties\ndisplay: grid'));
+                const loaded = parseRequirements('requiredCssProperties\ndisplay: grid');
                 const student = makeStudentDir('s', []);
                 fs.writeFileSync(path.join(student, 'index.html'),
                     '<!DOCTYPE html><html><head><title>T</title><style>body { display: flex }</style></head><body></body></html>');
 
-                const report = await checkSubmission(student, "", 1, {}, { ...requirements, ...loaded,
-                    additionalRequirements: [] });
+                const report = await checkSubmission(student, "", 1, {}, loaded);
 
                 expect(report).to.include('Missing display:grid property');
             });
         });
 
         describe('regular expression searches', () => {
-            const regExRequirements = {
-                ...requirements,
-                additionalRequirements: ["", "0", "0", "false", "false"],
-                regExpForHTML1: ["<h1>\\s*Welcome", "<img\\b[^>]*\\balt="],
-                regExpForHTML1Description: ["a Welcome heading", "an img with alt text"],
-            };
+            const regExRequirements = makeRequirements({
+                moreRequirements: { htmlFileCount: 0, cssFileCount: 0, valueCount: 5 },
+                htmlRegExps: [{ pattern: "<h1>\\s*Welcome", description: "a Welcome heading" },
+                    { pattern: "<img\\b[^>]*\\balt=", description: "an img with alt text" }],
+            });
             const page = (body) => `<!DOCTYPE html><html><head><title>T</title></head><body>${body}</body></html>`;
 
             it('passes a search that matches in any one of the files', async () => {
@@ -374,11 +365,9 @@ describe('SubmissionChecker', () => {
         });
 
         describe('counting css rules and properties', () => {
-            const countRequirements = {
-                ...requirements,
-                // no special file name, no html or css file counts, no validation, at least 3 rules and 3 distinct properties
-                additionalRequirements: ["", "0", "0", "false", "false", "3", "3"],
-            };
+            // no special file name, 0 html and css files, no validation, at least 3 rules and 3 distinct properties
+            const countRequirements = makeRequirements({ moreRequirements: {
+                htmlFileCount: 0, cssFileCount: 0, minCssRules: 3, minCssProperties: 3, valueCount: 7 } });
             const page = (styles) => `<!DOCTYPE html><html><head><title>T</title>${styles}</head><body></body></html>`;
 
             it('counts rules and properties in external css and in every style element', async () => {
@@ -402,6 +391,24 @@ describe('SubmissionChecker', () => {
                 expect(report).to.include('Found 2 css rules. Expected 3');
                 expect(report).to.include('Found 1 distinct css properties. Expected 3');
             });
+        });
+
+        it('does not report a missing special file when none is required, even with no files', async () => {
+            const student = makeStudentDir('t', []);
+
+            const report = await checkSubmission(student, "", 1, {}, requirements);
+
+            expect(report).to.include('Found 0 html files. Expected 2');
+            expect(report).to.not.match(/Missing .* file \(/);
+        });
+
+        it('reports a missing special file when there are no files', async () => {
+            const student = makeStudentDir('u', []);
+            const withSpecialFile = makeRequirements({ moreRequirements: { ...requirements.moreRequirements, specialFileName: 'index' } });
+
+            const report = await checkSubmission(student, "", 1, {}, withSpecialFile);
+
+            expect(report).to.include('Missing index file (index.html or index.htm)');
         });
 
         it('ignores __MACOSX and hidden files', async () => {

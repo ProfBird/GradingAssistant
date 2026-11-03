@@ -129,7 +129,7 @@ Elements, regular expression and selector results are combined across all of a s
 
 ##### Requirements file
 
-A requirements file configures the program for a particular lab assignment. It can be written in a spreadsheet and then saved in .csv format. In the file, each row is one line and each column holds a list of values. Empty cells are ignored.
+A requirements file configures the program for a particular lab assignment. It can be written in a spreadsheet and then saved in .csv format. In the file, each row is one line and each column holds a list of values. Empty cells are ignored. When the program loads the file it prints a warning for anything it can't use, such as a column name it doesn't know (often from an older layout), fewer than 8 settings values, or a count that isn't a number. Columns named `line`, `Notes`, or ending in `Description` are notes for the reader and are not warned about.
 
 Some of the columns are read **by position**:
 
@@ -164,7 +164,7 @@ Other columns used for HTML and CSS checks are:
 
 - `requiredElements1` and `requiredElements2`, the required elements (CSS selectors) for part 1 and part 2. Each can have an optional `number1` / `number2` column giving the minimum number of that element, added up over all of a student's files. The number is read from the same row as its element, and blank means 1. For example, `h1, h2, h3, h4, h5, h6` with `2` in `number1` needs at least two headings of any level.
 - `requiredCssSelectors` and `requiredCssProperties`.
-- The parallel lists `regExpForHTML1` / `regExpForHTML1Description` and `regExpForCSS1` / `regExpForCSS1Description`. The CSS expressions are matched against the CSS exactly as the student wrote it, including white space.
+- `regExpForHTML1` / `regExpForHTML1Description` and `regExpForCSS1` / `regExpForCSS1Description`. Each description goes on the same row as its regular expression; a regular expression with no description is shown as the pattern itself. The CSS expressions are matched against the CSS exactly as the student wrote it, including white space.
 
 The deprecated JavaScript checker uses the `unitTests` and `filesToTest` columns.
 
@@ -229,7 +229,8 @@ Missing Comment in head in files
 | `TestAnyLab.mjs` | Main program. `main()` loops over student folders and writes the reports; it runs only when the file is started with node, so tests can import the other functions (`parseArguments`, `loadSettings`, ...). |
 | `SubmissionFolders.mjs` | Finds the folder that holds a submission (skipping wrapper folders and junk) and splits it into parts. |
 | `SubmissionChecker.mjs` | Old-style `checkSubmission()` that does the HTML and CSS checks. Being moved into `HtmlAndCssChecker`. |
-| `HtmlAndCssChecker.mjs` | Loads the HTML and CSS requirements from the csv file. CSS validation (`validateCSS`) is here. |
+| `Requirements.mjs` | Reads the requirements csv file into named fields, and warns about problems such as column names the program doesn't use. All other code uses these fields instead of reading the csv. |
+| `HtmlAndCssChecker.mjs` | Holds the requirements for the HTML and CSS checks. CSS validation (`validateCSS`) is here. |
 | `HtmlValidators.mjs` | Pluggable HTML validators: `html-validate`, `w3c`, `vnu`. |
 | `JsChecker.mjs`, `Checker.mjs` | The deprecated JavaScript checker (runs Mocha tests on student JS), which will be removed, and the base class. |
 | `UnzipFiles.mjs` | Unzips Moodle bulk downloads. |

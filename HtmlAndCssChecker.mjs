@@ -1,4 +1,3 @@
-import csv from "csv-parser";
 import os from "os";
 import fetch, { FormData } from "node-fetch";
 import { JSDOM } from "jsdom";
@@ -13,122 +12,12 @@ let lastCssRequest = 0;
 */
 export class HtmlAndCssChecker extends Checker {
     /**  Constructor for HtmlAndCssChecker class
-     * @param {Buffer} requirementsFileBuffer - Returned by fs.readFileSync
+     * @param {import("./Requirements.mjs").Requirements} requirements - Returned by readRequirementsFile
      */
-    constructor(requirementsFileBuffer) {
+    constructor(requirements) {
         super();
-        this.loadRequirements(requirementsFileBuffer);
-    }
-
-    /**
-  * Object to hold the HTML and CSS requirements.
-  * @property {Array<string>} requiredElements1 - Required HTML elements for part 1.
-  * @property {Array<string>} requiredElements2 - Required HTML elements for part 2.
-  * @property {Array<number>} minElements1 - Minimum number of each requiredElements1 element (same order). From the number1 column; 1 if blank.
-  * @property {Array<number>} minElements2 - Minimum number of each requiredElements2 element (same order). From the number2 column; 1 if blank.
-  * @property {Array<string>} requiredCssSelectors - Required CSS selectors (global scope).
-  * @property {Array<string>} requiredCssProperties - Required CSS properties (global scope).
-  * @property {Array<string>} regExpForHTML1 - Regular expressions to check against the HTML.
-  * @property {Array<string>} regExpForHTML1Description - Descriptions of the regular expressions for the HTML.
-  * @property {Array<string>} regExpForCSS1 - Regular expressions to check against the CSS.
-  * @property {Array<string>} regExpForCSS1Description - Descriptions of the regular expressions for the CSS.
-  * @property {Array<string>} additionalRequirements - Additional requirements.
-  */
-    requirements = {
-        // Required HTML elements for parts 1 and 2 (global scope)
-        requiredElements1: [],
-        requiredElements2: [],
-        // How many of each required element are needed, in the same order as the elements
-        minElements1: [],
-        minElements2: [],
-        // Required CSS selectors and properties (global scope)
-        requiredCssSelectors: [],
-        requiredCssProperties: [],
-        additionalRequirements: [],
-        // Parallel arrays
-        // TODO: Change from parallel arrays to an array of objects
-        regExpForHTML1: [],
-        regExpForHTML1Description: [],
-        regExpForCSS1: [],
-        regExpForCSS1Description: []
-    };
-
-    // Indexes into the additionalRequirements array:
-    // 0 Required special file name, like index.html
-    // 1 Number of html files expected in the lab submission
-    // 2 Number of css files expected in the lab submission
-    // 3 Validate the html files: false, true (default validator), or a validator name (html-validate, w3c, vnu)
-    // 4 Validate the css files, true or false
-    // 5 Minimum number of css rules in the external and embedded css (optional)
-    // 6 Minimum number of distinct css properties in the external and embedded css (optional). Blank cells are skipped, so use 0 in 5 to set only 6
-
-    // Methods
-
-    /** loadRequirements method
-     * Load requirements for checking HTML and CSS files.
-     * @param {BUFFER} fileBuffer 
-     */
-    loadRequirements(fileBuffer) {
-            csv()  // the .on function sets up lisetners
-                .on("data", (row) =>    // row is an object containing the data from one row of the csv file
-                {
-                    // The minimum number is read from the same row as its element,
-                    // so a blank cell in the number column can't shift the numbers
-                    if (row.requiredElements1) {
-                        this.requirements.requiredElements1.push(row.requiredElements1);
-                        this.requirements.minElements1.push(HtmlAndCssChecker.parseMinimum(row.number1));
-                    }
-                    if (row.requiredElements2) {
-                        this.requirements.requiredElements2.push(row.requiredElements2);
-                        this.requirements.minElements2.push(HtmlAndCssChecker.parseMinimum(row.number2));
-                    }
-                    if (row.requiredCssSelectors) {
-                        this.requirements.requiredCssSelectors.push(row.requiredCssSelectors);
-                    }
-                    if (row.requiredCssProperties) {
-                        // remove whitespace
-                        row.requiredCssProperties = row.requiredCssProperties.replace(/\s/g, "");
-                        this.requirements.requiredCssProperties.push(row.requiredCssProperties);
-                    }
-                    if (row.moreRequirements) {
-                        this.requirements.additionalRequirements.push(row.moreRequirements);
-                    }
-                    if (row.regExpForHTML1) {
-                        this.requirements.regExpForHTML1.push(row.regExpForHTML1);
-                    }
-                    if (row.regExpForHTML1Description) {
-                        this.requirements.regExpForHTML1Description.push(row.regExpForHTML1Description);
-                    }
-                    if (row.regExpForCSS1) {
-                        this.requirements.regExpForCSS1.push(row.regExpForCSS1);
-                    }
-                    if (row.regExpForCSS1Description) {
-                        this.requirements.regExpForCSS1Description.push(row.regExpForCSS1Description);
-                    }
-                })
-                .on("error", (error) => {
-                    console.error(error);
-                })
-                .end(fileBuffer);  // this sends data to the csv parser. end() also parses a last row that has no trailing newline
-    } // End of loadRequirements method
-
-    /** parseMinimum method
-     * Convert a value from the number1 or number2 column to the minimum number of an element.
-     * @param {string|undefined} value - The text from the csv file
-     * @returns {number} The number, or 1 if the value is blank or not a number
-     */
-    static parseMinimum(value) {
-        const minimum = parseInt(value, 10);
-        return Number.isNaN(minimum) ? 1 : minimum;
-    }
-
-    /** isCssValidationOn method
-     * Convert the "Validate CSS" value from the requirements file to a boolean.
-     * @param {string|undefined} value - "true" or "false" (case-insensitive). Missing means false.
-     * @returns {boolean}
-     */
-    static isCssValidationOn(value) {
-        return String(value ?? "").trim().toLowerCase() === "true";
+        /** The requirements to check the HTML and CSS files against */
+        this.requirements = requirements;
     }
 
     /**

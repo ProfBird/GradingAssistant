@@ -62,19 +62,19 @@ describe('TestAnyLab', () => {
     describe('#getSubmissionsPath()', () => {
         const req = '/courses/Lab1/req.csv';
         it('uses the Mac OS path (settings[0]) on mac and other systems', () => {
-            expect(getSubmissionsPath(['/abs/subs', 'C:/win'], req, 'darwin')).to.equal('/abs/subs');
-            expect(getSubmissionsPath(['/abs/subs', 'C:/win'], req, 'linux')).to.equal('/abs/subs');
+            expect(getSubmissionsPath({ macSubmissionsPath: '/abs/subs', windowsSubmissionsPath: 'C:/win' }, req, 'darwin')).to.equal('/abs/subs');
+            expect(getSubmissionsPath({ macSubmissionsPath: '/abs/subs', windowsSubmissionsPath: 'C:/win' }, req, 'linux')).to.equal('/abs/subs');
         });
         it('uses the Windows path (settings[1]) on Windows', () => {
-            expect(getSubmissionsPath(['/abs/subs', 'C:/win/subs'], req, 'win32')).to.equal('C:/win/subs');
+            expect(getSubmissionsPath({ macSubmissionsPath: '/abs/subs', windowsSubmissionsPath: 'C:/win/subs' }, req, 'win32')).to.equal('C:/win/subs');
         });
         it('makes a relative path relative to the requirements file', () => {
-            expect(getSubmissionsPath(['subs/lab1'], req, 'darwin')).to.equal('/courses/Lab1/subs/lab1');
-            expect(getSubmissionsPath(['x', 'subs'], 'C:\\courses\\req.csv', 'win32')).to.equal('C:\\courses\\subs');
+            expect(getSubmissionsPath({ macSubmissionsPath: 'subs/lab1' }, req, 'darwin')).to.equal('/courses/Lab1/subs/lab1');
+            expect(getSubmissionsPath({ macSubmissionsPath: 'x', windowsSubmissionsPath: 'subs' }, 'C:\\courses\\req.csv', 'win32')).to.equal('C:\\courses\\subs');
         });
         it('throws if there is no path for the platform', () => {
-            expect(() => getSubmissionsPath(['/abs'], req, 'win32')).to.throw('does not contain a submissions path');
-            expect(() => getSubmissionsPath([], req, 'darwin')).to.throw('does not contain a submissions path');
+            expect(() => getSubmissionsPath({ macSubmissionsPath: '/abs' }, req, 'win32')).to.throw('does not contain a submissions path');
+            expect(() => getSubmissionsPath({  }, req, 'darwin')).to.throw('does not contain a submissions path');
         });
     });
 

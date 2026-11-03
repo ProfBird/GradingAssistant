@@ -17,10 +17,11 @@ npm run docs                               # JSDoc into docs/
 
 | File | Role |
 |---|---|
-| `TestAnyLab.mjs` | Main program. `main()` runs only when the file is started with node (tests import it). `parseArguments()`, `loadSettings()` (reads the `settings` column) and `getSubmissionsPath()` are exported. Loops over student folders. Writes reports. |
+| `TestAnyLab.mjs` | Main program. `main()` runs only when the file is started with node (tests import it). `parseArguments()`, `loadSettings()` (reads the requirements file and makes the checkers) and `getSubmissionsPath()` are exported. Loops over student folders. Writes reports. |
+| `Requirements.mjs` | **The only reader of the requirements csv** (except the deprecated `JsChecker`). `parseRequirements()` / `readRequirementsFile()` return named fields (`settings`, `moreRequirements`, `requiredElements1` as `{selector, minimum}`, `htmlRegExps` as `{pattern, description}`, ...) plus `warnings` (unknown columns, too few settings, non-numeric counts, unknown validator). `makeRequirements()` builds requirements for tests. |
 | `SubmissionFolders.mjs` | Finds the folder that holds a submission (skips wrapper folders and junk) and splits it into parts. |
 | `SubmissionChecker.mjs` | Old-style `checkSubmission()` that does the HTML/CSS checks. Being moved into `HtmlAndCssChecker`. |
-| `HtmlAndCssChecker.mjs` | Loads HTML/CSS requirements from the csv. `validateCSS` is still here. |
+| `HtmlAndCssChecker.mjs` | Holds the parsed requirements for the HTML/CSS checks. `validateCSS` is here. |
 | `HtmlValidators.mjs` | Pluggable HTML validators: `html-validate` (default), `w3c`, `vnu`. |
 | `JsChecker.mjs`, `Checker.mjs` | JS checker (runs Mocha tests on student JS) and the base class. In progress. |
 | `UnzipFiles.mjs` | Unzips Moodle bulk downloads. Renames folders by stripping digits, spaces and underscores. |
@@ -32,7 +33,8 @@ Each `.csv` row is one line, and each column holds a list of values. Empty cells
 - `settings` column, **by position**: 0 Mac submissions path, 1 Windows path, 2 number of parts, 3 lab name, 4 all parts in one folder?, 5 check HTML, 6 check CSS, 7 check JS. Missing values get defaults (`loadSettings`), and a file with fewer than 8 values prints a warning.
 - `moreRequirements` column, **by position**: 0 special file name (e.g. `index`), 1 number of HTML files, 2 number of CSS files, 3 validate HTML (`false`, `true`, or `html-validate`/`w3c`/`vnu`), 4 validate CSS, 5 minimum number of CSS rules, 6 minimum number of distinct CSS properties (5 and 6 count external and embedded CSS, not inline styles; both optional; to set only 6, put 0 in 5 because empty cells are skipped).
 - `number1` / `number2` columns: minimum number of each `requiredElements1` / `requiredElements2` element, summed across all of a student's files. Each number is read from the same row as its element; blank means 1.
-- Regex checks use the `regExpForHTML1`, `regExpForHTML1Description`, `regExpForCSS1` and `regExpForCSS1Description` columns (parallel lists).
+- Regex checks use the `regExpForHTML1`, `regExpForHTML1Description`, `regExpForCSS1` and `regExpForCSS1Description` columns. Each description is read from the same row as its pattern.
+- Adding a column or a `settings`/`moreRequirements` position: change `Requirements.mjs` (the `knownColumns` list, the typedefs and `parseRequirements`), then use the named field. Code outside the loader never reads columns or positions. Columns named `line`, `Notes`, `...Description` or left blank are notes and are not warned about.
 - Older requirements files use earlier layouts and are not compatible. The examples in `docs/` (`ExampleLab1Requirements.csv`, `CIS195Lab06GradeAssist.csv`, `CIS195TermProjectGradeAssist.csv`) use the current layout; `test/ExampleRequirements.test.mjs` checks them, so update the examples and the test when the layout changes.
 
 ## Folder conventions (Canvas and Moodle)
@@ -43,7 +45,7 @@ Each `.csv` row is one line, and each column holds a list of values. Empty cells
 
 ## Gotchas
 
-- **`csv-parser` modifies the buffer you give it** (when it un-escapes `""`). Pass `Buffer.from(buffer)` to each parser. Several parsers share one file buffer in `TestAnyLab.mjs`.
+- **`csv-parser` modifies the buffer you give it** (when it un-escapes `""`), and it keeps a leading byte order mark in the first column name. `parseCsv()` in `Requirements.mjs` handles both; only it and the deprecated `JsChecker` use `csv-parser`.
 - The special file name check is strict on purpose. `index` accepts only `index.html` or `index.htm`; a name with an extension (`styles.css`) must match exactly. Names that merely contain it (`reindex.html`, `index.html.html`) fail. The case must match (`Index.html` fails), and a wrong-case name is reported separately from a missing file.
 - The W3C validator service rejects bulk requests (HTTP errors with an HTML body). That is why `html-validate` is the default. `vnu-jar` 26.x needs Java 17 or newer, and the user's machine has Java 11. `vnu-jar@23.4.11` works on Java 11.
 - Regex and element results are combined across a student's files. One match in any file passes.

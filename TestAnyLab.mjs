@@ -1,11 +1,13 @@
 import fs from "fs";
-import csv from "csv-parser";
 import path from "path";
 import { pathToFileURL } from "url";
 import { HtmlAndCssChecker } from './HtmlAndCssChecker.mjs';
 import { JsChecker } from './JsChecker.mjs';
 import { checkSubmission } from "./SubmissionChecker.mjs";
 import { getPartDirs } from "./SubmissionFolders.mjs";
+import { readRequirementsFile, parseBoolean } from "./Requirements.mjs";
+
+export { parseBoolean };
 
 /* Location of the files downloaded from Moodle and unzipped on dev machines */
 // Windows path:  G:/My Drive/Courses/CIS195/2023-Summer/LabXX/CIS195_Su23LabXSubmissions
@@ -190,9 +192,8 @@ async function checkStudent(studentDir, { labSettings, htmlAndCssChecker, jsChec
 }  // End of checkStudent function
 
 /** loadSettings function
-* Load general settings from a csv requirements file
-* (Specific requiremnts for HTML, CSS, JS, etc. loaded
-* by a method in the classes that check those files.) 
+* Load a csv requirements file: the general settings, and the checkers for the
+* HTML, CSS, JS, etc. files. Warnings about the file are displayed.
 * @param {string} requirementsFilePath - The csv requirements file name
 * @param {string} [platform] - The operating system, like process.platform. Chooses which submissions path to use.
 * @returns {{labSettings: LabSettings, htmlAndCssChecker: HtmlAndCssChecker, jsChecker: (JsChecker|null)}}
@@ -200,58 +201,31 @@ async function checkStudent(studentDir, { labSettings, htmlAndCssChecker, jsChec
 * @throws {Error} If the file can't be read or has no submissions path for this platform
 */
 export function loadSettings(requirementsFilePath, platform = process.platform) {
-    const settings = [];
-    /* settings array elements will hold these settings values:
-        0: MacOsSubmissionPath (can be relative or absolute)
-        1: WindowsSubmissionPath (can be relative or absolute)
-        2: Number of lab parts (ie, Part 1, Part2, etc.)
-        3: Lab Name (ie, Lab 1, Lab 2, etc.)
-        4: Are all lab parts in one folder? (true or false)
-        5: Check HTML files - TRUE or FALSE // TODO: separate HTML and CSS checks
-        6. Check CSS files - TRUE or FALSE
-        7: Check JavaScript files - TRUE or FALSE
-    */
-    let fileBuffer;
-    let htmlAndCssChecker;
+    let requirements;
     try {
-        fileBuffer = fs.readFileSync(requirementsFilePath);
-        csv()  // the .on function sets up lisetners
-            .on("data", (row) =>    // row is an object containing the data from one row of the csv file
-            {
-                if (row.settings) {  // settings is the name of the column in the csv file
-                    settings.push(row.settings);
-                }
-            })
-            .on("error", (error) => {
-                console.error(error);
-            })
-            .end(Buffer.from(fileBuffer));  // this sends data to the csv parser. csv-parser modifies the buffer it is given, so give it a copy. end() also parses a last row that has no trailing newline
-
-        // Load requrirements
-        htmlAndCssChecker = new HtmlAndCssChecker(Buffer.from(fileBuffer));
+        requirements = readRequirementsFile(requirementsFilePath);
     }
     catch (error) {
         throw new Error(`Error processing requirements file ${requirementsFilePath}: ${error.message}`);
     }
-
-    if (settings.length < 8) {
-        console.warn(`Warning: ${requirementsFilePath} has ${settings.length} of the 8 expected values in its settings column. Defaults will be used for the missing ones.`);
+    for (const warning of requirements.warnings) {
+        console.warn(warning);
     }
 
-    // Copy settings to the labSettings object, using defaults for any missing values
-    const parts = parseInt(settings[2], 10);
+    const { settings } = requirements;
     /** @type {LabSettings} */
     const labSettings = {
         submissionsPath: getSubmissionsPath(settings, requirementsFilePath, platform),
-        numberOfParts: Number.isNaN(parts) ? 1 : parts,
-        areAllInOneDir: parseBoolean(settings[4], true),
-        isHTML: parseBoolean(settings[5], false),  // Currenty for HTML & CSS
-        isCSS: parseBoolean(settings[6], false),  // Currently not used 3/10/24
-        isJavaScript: parseBoolean(settings[7], false),
+        numberOfParts: settings.numberOfParts,
+        areAllInOneDir: settings.areAllInOneDir,
+        isHTML: settings.checkHtml,  // Currenty for HTML & CSS
+        isCSS: settings.checkCss,  // Currently not used 3/10/24
+        isJavaScript: settings.checkJavaScript,
     };
-    // The JavaScript checker is deprecated, so only load it for a JavaScript lab
+    const htmlAndCssChecker = new HtmlAndCssChecker(requirements);
+    // The JavaScript checker is deprecated, so only load it for a JavaScript lab. It reads its own columns.
     const jsChecker = labSettings.isJavaScript
-        ? new JsChecker(Buffer.from(fileBuffer), path.dirname(requirementsFilePath))
+        ? new JsChecker(fs.readFileSync(requirementsFilePath), path.dirname(requirementsFilePath))
         : null;
     return { labSettings, htmlAndCssChecker, jsChecker };
 } // End of loadSettings function
@@ -259,15 +233,15 @@ export function loadSettings(requirementsFilePath, platform = process.platform) 
 /** getSubmissionsPath function
  * Get the path to the folder holding the student submissions from the settings column.
  * A relative path is relative to the folder holding the requirements file.
- * @param {Array<string>} settings - Values from the settings column
+ * @param {import("./Requirements.mjs").Settings} settings - From the settings column
  * @param {string} requirementsFilePath - The csv requirements file name
  * @param {string} platform - The operating system, like process.platform
  * @returns {string}
  * @throws {Error} If the settings have no submissions path for this platform
  */
 export function getSubmissionsPath(settings, requirementsFilePath, platform) {
-    // Windows uses settings[1]. Mac OS and other systems use settings[0].
-    const pathSetting = platform === "win32" ? settings[1] : settings[0];
+    // Windows uses the Windows path. Mac OS and other systems use the Mac OS path.
+    const pathSetting = platform === "win32" ? settings.windowsSubmissionsPath : settings.macSubmissionsPath;
     if (!pathSetting) {
         throw new Error(`Error: the settings column of ${requirementsFilePath} does not contain a submissions path for this platform.`);
     }
@@ -277,17 +251,4 @@ export function getSubmissionsPath(settings, requirementsFilePath, platform) {
         return pathSetting;
     }
     return pathModule.join(pathModule.dirname(requirementsFilePath), pathSetting);
-}
-
-/** parseBoolean function
- * Convert a "true"/"false" string from the settings column to a boolean
- * @param {string|undefined} value - The text from the csv file (case-insensitive)
- * @param {boolean} defaultValue - Returned if value is missing or empty
- * @returns {boolean}
- */
-export function parseBoolean(value, defaultValue) {
-    if (value === undefined || value === null || String(value).trim() === "") {
-        return defaultValue;
-    }
-    return String(value).trim().toLowerCase() === "true";
 }

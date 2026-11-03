@@ -27,41 +27,40 @@ describe('Example requirements files in docs', () => {
                 }
             });
 
-            it('has all 8 settings values and a submissions path relative to the file', () => {
+            it('has no warnings, all 8 settings values, and a submissions path relative to the file', () => {
                 expect(warnings).to.deep.equal([]);
                 expect(loaded.labSettings.submissionsPath.startsWith(docsDir + path.sep)).to.equal(true);
                 expect(loaded.labSettings).to.include({ numberOfParts: 1, isHTML: true, isJavaScript: false });
             });
 
             it('has the moreRequirements values in the current positions', () => {
-                const more = loaded.htmlAndCssChecker.requirements.additionalRequirements;
-                expect(more[0]).to.equal('index');                 // special file name
-                expect(parseInt(more[1])).to.be.a('number');       // number of HTML files
-                expect(more[1]).to.match(/^\d+$/);
-                expect(more[2]).to.match(/^\d+$/);                 // number of CSS files
-                expect(more[3]).to.match(/^(true|false)$/i);       // validate HTML
-                expect(more[4]).to.match(/^(true|false)$/i);       // validate CSS
-                for (const optional of more.slice(5)) {            // minimum CSS rules and properties
-                    expect(optional).to.match(/^\d+$/);
-                }
+                const { moreRequirements } = loaded.htmlAndCssChecker.requirements;
+                expect(moreRequirements.specialFileName).to.equal('index');
+                expect(moreRequirements.htmlFileCount).to.be.a('number');
+                expect(moreRequirements.cssFileCount).to.be.a('number');
+                expect(moreRequirements.htmlValidator).to.be.oneOf([null, 'html-validate', 'w3c', 'vnu']);
+                expect(moreRequirements.validateCss).to.be.a('boolean');
+                expect(moreRequirements.valueCount).to.be.oneOf([5, 7]);
             });
 
             it('has a minimum number for each required element, and valid selectors', () => {
                 const { requirements } = loaded.htmlAndCssChecker;
                 expect(requirements.requiredElements1.length).to.be.greaterThan(0);
-                expect(requirements.minElements1).to.have.length(requirements.requiredElements1.length);
-                for (const selector of [...requirements.requiredElements1, ...requirements.requiredCssSelectors]) {
+                for (const { selector, minimum } of requirements.requiredElements1) {
+                    expect(minimum, selector).to.be.at.least(1);
+                }
+                const selectors = [...requirements.requiredElements1.map((e) => e.selector), ...requirements.requiredCssSelectors];
+                for (const selector of selectors) {
                     expect(() => document.querySelectorAll(selector), selector).to.not.throw();
                 }
             });
 
-            it('has regular expressions that compile, each with a description', () => {
+            it('has regular expressions that compile, each with its own description', () => {
                 const { requirements } = loaded.htmlAndCssChecker;
-                for (const expression of [...requirements.regExpForHTML1, ...requirements.regExpForCSS1]) {
-                    expect(() => new RegExp(expression, 'gim'), expression).to.not.throw();
+                for (const { pattern, description } of [...requirements.htmlRegExps, ...requirements.cssRegExps]) {
+                    expect(() => new RegExp(pattern, 'gim'), pattern).to.not.throw();
+                    expect(description, pattern).to.not.match(/^a match for/);
                 }
-                expect(requirements.regExpForHTML1Description).to.have.length(requirements.regExpForHTML1.length);
-                expect(requirements.regExpForCSS1Description).to.have.length(requirements.regExpForCSS1.length);
             });
         });
     }

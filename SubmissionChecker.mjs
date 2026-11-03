@@ -3,7 +3,7 @@ import path from "path";
 import { JSDOM } from "jsdom";
 import * as cssTree from "css-tree";
 import { HtmlAndCssChecker } from "./HtmlAndCssChecker.mjs";
-import { validateHtml, resolveHtmlValidatorSetting } from "./HtmlValidators.mjs";
+import { validateHtml } from "./HtmlValidators.mjs";
 import { isJunk } from "./SubmissionFolders.mjs";
 
 /********* This is the central function for this program! **********
@@ -15,18 +15,8 @@ import { isJunk } from "./SubmissionFolders.mjs";
 * @param {string} filePath - The path to the file to check. Empty string if there are multiple .html files.
 * @param {string} LabPart - The lab part number.  
 * @param {Object} settings - The settings for this lab assignment.      
-* @param {Object} requirements - The requirements to check against.
-* @property {Array<string>} requirements.requiredElements1 - Part1 required HTML elements.
-* @property {Array<string>} requirements.requiredElements2 - Part2 required HTML elements.
-* @property {Array<number>} requirements.minElements1 - Minimum number of each Part1 element (1 if missing).
-* @property {Array<number>} requirements.minElements2 - Minimum number of each Part2 element (1 if missing).
-* @property {Array<string>} requirements.requiredCssSelectors - The required CSS selectors.
-* @property {Array<string>} requirements.requiredCssProperties - The required CSS properties.
-* @property {Array<string>} requirements.regExpForHTML1 - Regular expressions to check against the HTML.
-* @property {Array<string>} requirements.regExpForHTML1Description - Descriptions of the regular expressions for the HTML.
-* @property {Array<string>} requirements.regExpForCSS1 - Regular expressions to check against the CSS.
-* @property {Array<string>} requirements.regExpForCSS1Description - Descriptions of the regular expressions for the CSS.
-* @property {Array<string>} requirements.additionalRequirements - Additional requirements.
+* @param {import("./Requirements.mjs").Requirements} requirements - The requirements to check against,
+*   from readRequirementsFile (or makeRequirements in the tests).
 */
 // TODO: move all the html and css checks to the HtmlAndCssChecker class, then the HtmlAndCssRequirements won't ned to be a parameter.
 async function checkSubmission(
@@ -39,8 +29,9 @@ async function checkSubmission(
 {
     let message = ""; // Individual message
     let report = ""; // All messages for the operations in this function
-    let requiredElements = (LabPart === 1) ? HtmlAndCssRequirements.requiredElements1 : HtmlAndCssRequirements.requiredElements2;
-    const minElements = (LabPart === 1) ? HtmlAndCssRequirements.minElements1 : HtmlAndCssRequirements.minElements2;
+    const { moreRequirements } = HtmlAndCssRequirements;
+    // Part 1 uses the part 1 elements. Part 2 and later use the part 2 elements.
+    const requiredElements = (LabPart === 1) ? HtmlAndCssRequirements.requiredElements1 : HtmlAndCssRequirements.requiredElements2;
     // How many times each required element was found in all the lab files (same order as requiredElements)
     const elementCounts = requiredElements.map(() => 0);
     // TODO: make this a paramenter and define it in the main
@@ -50,15 +41,11 @@ async function checkSubmission(
     const allProperties = []; // the name of every property declared in the css files and embedded css for one part of the lab
     let countHTMLFiles = 0; // Number of html files found in the lab files
     let countCSSFiles = 0; // Number of css files found in the lab files
-    const additionalRequirementResults = [];
+    // true when the required special file name is found (or none is required)
+    let specialFileFound = moreRequirements.specialFileName === null;
     const wrongCaseFileNames = []; // files that match the required special file name except for upper/lower case
     let regExpHtmlResults = [];
     let regExpCssResults = [];
-    // initialize all elements to false
-    for (let i = 0; i < HtmlAndCssRequirements.additionalRequirements.length; i++)
-    {
-        additionalRequirementResults.push(false);
-    }
 
     if (filePath === "")
     {
@@ -88,7 +75,7 @@ async function checkSubmission(
     }
 
     // compare elementCounts to the number required and log any missing elements
-    report = summarizeForRequiredElements(elementCounts, requiredElements, minElements, report);
+    report = summarizeForRequiredElements(elementCounts, requiredElements, report);
     // TODO: combine the following two functions into one and check for properties in specific selectors.
     if (HtmlAndCssRequirements.requiredCssSelectors.length > 0)
     {
@@ -98,33 +85,37 @@ async function checkSubmission(
     {
         report = summarizeForRequiredProperties(foundProperties, HtmlAndCssRequirements.requiredCssProperties, report);
     }
-    if (HtmlAndCssRequirements.additionalRequirements.length > 0)
+    if (moreRequirements.valueCount > 0)
     {
         report += "Additional requirements:\n"
-        report += summarizeAdditionalRequirements(countHTMLFiles, countCSSFiles,
-            allSelectors, allProperties,
-            foundSelectors, foundProperties, HtmlAndCssRequirements.additionalRequirements, additionalRequirementResults,
-            wrongCaseFileNames);
+        report += summarizeAdditionalRequirements({
+            htmlFileCount: countHTMLFiles,
+            cssFileCount: countCSSFiles,
+            ruleSelectors: allSelectors,
+            propertyNames: allProperties,
+            specialFileFound,
+            wrongCaseFileNames,
+        }, moreRequirements);
     }
     // A search that never ran (no HTML or CSS files were found) did not find a match
-    while (regExpHtmlResults.length < HtmlAndCssRequirements.regExpForHTML1.length)
+    while (regExpHtmlResults.length < HtmlAndCssRequirements.htmlRegExps.length)
     {
         regExpHtmlResults.push(false);
     }
-    while (regExpCssResults.length < HtmlAndCssRequirements.regExpForCSS1.length)
+    while (regExpCssResults.length < HtmlAndCssRequirements.cssRegExps.length)
     {
         regExpCssResults.push(false);
     }
-    if (HtmlAndCssRequirements.regExpForHTML1.length > 0)
+    if (HtmlAndCssRequirements.htmlRegExps.length > 0)
     {
         report += "Regular expression searches in HTML files:\n"
-        report += summarizeRegExpSearches(regExpHtmlResults, HtmlAndCssRequirements.regExpForHTML1Description);
+        report += summarizeRegExpSearches(regExpHtmlResults, HtmlAndCssRequirements.htmlRegExps);
     }
 
-    if (HtmlAndCssRequirements.regExpForCSS1.length > 0)
+    if (HtmlAndCssRequirements.cssRegExps.length > 0)
     {
         report += "Regular expression searches in CSS files:\n"
-        report += summarizeRegExpSearches(regExpCssResults, HtmlAndCssRequirements.regExpForCSS1Description);
+        report += summarizeRegExpSearches(regExpCssResults, HtmlAndCssRequirements.cssRegExps);
     }
     return report;
 
@@ -167,23 +158,22 @@ async function checkSubmission(
             {
                 countHTMLFiles++;
                 // Validate HTML
-                const htmlValidator = resolveHtmlValidatorSetting(HtmlAndCssRequirements.additionalRequirements[3]);
-                if (htmlValidator !== null)
+                if (moreRequirements.htmlValidator !== null)
                 {
-                    report += await validateHtml(fileContents, fileName, htmlValidator);
+                    report += await validateHtml(fileContents, fileName, moreRequirements.htmlValidator);
                 }
 
                 // Count the required html elements in fileContents, add to elementCounts
                 const dom = new JSDOM(fileContents);
-                for (const [i, element] of requiredElements.entries())
+                for (const [i, { selector }] of requiredElements.entries())
                 {
                     let elements = [];
                     try
                     {
-                        elements = dom.window.document.querySelectorAll(element);
+                        elements = dom.window.document.querySelectorAll(selector);
                     } catch (error)
                     {
-                        message = `Error finding ${element} element in ${fileName}`;
+                        message = `Error finding ${selector} element in ${fileName}`;
                         console.error(message);
                         report += message + `\n`;
                     }
@@ -210,7 +200,7 @@ async function checkSubmission(
                 foundProperties.push(...inlineStyles.foundProperties);
 
                 regExpHtmlResults = orRegExpResults(regExpHtmlResults,
-                    checkFileWithRegExp(HtmlAndCssRequirements.regExpForHTML1, fileContents));
+                    checkFileWithRegExp(HtmlAndCssRequirements.htmlRegExps, fileContents));
 
                 // Render the html page and check for required output
                 // TODO: Load required output from csv file
@@ -229,7 +219,7 @@ async function checkSubmission(
                 allProperties.push(...externalCss.propertyNames);
 
                 // Validate CSS if the requirements file asks for it
-                if (HtmlAndCssChecker.isCssValidationOn(HtmlAndCssRequirements.additionalRequirements[4]))
+                if (moreRequirements.validateCss)
                 {
                     report += await HtmlAndCssChecker.validateCSS(fileContents, fileName);
                 }
@@ -259,25 +249,19 @@ async function checkSubmission(
 
                 // Do regular expression searches of the CSS file contents
                 regExpCssResults = orRegExpResults(regExpCssResults,
-                    checkFileWithRegExp(HtmlAndCssRequirements.regExpForCSS1, fileContents));
+                    checkFileWithRegExp(HtmlAndCssRequirements.cssRegExps, fileContents));
 
             } // end of processing .css files
 
             // --- Check the file for additional requirements ---
             // Check for a special file name
-            const specialFileName = HtmlAndCssRequirements.additionalRequirements[0] === '""' ? "" : HtmlAndCssRequirements.additionalRequirements[0];
-
-            if (specialFileName == undefined || specialFileName == "")
+            if (moreRequirements.specialFileName !== null)
             {
-                additionalRequirementResults[0] = true; // set to true if we are not looking for a special file name
-            }
-            else
-            {
-                // if any file name has the special file name, set the results to true. Partial match for .htm an .html
-                const nameCheck = checkSpecialFileName(fileName, specialFileName);
+                // if any file name has the special file name, set the result to true. Partial match for .htm an .html
+                const nameCheck = checkSpecialFileName(fileName, moreRequirements.specialFileName);
                 if (nameCheck === "ok")
                 {
-                    additionalRequirementResults[0] = true;
+                    specialFileFound = true;
                 } else if (nameCheck === "wrong-case")
                 {
                     wrongCaseFileNames.push(path.basename(fileName));
@@ -307,12 +291,12 @@ async function checkSubmission(
     /* The boolean results are or'ed together from each file checked */
     /* One search result is enough to set the overall result to true */
     /*****************************************************************/
-    function checkFileWithRegExp(regExpArray, fileContents)
+    function checkFileWithRegExp(regExpSearches, fileContents)
     {
         const regExpResults = [];
-        for (let i = 0; i < regExpArray.length; i++)
+        for (let i = 0; i < regExpSearches.length; i++)
         {
-            let regexp = new RegExp(regExpArray[i], "gim");
+            let regexp = new RegExp(regExpSearches[i].pattern, "gim");
             regExpResults[i] ||= (regexp.test(fileContents)); // true / false result
         }
         return regExpResults;
@@ -374,7 +358,7 @@ function getEmbeddedCssSelectorsAndProperties(styleElement, requiredSelectors, r
 /***************************************************************************************
  * The required properties that one CSS declaration satisfies.
  * A requirement is either a property name (color) or a name and value (color: red).
- * White space is ignored when comparing, because loadRequirements removes it from the
+ * White space is ignored when comparing, because parseRequirements removes it from the
  * requirements and the student may or may not have it in the CSS.
  * Used for embedded and inline CSS.
  * @param {string} property - The declared property name
@@ -439,25 +423,24 @@ function getInlineStyles(elements, requiredProperties) {
 /********************************************************************
  * Check results for required html elements
  * @param {Array<number>} elementCounts - How many times each required element was found in all the files.
- * @param {Array<string>} requiredElements - The required element selectors, in the same order as elementCounts.
- * @param {Array<number>} [minElements] - Minimum number of each element, in the same order. Missing means 1.
+ * @param {Array<import("./Requirements.mjs").RequiredElement>} requiredElements - The required elements,
+ *   in the same order as elementCounts.
  * @param {string} report - The report string to append to.
  * @returns {string} The updated report string.
  */
-function summarizeForRequiredElements(elementCounts, requiredElements, minElements = [], report)
+function summarizeForRequiredElements(elementCounts, requiredElements, report)
 {
     const messages = [];
     // TODO: diffrentiate between missing elements and missing attributes
-    requiredElements.forEach((element, i) =>
+    requiredElements.forEach(({ selector, minimum }, i) =>
     {
         const count = elementCounts[i] ?? 0;
-        const minimum = minElements[i] ?? 1;
         if (count === 0 && minimum > 0)
         {
-            messages.push(`Missing ${element} element`);
+            messages.push(`Missing ${selector} element`);
         } else if (count < minimum)
         {
-            messages.push(`Found ${count} ${element} elements. Expected at least ${minimum}`);
+            messages.push(`Found ${count} ${selector} elements. Expected at least ${minimum}`);
         }
     });
     if (messages.length > 0)
@@ -567,48 +550,59 @@ function checkSpecialFileName(fileName, specialFileName)
     return "no";
 }
 
-/**************************************************/
-/* Summarize results for additional requirements  */
-/* Summary of results of checking in all files    */
-/**************************************************/
-function summarizeAdditionalRequirements(countHTMLFiles, countCSSFiles, allSelectors, allProperties,
-    foundSelectors, foundProperties, additionalRequirements, additionalRequirementResults, wrongCaseFileNames = [])
+/**************************************************
+ * Summarize results for additional requirements (the moreRequirements column)
+ * Summary of results of checking in all files
+ * @param {Object} found - What was found in all of the student's files
+ * @param {number} found.htmlFileCount - Number of HTML files
+ * @param {number} found.cssFileCount - Number of CSS files
+ * @param {Array<string>} [found.ruleSelectors] - The selector of every css rule
+ * @param {Array<string>} [found.propertyNames] - The name of every css property declared
+ * @param {boolean} [found.specialFileFound] - true if the special file name was found, or none is required
+ * @param {Array<string>} [found.wrongCaseFileNames] - Files named like the special file except for upper/lower case
+ * @param {import("./Requirements.mjs").MoreRequirements} moreRequirements
+ * @returns {string} The report
+ */
+function summarizeAdditionalRequirements(
+    { htmlFileCount, cssFileCount, ruleSelectors = [], propertyNames = [], specialFileFound = true, wrongCaseFileNames = [] },
+    moreRequirements)
 {
     let areAllAdditionalRequirementsMet = true;
     let message = "";
     let report = "";
 
     //TODO: Make one function for checking number of either CSS or HTML files
-    const requiredNumberOfHTMLFiles = parseInt(additionalRequirements[1]);
+    const requiredNumberOfHTMLFiles = moreRequirements.htmlFileCount;
     // Report if less than the expected number of html files is found
-    if (countHTMLFiles < requiredNumberOfHTMLFiles)
+    if (requiredNumberOfHTMLFiles !== null && htmlFileCount < requiredNumberOfHTMLFiles)
     {
         areAllAdditionalRequirementsMet = false;
-        message = `Found ${countHTMLFiles} html files. Expected ${requiredNumberOfHTMLFiles}`;
+        message = `Found ${htmlFileCount} html files. Expected ${requiredNumberOfHTMLFiles}`;
         console.log(message);
         report += message + `\n`;
     }
 
-    const requiredNumberOfCSSFiles = parseInt(additionalRequirements[2]);
+    const requiredNumberOfCSSFiles = moreRequirements.cssFileCount;
     // Report if less than the expected number of css files is found
-    if (countCSSFiles < requiredNumberOfCSSFiles)
+    if (requiredNumberOfCSSFiles !== null && cssFileCount < requiredNumberOfCSSFiles)
     {
         areAllAdditionalRequirementsMet = false;
-        message = `Found ${countCSSFiles} css files. Expected ${requiredNumberOfCSSFiles}`;
+        message = `Found ${cssFileCount} css files. Expected ${requiredNumberOfCSSFiles}`;
         console.log(message);
         report += message + `\n`;
     }
     // Report if a special file name is required and not found
-    if (additionalRequirementResults[0] === false)
+    const { specialFileName } = moreRequirements;
+    if (specialFileName !== null && !specialFileFound)
     {
         areAllAdditionalRequirementsMet = false;
         if (wrongCaseFileNames.length > 0)
         {
             // The file exists, but the case of its name is wrong
-            message = `File name has the wrong upper/lower case: ${[...new Set(wrongCaseFileNames)].join(", ")}. It must be named ${getSpecialFileNames(additionalRequirements[0]).join(" or ")}`;
+            message = `File name has the wrong upper/lower case: ${[...new Set(wrongCaseFileNames)].join(", ")}. It must be named ${getSpecialFileNames(specialFileName).join(" or ")}`;
         } else
         {
-            message = `Missing ${additionalRequirements[0]} file (${getSpecialFileNames(additionalRequirements[0]).join(" or ")})`;
+            message = `Missing ${specialFileName} file (${getSpecialFileNames(specialFileName).join(" or ")})`;
         }
         console.log(message);
         report += message + `\n`;
@@ -617,19 +611,19 @@ function summarizeAdditionalRequirements(countHTMLFiles, countCSSFiles, allSelec
     // Report if the required number of css rules (external and embedded) is not found.
     // A blank or missing value means there is no requirement.
     // TODO: check separately for embedded and external selectors
-    const requiredNumberOfSelectors = parseInt(additionalRequirements[5]);
-    if (allSelectors.length < requiredNumberOfSelectors)
+    const requiredNumberOfSelectors = moreRequirements.minCssRules;
+    if (requiredNumberOfSelectors !== null && ruleSelectors.length < requiredNumberOfSelectors)
     {
         areAllAdditionalRequirementsMet = false;
-        message = `Found ${allSelectors.length} css rules. Expected ${requiredNumberOfSelectors}`;
+        message = `Found ${ruleSelectors.length} css rules. Expected ${requiredNumberOfSelectors}`;
         console.log(message);
         report += message + `\n`;
     }
 
     // Report if the required number of distinct css properties is not found
-    const uniqueProperties = [...new Set(allProperties)];
-    const requiredNumberOfProperties = parseInt(additionalRequirements[6]);
-    if (uniqueProperties.length < requiredNumberOfProperties)
+    const uniqueProperties = [...new Set(propertyNames)];
+    const requiredNumberOfProperties = moreRequirements.minCssProperties;
+    if (requiredNumberOfProperties !== null && uniqueProperties.length < requiredNumberOfProperties)
     {
         areAllAdditionalRequirementsMet = false;
         message = `Found ${uniqueProperties.length} distinct css properties. Expected ${requiredNumberOfProperties}`;
@@ -647,11 +641,14 @@ function summarizeAdditionalRequirements(countHTMLFiles, countCSSFiles, allSelec
     return report;
 }
 
-/****************************************************/
-/* Sumarize results or regular expression searches  */
-/* Summary of results of searches in all files      */
-/****************************************************/
-function summarizeRegExpSearches(regExpResults, regExpDescriptions)
+/****************************************************
+ * Sumarize results or regular expression searches
+ * Summary of results of searches in all files
+ * @param {Array<boolean>} regExpResults - true for each search that matched in a file
+ * @param {Array<import("./Requirements.mjs").RegExpSearch>} regExpSearches - The searches, in the same order
+ * @returns {string} The report
+ */
+function summarizeRegExpSearches(regExpResults, regExpSearches)
 {
     let message = "";
     let report = "";
@@ -663,7 +660,7 @@ function summarizeRegExpSearches(regExpResults, regExpDescriptions)
         if (regExpResults[i] === false)
         {
             didAllRegExpSearchesPass = false;
-            message = `Missing ${regExpDescriptions[i]} in files`;
+            message = `Missing ${regExpSearches[i].description} in files`;
             console.log(message);
             report += message + `\n`;
         }
