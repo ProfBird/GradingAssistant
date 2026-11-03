@@ -4,6 +4,7 @@ import { getEmbeddedCssSelectorsAndProperties,
     summarizeAdditionalRequirements,
     getCssRulesAndPropertyNames,
     checkSubmission } from '../SubmissionChecker.mjs';
+import { HtmlAndCssChecker } from '../HtmlAndCssChecker.mjs';
 import { expect } from 'chai';
 import jsdom from 'jsdom';
 import fs from 'fs';
@@ -291,6 +292,35 @@ describe('SubmissionChecker', () => {
                 const report = await checkSubmission(student, "", 2, {}, elementRequirements);
 
                 expect(report).to.include('Found 1 p elements. Expected at least 2');
+            });
+        });
+
+        describe('required css properties in embedded and inline css', () => {
+            it('finds a property and value, written with or without spaces, using requirements from the csv loader', async () => {
+                // Load the requirements the way the program does, which removes the spaces
+                const { requirements: loaded } = new HtmlAndCssChecker(Buffer.from(
+                    'requiredCssProperties\ndisplay: grid\ndisplay: flex\ncolor\nmargin: 0 auto'));
+                const student = makeStudentDir('r', []);
+                fs.writeFileSync(path.join(student, 'index.html'),
+                    '<!DOCTYPE html><html><head><title>T</title><style>body { display: grid; color: red }' +
+                    ' main { margin:0  auto }</style></head><body><p style="display:  flex">x</p></body></html>');
+
+                const report = await checkSubmission(student, "", 1, {}, { ...requirements, ...loaded,
+                    additionalRequirements: [] });
+
+                expect(report).to.include('All required properties found');
+            });
+
+            it('reports a property whose value is different', async () => {
+                const { requirements: loaded } = new HtmlAndCssChecker(Buffer.from('requiredCssProperties\ndisplay: grid'));
+                const student = makeStudentDir('s', []);
+                fs.writeFileSync(path.join(student, 'index.html'),
+                    '<!DOCTYPE html><html><head><title>T</title><style>body { display: flex }</style></head><body></body></html>');
+
+                const report = await checkSubmission(student, "", 1, {}, { ...requirements, ...loaded,
+                    additionalRequirements: [] });
+
+                expect(report).to.include('Missing display:grid property');
             });
         });
 

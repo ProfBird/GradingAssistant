@@ -359,11 +359,7 @@ function getEmbeddedCssSelectorsAndProperties(styleElement, requiredSelectors, r
             const property = node.property;
             const value = cssTree.generate(node.value).trim();
             allProperties.push(`${property}: ${value}`);
-            if (requiredProperties.includes(`${property}: ${value}`.trim())) {
-                foundProperties.push(`${property}: ${value}`);
-            } else if (requiredProperties.includes(property)) {
-                foundProperties.push(property);
-            }
+            foundProperties.push(...matchRequiredProperties(property, value, requiredProperties));
         }
     });
 
@@ -373,6 +369,26 @@ function getEmbeddedCssSelectorsAndProperties(styleElement, requiredSelectors, r
         allProperties,
         foundProperties
     };
+}
+
+/***************************************************************************************
+ * The required properties that one CSS declaration satisfies.
+ * A requirement is either a property name (color) or a name and value (color: red).
+ * White space is ignored when comparing, because loadRequirements removes it from the
+ * requirements and the student may or may not have it in the CSS.
+ * Used for embedded and inline CSS.
+ * @param {string} property - The declared property name
+ * @param {string} value - The declared value
+ * @param {Array<string>} requiredProperties - The required properties
+ * @returns {Array<string>} The requirements that match, as written in requiredProperties
+ */
+function matchRequiredProperties(property, value, requiredProperties) {
+    const removeWhitespace = (text) => text.replace(/\s/g, "");
+    const nameAndValue = removeWhitespace(`${property}:${value}`);
+    return requiredProperties.filter((required) => {
+        const normalized = removeWhitespace(required);
+        return normalized === nameAndValue || normalized === removeWhitespace(property);
+    });
 }
 
 /***************************************************************************************
@@ -412,13 +428,8 @@ function getInlineStyles(elements, requiredProperties) {
             while ((match = propertyRegex.exec(inlineStyle)) !== null) {
                 const property = match[1];
                 const value = match[2].trim();
-                // TODO: This code is duplicated in getEmbeddedCssSelectorsAndProperties
                 allProperties.push(`${property}: ${value}`);
-                if (requiredProperties.includes(`${property}: ${value}`.trim())) {
-                    foundProperties.push(`${property}: ${value}`);
-                } else if (requiredProperties.includes(property)) {
-                    foundProperties.push(property);
-                }
+                foundProperties.push(...matchRequiredProperties(property, value, requiredProperties));
             }
         }
     }
