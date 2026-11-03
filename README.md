@@ -109,6 +109,8 @@ HTML and CSS are checked statically. JavaScript is checked by running Mocha unit
 
 #### HTML and CSS requirements
 
+The program can currently check for these lab assignemnt requirements being fulfilled:
+
 - HTML
   - Elements: check for specific required elements
   - Attributes: check for specific required attributes in particular elements
@@ -124,11 +126,7 @@ HTML and CSS are checked statically. JavaScript is checked by running Mocha unit
 
 Elements, regular expression and selector results are combined across all of a student's files: one match in any file passes.
 
-#### JavaScript requirements (in progress)
-
-JsChecker runs a Mocha test file against one student file per lab part. The requirements file names the test file in an `unitTests` column and the student file in a `filesToTest` column (one row per part). The unit test path is relative to the requirements file. The student file's path is passed to the tests in the `TESTED_FILE` environment variable. Checking JavaScript that is embedded in HTML (`<script>` elements) with Puppeteer is started but not finished.
-
-### Requirements file
+##### Requirements file
 
 A requirements file configures the program for a particular lab assignment. It can be written in a spreadsheet and then saved in .csv format. In the file, each row is one line and each column holds a list of values. Empty cells are ignored.
 
