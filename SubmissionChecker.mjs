@@ -233,8 +233,11 @@ async function checkSubmission(
                 const cssPropertyRegExp = /([a-zA-Z_-][\w-]*)(?=\s*:)/gi;
                 allProperties.push(...(fileContents.match(cssPropertyRegExp) ?? []));
 
-                // Validate CSS
-                report += await HtmlAndCssChecker.validateCSS(fileContents, fileName);
+                // Validate CSS if the requirements file asks for it
+                if (HtmlAndCssChecker.isCssValidationOn(HtmlAndCssRequirements.additionalRequirements[4]))
+                {
+                    report += await HtmlAndCssChecker.validateCSS(fileContents, fileName);
+                }
                 // TODO: check for embedded css styles in the html pages. 
                 // 11/16/23, already getting them in foundSelectors and foundProperties, but the syntax might not be checked.
 
@@ -250,10 +253,10 @@ async function checkSubmission(
                 // Get any required css properties from fileContents, put in foundProperties
                 // TODO: Use cssTree to get the properties
                 // remove all whitespace from the fileContents, this was already done to the requiredProperties
-                fileContents = fileContents.replace(/\s/g, '');
+                const contentsWithoutWhitespace = fileContents.replace(/\s/g, '');
                 for (let property of HtmlAndCssRequirements.requiredCssProperties)
                 {
-                    if (fileContents.includes(property))
+                    if (contentsWithoutWhitespace.includes(property))
                     {
                         foundProperties.push(property);
                     }

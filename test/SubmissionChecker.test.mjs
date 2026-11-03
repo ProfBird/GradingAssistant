@@ -162,6 +162,35 @@ describe('SubmissionChecker', () => {
             expect(report).to.include('All additional requirements met');
         });
 
+        describe('with CSS files (CSS validation turned off, so no network is used)', () => {
+            const cssRequirements = {
+                ...requirements,
+                // no special file name, 0 html files, 1 css file, don't validate html or css
+                additionalRequirements: ["", "0", "1", "false", "false"],
+                regExpForCSS1: ["color:\\s+red"],
+                regExpForCSS1Description: ["red color"],
+            };
+
+            it('matches CSS regular expressions against the original text, with whitespace', async () => {
+                const student = makeStudentDir('e', []);
+                fs.writeFileSync(path.join(student, 'styles.css'), 'p {\n    color:   red;\n}\n');
+
+                const report = await checkSubmission(student, "", 1, {}, cssRequirements);
+
+                expect(report).to.include('All regular expression searches passed');
+            });
+
+            it('does not crash on a CSS file with no selectors or properties', async () => {
+                const student = makeStudentDir('f', []);
+                fs.writeFileSync(path.join(student, 'styles.css'), '/* 123 */ 456');
+
+                const report = await checkSubmission(student, "", 1, {}, cssRequirements);
+
+                expect(report).to.include('Checking the styles.css file');
+                expect(report).to.not.include('W3C');
+            });
+        });
+
         it('ignores __MACOSX and hidden files', async () => {
             const student = makeStudentDir('d', ['index.html']);
             fs.mkdirSync(path.join(student, '__MACOSX'));

@@ -17,4 +17,16 @@ describe('HtmlAndCssChecker', () => {
             expect(checker.requirements.additionalRequirements).to.deep.equal(['index', '2']);
         });
     });
+
+    describe('#isCssValidationOn()', () => {
+        it('is on only for "true", ignoring case and spaces', () => {
+            expect(HtmlAndCssChecker.isCssValidationOn('true')).to.equal(true);
+            expect(HtmlAndCssChecker.isCssValidationOn(' TRUE ')).to.equal(true);
+        });
+        it('is off for "false", an empty value and a missing value', () => {
+            expect(HtmlAndCssChecker.isCssValidationOn('false')).to.equal(false);
+            expect(HtmlAndCssChecker.isCssValidationOn('')).to.equal(false);
+            expect(HtmlAndCssChecker.isCssValidationOn(undefined)).to.equal(false);
+        });
+    });
 });

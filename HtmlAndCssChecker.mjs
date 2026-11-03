@@ -2,9 +2,12 @@ import fs from "fs";
 import path from "path";
 import csv from "csv-parser";
 import os from "os";
-import fetch from "node-fetch";
+import fetch, { FormData } from "node-fetch";
 import { JSDOM } from "jsdom";
 import {Checker} from "./Checker.mjs";
+
+const minMsBetweenCssRequests = 1000;  // the CSS validator service rejects bursts of requests
+let lastCssRequest = 0;
 
 /** HtmlAndCssChecker class
 * This class is used to check HTML and CSS requirements.
@@ -99,21 +102,44 @@ export class HtmlAndCssChecker extends Checker {
                 .end(fileBuffer);  // this sends data to the csv parser. end() also parses a last row that has no trailing newline
     } // End of loadRequirements method
 
+    /** isCssValidationOn method
+     * Convert the "Validate CSS" value from the requirements file to a boolean.
+     * @param {string|undefined} value - "true" or "false" (case-insensitive). Missing means false.
+     * @returns {boolean}
+     */
+    static isCssValidationOn(value) {
+        return String(value ?? "").trim().toLowerCase() === "true";
+    }
+
     /**
      * Validate the CSS syntax using the W3C validator.
-     * @param {*} fileContents
-     * @param {*} fileName
-     * @returns
+     * The CSS is sent in the body of a POST request, so characters like # & + % and long files are fine.
+     * @param {string} fileContents - The CSS
+     * @param {string} fileName - Name of the file, used in the report
+     * @returns {Promise<string>} A report. Never throws; problems running the validator are reported.
      */
     static async validateCSS(fileContents, fileName) {
-        let message = ""; // Individual message
-        let report = ""; // All messages for the files in this lab submission
+        let report = ""; // All messages for this file
 
-        const response = await fetch(
-            `https://jigsaw.w3.org/css-validator/validator?profile=css3&output=soap12&text=${fileContents}`
-        );
+        try {
+            // The service rejects bursts of requests
+            const wait = lastCssRequest + minMsBetweenCssRequests - Date.now();
+            if (wait > 0) {
+                await new Promise((resolve) => setTimeout(resolve, wait));
+            }
+            lastCssRequest = Date.now();
 
-        if (response.ok) {
+            const form = new FormData();
+            form.set("profile", "css3");
+            form.set("output", "soap12");
+            form.set("text", fileContents);
+            const response = await fetch("https://jigsaw.w3.org/css-validator/validator", {
+                method: "POST",
+                body: form,
+            });
+            if (!response.ok) {
+                throw new Error(`the W3C CSS validator returned status ${response.status}`);
+            }
             const xmlText = await response.text();
             const dom = new JSDOM(xmlText, { contentType: "text/xml" });
             const messages = dom.window.document.getElementsByTagName("m:error");
@@ -126,8 +152,10 @@ export class HtmlAndCssChecker extends Checker {
                 }
                 report += os.EOL; // add a blank line after the errors
             }
-        } else {
-            console.error("Error: Invalid response");
+        } catch (error) {
+            const message = `Could not validate ${fileName} with the W3C CSS validator: ${error.message}`;
+            console.error(message);
+            report += message + "\n";
         }
         return report;
     } // End of validateCSS method
