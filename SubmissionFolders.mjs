@@ -18,6 +18,7 @@ export function isJunk(dirent) {
     return name.startsWith(".")                 // .DS_Store, .git, etc.
         || /^_*MACOSX$/i.test(name)             // __MACOSX, or MACOSX after UnzipFiles removes underscores
         || /_report\.txt$/i.test(name)          // report files written by this program
+        || /_report_backup_.*\.txt$/i.test(name)  // and their backups
         || (dirent.isFile() && archiveExtensions.test(name));  // leftover zip files
 }
 

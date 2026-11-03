@@ -41,7 +41,7 @@ describe('SubmissionFolders', () => {
 
         it('ignores junk folders and files', () => {
             make("Website/index.html", "MACOSX/Website/._index.html", "__MACOSX/x", ".DS_Store",
-                "Lab.zip", "TyTitan_report.txt");
+                "Lab.zip", "TyTitan_report.txt", "TyTitan_report_backup_2026-11-02_21-30-05.txt");
             expect(findSubmissionRoot(base)).to.equal(path.join(base, "Website"));
         });
 

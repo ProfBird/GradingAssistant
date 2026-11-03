@@ -94,7 +94,7 @@ node TestAnyLab.mjs requirementsFileName.csv [option]
 - `requirementsFileName.csv` is the path to the requirements file, including the file name.
 - The option is optional. Without one, the lab is checked and folders that already contain a `_report.txt` file are skipped. The options are:
   - `--help` displays a help message
-  - `--overwrite` overwrites existing report files. Without it, folders that already contain a `_report.txt` file are skipped.
+  - `--overwrite` overwrites existing report files. Without it, folders that already contain a `_report.txt` file are skipped. Before a report is overwritten, the old one is saved as a backup named with the time it was written, like `TyTitan_report_backup_2026-11-02_21-30-05.txt` (no backup is made if the new report is the same). The backups are ignored when the submission is checked.
 
 Requirements files normally live in the [CIS195-CourseMaterials](https://github.com/LCC-CIT/CIS195-CourseMaterials) repo (in `LabAutoGrading/`), not in this repo. Each one has the path to its submissions folder in its `settings` column.
 

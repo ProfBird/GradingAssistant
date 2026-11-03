@@ -93,6 +93,11 @@ export async function main(args) {
         // stop the checks of the other students
         const reportPath = path.join(labSettings.submissionsPath, studentDir, `${studentDir}_report.txt`);
         try {
+            // An existing report is kept as a backup before it is overwritten
+            const backupPath = backupReport(reportPath, report);
+            if (backupPath !== null) {
+                console.log(`Saved the old report as ${path.basename(backupPath)}`);
+            }
             fs.writeFileSync(reportPath, report);
         } catch (error) {
             console.error(`Could not save the report for ${studentDir}: ${error.message}`);
@@ -115,6 +120,44 @@ export async function main(args) {
 /***************************/
 /* End of the main program */
 /***************************/
+
+/** backupReport function
+ * Copy an existing report to a backup file before it is overwritten. The backup is named
+ * with the date and time the old report was saved, like TyTitan_report_backup_2026-11-02_21-30-05.txt,
+ * so each overwrite keeps its own backup. No backup is made if there is no report yet,
+ * or if the new report is the same as the old one.
+ * @param {string} reportPath - Path to the report file
+ * @param {string} newReport - The report that will be written
+ * @returns {string|null} The path to the backup, or null if none was needed
+ * @throws {Error} If the backup can't be made (then the old report must not be overwritten)
+ */
+export function backupReport(reportPath, newReport) {
+    let oldReport;
+    try {
+        oldReport = fs.readFileSync(reportPath, "utf8");
+    } catch (error) {
+        if (error.code === "ENOENT") {
+            return null;  // no report yet
+        }
+        throw error;
+    }
+    if (oldReport === newReport) {
+        return null;
+    }
+    const savedAt = fs.statSync(reportPath).mtime;
+    const pad = (number) => String(number).padStart(2, "0");
+    const stamp = `${savedAt.getFullYear()}-${pad(savedAt.getMonth() + 1)}-${pad(savedAt.getDate())}_` +
+        `${pad(savedAt.getHours())}-${pad(savedAt.getMinutes())}-${pad(savedAt.getSeconds())}`;
+    const base = reportPath.replace(/\.txt$/, "") + "_backup_" + stamp;
+    // Add a number if a backup with this time already exists
+    let backupPath = base + ".txt";
+    for (let n = 2; fs.existsSync(backupPath); n++) {
+        backupPath = `${base}_${n}.txt`;
+    }
+    // COPYFILE_EXCL: never replace an existing file
+    fs.copyFileSync(reportPath, backupPath, fs.constants.COPYFILE_EXCL);
+    return backupPath;
+}
 
 /** parseArguments function
  * Interpret the command line arguments.

@@ -1,4 +1,4 @@
-import { main, parseArguments, loadSettings, getSubmissionsPath, parseBoolean } from '../TestAnyLab.mjs';
+import { main, parseArguments, loadSettings, getSubmissionsPath, parseBoolean, backupReport } from '../TestAnyLab.mjs';
 import { expect } from 'chai';
 import fs from 'fs';
 import os from 'os';
@@ -116,6 +116,45 @@ describe('TestAnyLab', () => {
         });
     });
 
+    describe('#backupReport()', () => {
+        it('does nothing when there is no report yet', () => {
+            expect(backupReport(path.join(baseDir, 'Ann_report.txt'), 'new')).to.equal(null);
+            expect(fs.readdirSync(baseDir)).to.deep.equal([]);
+        });
+
+        it('does nothing when the new report is the same', () => {
+            const reportPath = path.join(baseDir, 'Ann_report.txt');
+            fs.writeFileSync(reportPath, 'same');
+            expect(backupReport(reportPath, 'same')).to.equal(null);
+            expect(fs.readdirSync(baseDir)).to.deep.equal(['Ann_report.txt']);
+        });
+
+        it('copies the old report to a file named with the time it was saved', () => {
+            const reportPath = path.join(baseDir, 'Ann_report.txt');
+            fs.writeFileSync(reportPath, 'old');
+            const savedAt = new Date(2026, 10, 2, 21, 30, 5);
+            fs.utimesSync(reportPath, savedAt, savedAt);
+
+            const backupPath = backupReport(reportPath, 'new');
+
+            expect(path.basename(backupPath)).to.equal('Ann_report_backup_2026-11-02_21-30-05.txt');
+            expect(fs.readFileSync(backupPath, 'utf8')).to.equal('old');
+            expect(fs.readFileSync(reportPath, 'utf8')).to.equal('old');  // the caller overwrites it
+        });
+
+        it('does not replace an earlier backup from the same second', () => {
+            const reportPath = path.join(baseDir, 'Ann_report.txt');
+            const savedAt = new Date(2026, 10, 2, 21, 30, 5);
+            for (const text of ['first', 'second']) {
+                fs.writeFileSync(reportPath, text);
+                fs.utimesSync(reportPath, savedAt, savedAt);
+                backupReport(reportPath, 'new');
+            }
+            expect(fs.readFileSync(path.join(baseDir, 'Ann_report_backup_2026-11-02_21-30-05.txt'), 'utf8')).to.equal('first');
+            expect(fs.readFileSync(path.join(baseDir, 'Ann_report_backup_2026-11-02_21-30-05_2.txt'), 'utf8')).to.equal('second');
+        });
+    });
+
     describe('#main()', () => {
         const htmlPage = '<!DOCTYPE html><html><head><title>T</title></head><body><h1>Hi</h1></body></html>';
         let log, error, warn;
@@ -168,6 +207,24 @@ describe('TestAnyLab', () => {
 
             await main([requirements, '--overwrite']);
             expect(fs.readFileSync(reportPath, 'utf8')).to.include('Checking the Ann directory');
+        });
+
+        it('keeps a backup of a report it overwrites, and still finds the submission', async () => {
+            const { subs, requirements } = makeLab();
+            const annDir = path.join(subs, 'Ann');
+            fs.writeFileSync(path.join(annDir, 'Ann_report.txt'), 'old report');
+
+            await main([requirements, '--overwrite']);
+            const backups = fs.readdirSync(annDir).filter((name) => name.startsWith('Ann_report_backup_'));
+            expect(backups).to.have.length(1);
+            expect(fs.readFileSync(path.join(annDir, backups[0]), 'utf8')).to.equal('old report');
+            // The backup is not mistaken for part of the submission
+            const report = fs.readFileSync(path.join(annDir, 'Ann_report.txt'), 'utf8');
+            expect(report).to.include('Submission found in Lab');
+
+            // The same report again: nothing new to back up
+            await main([requirements, '--overwrite']);
+            expect(fs.readdirSync(annDir).filter((name) => name.startsWith('Ann_report_backup_'))).to.have.length(1);
         });
 
         it('keeps checking the other students when a report cannot be saved', async function () {
