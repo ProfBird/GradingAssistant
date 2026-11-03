@@ -231,7 +231,8 @@ Missing Comment in head in files
 |---|---|
 | `TestAnyLab.mjs` | Main program. `main()` loops over student folders and writes the reports; it runs only when the file is started with node, so tests can import the other functions (`parseArguments`, `loadSettings`, ...). |
 | `SubmissionFolders.mjs` | Finds the folder that holds a submission (skipping wrapper folders and junk) and splits it into parts. |
-| `SubmissionChecker.mjs` | Old-style `checkSubmission()` that does the HTML and CSS checks. Being moved into `HtmlAndCssChecker`. |
+| `SubmissionChecker.mjs` | `checkSubmission()` checks one part of a student's lab. It reads each HTML and CSS file once, gives it to every check, and lays out the report from the checks' results. |
+| `HtmlAndCssChecks.mjs` | The HTML and CSS checks (validation, required elements, selectors, properties, additional requirements, regular expressions). Each returns a pass or fail result for each requirement. To add a check, write another one here. |
 | `CssParser.mjs` | Reads external, embedded and inline CSS with the css-tree parser, and finds the required selectors and properties in it. |
 | `Requirements.mjs` | Reads the requirements csv file into named fields, and warns about problems such as column names the program doesn't use. All other code uses these fields instead of reading the csv. |
 | `HtmlAndCssChecker.mjs` | Holds the requirements for the HTML and CSS checks. CSS validation (`validateCSS`) is here. |

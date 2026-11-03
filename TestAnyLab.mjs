@@ -170,13 +170,7 @@ async function checkStudent(studentDir, { labSettings, htmlAndCssChecker, jsChec
                 // TODO: Rewrite checkSubmision and move some code into HtmlAndCssChecker
                 // report +=  await htmlAndCssChecker.checkSubmission(partDirPath, part)
                 // We're still using the old checkSubmission function that also finds the right dirs and files
-                report += await checkSubmission(
-                    partDirPath,
-                    "",
-                    part,
-                    labSettings,
-                    htmlAndCssChecker.requirements
-                );
+                report += await checkSubmission(partDirPath, part, htmlAndCssChecker.requirements);
             }
             if(labSettings.isJavaScript)
             {

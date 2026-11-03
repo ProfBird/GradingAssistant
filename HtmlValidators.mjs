@@ -80,9 +80,7 @@ export function formatMessages(messages, fileName) {
     }
     let report = "";
     for (const m of messages) {
-        const message = `${m.severity} found on line ${m.line} column ${m.column}: ${m.message}`;
-        console.log(message);
-        report += message + "\n";
+        report += `${m.severity} found on line ${m.line} column ${m.column}: ${m.message}\n`;
     }
     return report + os.EOL;  // blank line after the errors
 }
