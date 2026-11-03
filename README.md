@@ -27,6 +27,14 @@ You need [Node.js](https://nodejs.org/) (the code uses ES modules, `.mjs`). Then
 npm install
 ```
 
+The easiest way to run the programs is the menu:
+
+```bash
+npm start
+```
+
+It asks what you want to do (check a lab or unzip a Moodle download), lets you pick the requirements file or download folder from a list of recent choices or with a file picker, asks about overwriting, then shows and runs the command. Use the arrow keys and Enter to choose; in the file picker, → opens a folder, ← goes up, and Esc goes back to the menu. The recent choices are saved in `.gradingassistant.json` in this folder (it isn't committed to git). You can still run the programs directly with the commands below.
+
 Other commands:
 
 ```bash
@@ -43,13 +51,13 @@ A Node program for unzipping files that have been bulk downloaded from the Moodl
 ### Usage
 
 ```bash
-node UnzipFiles.mjs filePath [options]
+node UnzipFiles.mjs folderPath [options]
 ```
 
-- `filePath`
-  If the file path contains spaces, enclose it in quotes. For example:
-  - Windows path: `"G:/My Drive/Courses/CS133JS/23F/Labs/Lab01.zip"`
-  - Mac OS path: `"/Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Fall/Labs/Lab01.zip"`
+- `folderPath` is the folder that holds the downloaded zip file (UnzipFiles unzips every `.zip` file in it).
+  If the path contains spaces, enclose it in quotes. For example:
+  - Windows path: `"G:/My Drive/Courses/CS133JS/23F/Labs"`
+  - Mac OS path: `"/Volumes/GoogleDrive/My Drive/Courses/CIS195/2023-Fall/Labs"`
 - options
   - `--help` Display the help message
   - `--overwrite` Overwrite existing unzipped files
@@ -239,6 +247,7 @@ Missing Comment in head in files
 | `HtmlValidators.mjs` | Pluggable HTML validators: `html-validate`, `w3c`, `vnu`. |
 | `JsChecker.mjs`, `Checker.mjs` | The deprecated JavaScript checker (runs Mocha tests on student JS), which will be removed, and the base class. |
 | `UnzipFiles.mjs` | Unzips Moodle bulk downloads. |
+| `Menu.mjs` | The arrow-key menu (`npm start`) that runs TestAnyLab and UnzipFiles and remembers recent choices. |
 
 More notes are in [docs/CodeExplanation.md](docs/CodeExplanation.md).
 

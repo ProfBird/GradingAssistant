@@ -5,9 +5,10 @@ Node.js (ES modules, `.mjs`) tools that help grade student web-development labs.
 ## Commands
 
 ```bash
+npm start                                  # arrow-key menu (Menu.mjs) that runs the two programs below
 npm test                                   # Mocha unit tests (test/*.test.mjs)
 node TestAnyLab.mjs <requirements.csv> --overwrite   # check a lab; --help lists options
-node UnzipFiles.mjs <path-to-downloaded.zip>         # unzip a bulk download (Moodle style)
+node UnzipFiles.mjs <folder-holding-the-download.zip> # unzip every .zip in the folder (Moodle style)
 npm run docs                               # JSDoc into docs/
 ```
 
@@ -27,6 +28,7 @@ npm run docs                               # JSDoc into docs/
 | `HtmlValidators.mjs` | Pluggable HTML validators: `html-validate` (default), `w3c`, `vnu`. |
 | `JsChecker.mjs`, `Checker.mjs` | JS checker (runs Mocha tests on student JS) and the base class. In progress. |
 | `UnzipFiles.mjs` | Unzips Moodle bulk downloads. Renames folders by stripping digits, spaces and underscores. |
+| `Menu.mjs` | `npm start`. Arrow-key menu (`@inquirer/prompts`, `inquirer-file-selector`) that builds and runs the TestAnyLab/UnzipFiles command lines as child processes. Recent choices are in `.gradingassistant.json` (gitignored); `loadConfig()` falls back to defaults for a missing or bad file. If a program gets a new option, add a prompt for it here. |
 
 ## Requirements file layout
 

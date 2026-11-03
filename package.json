@@ -1,19 +1,22 @@
 {
   "dependencies": {
+    "@inquirer/prompts": "^8.7.5",
     "css-tree": "^2.3.1",
     "csv-parser": "^3.0.0",
     "html-validate": "^11.16.2",
+    "inquirer-file-selector": "^2.0.0",
     "jsdom": "^22.1.0",
     "node-fetch": "^3.3.1",
     "vnu-jar": "^26.10.9"
   },
   "devDependencies": {
-    "@types/node": "^20.11.25",
+    "@types/node": "^22.20.5",
     "chai": "^4.3.10",
     "jsdoc": "^4.0.2",
     "mocha": "^10.2.0"
   },
   "scripts": {
+    "start": "node Menu.mjs",
     "test": "mocha",
     "docs": "jsdoc -d ./docs ."
   }
