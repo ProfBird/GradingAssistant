@@ -49,6 +49,39 @@ describe('HtmlAndCssChecker', () => {
         });
     });
 
+    describe('minimum numbers of required elements (number1 and number2 columns)', () => {
+        it('reads each minimum from the same row as its element', () => {
+            const csvText = [
+                'requiredElements1,number1,requiredElements2,number2',
+                'title,1,h1,3',
+                'a[href],2,,',      // blank cell in requiredElements2: no element, so no number
+                'img,,p,',          // blank number1: the minimum is 1
+                ',5,,',             // a number with no element is ignored
+                'br,2,,',
+            ].join('\n');
+
+            const { requirements } = new HtmlAndCssChecker(Buffer.from(csvText));
+
+            expect(requirements.requiredElements1).to.deep.equal(['title', 'a[href]', 'img', 'br']);
+            expect(requirements.minElements1).to.deep.equal([1, 2, 1, 2]);
+            expect(requirements.requiredElements2).to.deep.equal(['h1', 'p']);
+            expect(requirements.minElements2).to.deep.equal([3, 1]);
+        });
+
+        it('uses 1 when there is no number column', () => {
+            const { requirements } = new HtmlAndCssChecker(Buffer.from('requiredElements1\nh1\np'));
+            expect(requirements.minElements1).to.deep.equal([1, 1]);
+        });
+
+        it('parseMinimum() reads whole numbers and uses 1 for anything else', () => {
+            expect(HtmlAndCssChecker.parseMinimum('3')).to.equal(3);
+            expect(HtmlAndCssChecker.parseMinimum(' 2 ')).to.equal(2);
+            expect(HtmlAndCssChecker.parseMinimum('')).to.equal(1);
+            expect(HtmlAndCssChecker.parseMinimum(undefined)).to.equal(1);
+            expect(HtmlAndCssChecker.parseMinimum('two')).to.equal(1);
+        });
+    });
+
     describe('#validateCSS()', function () {
         this.timeout(10000);  // requests are spaced one second apart
         const soap = (errors) => '<?xml version="1.0"?><env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope" ' +

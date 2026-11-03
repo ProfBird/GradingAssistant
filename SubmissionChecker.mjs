@@ -18,6 +18,8 @@ import { isJunk } from "./SubmissionFolders.mjs";
 * @param {Object} requirements - The requirements to check against.
 * @property {Array<string>} requirements.requiredElements1 - Part1 required HTML elements.
 * @property {Array<string>} requirements.requiredElements2 - Part2 required HTML elements.
+* @property {Array<number>} requirements.minElements1 - Minimum number of each Part1 element (1 if missing).
+* @property {Array<number>} requirements.minElements2 - Minimum number of each Part2 element (1 if missing).
 * @property {Array<string>} requirements.requiredCssSelectors - The required CSS selectors.
 * @property {Array<string>} requirements.requiredCssProperties - The required CSS properties.
 * @property {Array<string>} requirements.regExpForHTML1 - Regular expressions to check against the HTML.
@@ -38,7 +40,9 @@ async function checkSubmission(
     let message = ""; // Individual message
     let report = ""; // All messages for the operations in this function
     let requiredElements = (LabPart === 1) ? HtmlAndCssRequirements.requiredElements1 : HtmlAndCssRequirements.requiredElements2;
-    const foundElements = []; // will hold required elements found in the lab files
+    const minElements = (LabPart === 1) ? HtmlAndCssRequirements.minElements1 : HtmlAndCssRequirements.minElements2;
+    // How many times each required element was found in all the lab files (same order as requiredElements)
+    const elementCounts = requiredElements.map(() => 0);
     // TODO: make this a paramenter and define it in the main
     const foundSelectors = []; // all the required css slectors that were found in the css files and embedded css
     const allSelectors = [];  // the selector of every rule found in the css files and embedded css for one part of the lab
@@ -83,8 +87,8 @@ async function checkSubmission(
         report += await checkFile(fileContents, filePath);
     }
 
-    // compare foundElements to requiredElements and log any missing elements
-    report = summarizeForRequiredElements(foundElements, requiredElements, report);
+    // compare elementCounts to the number required and log any missing elements
+    report = summarizeForRequiredElements(elementCounts, requiredElements, minElements, report);
     // TODO: combine the following two functions into one and check for properties in specific selectors.
     if (HtmlAndCssRequirements.requiredCssSelectors.length > 0)
     {
@@ -169,9 +173,9 @@ async function checkSubmission(
                     report += await validateHtml(fileContents, fileName, htmlValidator);
                 }
 
-                // Get any required html elements from fileContents, put in foundElements
+                // Count the required html elements in fileContents, add to elementCounts
                 const dom = new JSDOM(fileContents);
-                for (const element of requiredElements)
+                for (const [i, element] of requiredElements.entries())
                 {
                     let elements = [];
                     try
@@ -183,12 +187,7 @@ async function checkSubmission(
                         console.error(message);
                         report += message + `\n`;
                     }
-                    // if something is in the elements array, then the element was found
-                    // TODO: figure out a cleaner way to do this
-                    if (elements.length !== 0)
-                    {
-                        foundElements.push(element);
-                    }
+                    elementCounts[i] += elements.length;
                 } // end looping through requiredElements
 
                 // Get embedded css out of the html file (there can be more than one style element)
@@ -426,28 +425,37 @@ function getInlineStyles(elements, requiredProperties) {
     return { allProperties, foundProperties };
 }
 
-/********************************************/
-/* Check results for required html elements */
-/********************************************/
-function summarizeForRequiredElements(foundElements, requiredElements, report)
+/********************************************************************
+ * Check results for required html elements
+ * @param {Array<number>} elementCounts - How many times each required element was found in all the files.
+ * @param {Array<string>} requiredElements - The required element selectors, in the same order as elementCounts.
+ * @param {Array<number>} [minElements] - Minimum number of each element, in the same order. Missing means 1.
+ * @param {string} report - The report string to append to.
+ * @returns {string} The updated report string.
+ */
+function summarizeForRequiredElements(elementCounts, requiredElements, minElements = [], report)
 {
-    const missingElements = requiredElements.filter(
-        (element) => !foundElements.includes(element)
-    );
+    const messages = [];
     // TODO: diffrentiate between missing elements and missing attributes
-    if (missingElements.length > 0)
+    requiredElements.forEach((element, i) =>
     {
-        const message = `Missing ${missingElements.length} required elements`;
-        report += message + `\n`;
-        for (const element of missingElements)
+        const count = elementCounts[i] ?? 0;
+        const minimum = minElements[i] ?? 1;
+        if (count === 0 && minimum > 0)
         {
-            const message = `Missing ${element} element`;
-            report += message + `\n`;
+            messages.push(`Missing ${element} element`);
+        } else if (count < minimum)
+        {
+            messages.push(`Found ${count} ${element} elements. Expected at least ${minimum}`);
         }
+    });
+    if (messages.length > 0)
+    {
+        report += `Missing ${messages.length} required elements\n`;
+        report += messages.join("\n") + "\n";
     } else
     {
-        const message = `All required elements found`;
-        report += message + `\n`;
+        report += `All required elements found\n`;
     }
     return report;
 } 

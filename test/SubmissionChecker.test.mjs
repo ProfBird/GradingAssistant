@@ -231,6 +231,69 @@ describe('SubmissionChecker', () => {
             });
         });
 
+        describe('minimum numbers of required elements', () => {
+            const elementRequirements = {
+                ...requirements,
+                requiredElements1: ["h1, h2, h3", "a[href]", "img[alt]"],
+                minElements1: [2, 2, 1],
+                requiredElements2: ["p"],
+                minElements2: [2],
+                additionalRequirements: ["", "0", "0", "false", "false"],
+            };
+            const page = (body) => `<!DOCTYPE html><html><head><title>T</title></head><body>${body}</body></html>`;
+
+            it('adds up the matching elements from all of the files', async () => {
+                const student = makeStudentDir('m', []);
+                fs.writeFileSync(path.join(student, 'index.html'), page('<h1>A</h1><a href="x">x</a><img src="a" alt="a">'));
+                fs.writeFileSync(path.join(student, 'two.html'), page('<h2>B</h2><a href="y">y</a>'));
+
+                const report = await checkSubmission(student, "", 1, {}, elementRequirements);
+
+                expect(report).to.include('All required elements found');
+            });
+
+            it('reports an element that was found fewer times than required', async () => {
+                const student = makeStudentDir('n', []);
+                fs.writeFileSync(path.join(student, 'index.html'), page('<h1>A</h1><a href="x">x</a><img src="a" alt="a">'));
+
+                const report = await checkSubmission(student, "", 1, {}, elementRequirements);
+
+                expect(report).to.include('Missing 2 required elements');
+                expect(report).to.include('Found 1 h1, h2, h3 elements. Expected at least 2');
+                expect(report).to.include('Found 1 a[href] elements. Expected at least 2');
+                expect(report).to.not.include('img[alt]');
+            });
+
+            it('still reports an element that is not there at all as missing', async () => {
+                const student = makeStudentDir('o', []);
+                fs.writeFileSync(path.join(student, 'index.html'), page('<h1>A</h1><h2>B</h2><a href="x">x</a><a href="y">y</a>'));
+
+                const report = await checkSubmission(student, "", 1, {}, elementRequirements);
+
+                expect(report).to.include('Missing 1 required elements');
+                expect(report).to.include('Missing img[alt] element');
+            });
+
+            it('requires 1 of each element when there are no minimums', async () => {
+                const student = makeStudentDir('p', []);
+                fs.writeFileSync(path.join(student, 'index.html'), page('<h1>A</h1><a href="x">x</a><img src="a" alt="a">'));
+                const { minElements1, minElements2, ...withoutMinimums } = elementRequirements;
+
+                const report = await checkSubmission(student, "", 1, {}, withoutMinimums);
+
+                expect(report).to.include('All required elements found');
+            });
+
+            it('uses the part 2 elements and minimums for part 2', async () => {
+                const student = makeStudentDir('q', []);
+                fs.writeFileSync(path.join(student, 'index.html'), page('<p>one</p>'));
+
+                const report = await checkSubmission(student, "", 2, {}, elementRequirements);
+
+                expect(report).to.include('Found 1 p elements. Expected at least 2');
+            });
+        });
+
         describe('regular expression searches', () => {
             const regExRequirements = {
                 ...requirements,

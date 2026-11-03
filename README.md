@@ -161,7 +161,7 @@ Missing values get defaults, and a file with fewer than 8 settings values prints
 | 5 | Minimum number of CSS rules in the external and embedded CSS (optional) |
 | 6 | Minimum number of distinct CSS properties in the external and embedded CSS (optional; to set only this one, put `0` in position 5 because empty cells are skipped) |
 
-Other columns used for HTML and CSS checks are `requiredElements1` and `requiredElements2`, `requiredCssSelectors`, `requiredCssProperties`, and the parallel lists `regExpForHTML1` / `regExpForHTML1Description` and `regExpForCSS1` / `regExpForCSS1Description`. The JavaScript columns are `unitTests` and `filesToTest`.
+Other columns used for HTML and CSS checks are `requiredElements1` and `requiredElements2` (each with an optional `number1` / `number2` column giving the minimum number of that element across all of a student's files; blank means 1), `requiredCssSelectors`, `requiredCssProperties`, and the parallel lists `regExpForHTML1` / `regExpForHTML1Description` and `regExpForCSS1` / `regExpForCSS1Description`. The JavaScript columns are `unitTests` and `filesToTest`.
 
 Older requirements files use earlier layouts and are not compatible. See the `docs` folder for examples ([Lab 6](docs/CIS195Lab06GradeAssist.csv), [term project](docs/CIS195TermProjectGradeAssist.csv)). Note that [ExampleJsRequirementsTable.md](docs/ExampleJsRequirementsTable.md) describes an older layout.
 
