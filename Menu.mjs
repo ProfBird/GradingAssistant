@@ -22,6 +22,7 @@ const maxRecent = 8;
 /** @typedef {Object} MenuConfig - The recent choices
  * @property {Array<string>} recentRequirementsFiles - Most recent first
  * @property {Array<string>} recentSubmissionsFolders - Folders holding LMS downloads to unzip, most recent first
+ * @property {Array<string>} recentCheckedFolders - Folders of unzipped submissions chosen to check instead of the one in the requirements file, most recent first
  * @property {boolean} overwriteReports - The last answer to "Overwrite existing report files?"
  * @property {boolean} overwriteUnzipped - The last answer to "Overwrite existing unzipped files?"
  * @property {string} lastAction - "check" or "unzip"
@@ -72,7 +73,7 @@ async function runMenu() {
 }
 
 /** checkLab function
- * Ask for a requirements file and the overwrite option, then run TestAnyLab.
+ * Ask for a requirements file, the overwrite option and optionally a different submissions folder, then run TestAnyLab.
  * @param {MenuConfig} config
  */
 async function checkLab(config) {
@@ -93,10 +94,30 @@ async function checkLab(config) {
     }
     const overwrite = await confirm({ message: "Overwrite existing report files?", default: config.overwriteReports });
 
+    // Usually the requirements file says where the submissions are
+    let submissionsFolder;
+    if (await confirm({ message: "Check a different submissions folder than the one in the requirements file?", default: false })) {
+        submissionsFolder = await chooseRecentOrBrowse({
+            message: "Folder with the unzipped submissions:",
+            recent: config.recentCheckedFolders,
+            browseLabel: "Browse for a folder...",
+            browse: (basePath) => fileSelector({
+                message: "Choose the folder that holds the students' folders (Enter to choose, → to open, ← to go up, Esc to cancel):",
+                basePath,
+                type: "directory",
+                allowCancel: true,
+            }),
+        });
+        if (submissionsFolder === null) {
+            return;
+        }
+        config.recentCheckedFolders = addRecent(config.recentCheckedFolders, submissionsFolder);
+    }
+
     config.recentRequirementsFiles = addRecent(config.recentRequirementsFiles, requirementsFile);
     config.overwriteReports = overwrite;
     saveConfig(config);
-    await runProgram("TestAnyLab.mjs", buildArguments(requirementsFile, overwrite));
+    await runProgram("TestAnyLab.mjs", buildArguments(requirementsFile, overwrite, submissionsFolder));
 }
 
 /** unzipDownload function
@@ -189,10 +210,15 @@ async function runProgram(script, args) {
 /** buildArguments function
  * @param {string} target - The requirements file or the download folder
  * @param {boolean} overwrite
+ * @param {string} [submissionsFolder] - For TestAnyLab: a submissions folder to use instead of the one in the requirements file
  * @returns {Array<string>} The command line arguments for TestAnyLab or UnzipFiles
  */
-export function buildArguments(target, overwrite) {
-    return overwrite ? [target, "--overwrite"] : [target];
+export function buildArguments(target, overwrite, submissionsFolder) {
+    const args = overwrite ? [target, "--overwrite"] : [target];
+    if (submissionsFolder) {
+        args.push("--submissions", submissionsFolder);
+    }
+    return args;
 }
 
 /** addRecent function
@@ -213,6 +239,7 @@ export function loadConfig(filePath = configPath) {
     const defaults = {
         recentRequirementsFiles: [],
         recentSubmissionsFolders: [],
+        recentCheckedFolders: [],
         overwriteReports: false,
         overwriteUnzipped: false,
         lastAction: "check",

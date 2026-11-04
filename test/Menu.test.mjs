@@ -10,6 +10,11 @@ describe('Menu', () => {
             expect(buildArguments('/a b/req.csv', false)).to.deep.equal(['/a b/req.csv']);
             expect(buildArguments('/a b/req.csv', true)).to.deep.equal(['/a b/req.csv', '--overwrite']);
         });
+        it('adds --submissions and the folder only when a folder is given', () => {
+            expect(buildArguments('/a b/req.csv', false, '/c d/subs')).to.deep.equal(['/a b/req.csv', '--submissions', '/c d/subs']);
+            expect(buildArguments('/a b/req.csv', true, '/c d/subs')).to.deep.equal(['/a b/req.csv', '--overwrite', '--submissions', '/c d/subs']);
+            expect(buildArguments('/a b/req.csv', false, undefined)).to.deep.equal(['/a b/req.csv']);
+        });
     });
 
     describe('#addRecent()', () => {
@@ -37,7 +42,7 @@ describe('Menu', () => {
             fs.rmSync(dir, { recursive: true, force: true });
         });
 
-        const defaults = { recentRequirementsFiles: [], recentSubmissionsFolders: [], overwriteReports: false,
+        const defaults = { recentRequirementsFiles: [], recentSubmissionsFolders: [], recentCheckedFolders: [], overwriteReports: false,
             overwriteUnzipped: false, lastAction: 'check' };
 
         it('gives the defaults when there is no file, without a warning', () => {

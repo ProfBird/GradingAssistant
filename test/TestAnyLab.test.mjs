@@ -46,6 +46,30 @@ describe('TestAnyLab', () => {
             expect(result.quitProgram).to.equal(true);
             expect(result.message).to.equal('Unknown option: --bogus');
         });
+        it('has no submissions folder unless --submissions is given', () => {
+            expect(parseArguments(['req.csv']).submissionsPath).to.equal(undefined);
+        });
+        it('reads --submissions with the folder as the next argument or after an equals sign', () => {
+            expect(parseArguments(['req.csv', '--submissions', '/a b/subs'])).to.include({ submissionsPath: '/a b/subs', quitProgram: false });
+            expect(parseArguments(['req.csv', '--submissions=/a b/subs'])).to.include({ submissionsPath: '/a b/subs', quitProgram: false });
+        });
+        it('reads --submissions and --overwrite in either order', () => {
+            expect(parseArguments(['req.csv', '--submissions', 'subs', '--overwrite']))
+                .to.include({ submissionsPath: 'subs', overwrite: true, quitProgram: false });
+            expect(parseArguments(['req.csv', '--overwrite', '--submissions', 'subs']))
+                .to.include({ submissionsPath: 'subs', overwrite: true, quitProgram: false });
+        });
+        it('quits when --submissions has no folder', () => {
+            for (const args of [['req.csv', '--submissions'], ['req.csv', '--submissions=']]) {
+                const result = parseArguments(args);
+                expect(result.quitProgram).to.equal(true);
+                expect(result.message).to.equal('Missing folder after --submissions');
+            }
+        });
+        it('quits on an unknown option even after a good one, and describes --submissions in the help', () => {
+            expect(parseArguments(['req.csv', '--overwrite', '--bogus'])).to.include({ quitProgram: true, message: 'Unknown option: --bogus' });
+            expect(parseArguments(['req.csv', '--submissions', 'subs', '--help']).message).to.include('--submissions <folder>');
+        });
     });
 
     describe('#parseBoolean()', () => {
@@ -113,6 +137,20 @@ describe('TestAnyLab', () => {
         it('throws a message naming the file if it cannot be read', () => {
             const missing = path.join(baseDir, 'missing.csv');
             expect(() => loadSettings(missing, 'darwin')).to.throw(`Error processing requirements file ${missing}`);
+        });
+        it('uses a given submissions folder instead of the one in the file, even if the file has none', () => {
+            const other = path.join(baseDir, 'other');
+            fs.mkdirSync(other);
+            const withPath = writeRequirements({ settings: ['subs', 'winsubs', '1', 'Lab', 'true', 'true', 'true', 'false'] });
+            expect(loadSettings(withPath, 'darwin', other).labSettings.submissionsPath).to.equal(other);
+            const noPath = writeRequirements({ settings: ['', '', '1', 'Lab', 'true', 'true', 'true', 'false'] }, 'nopath.csv');
+            expect(loadSettings(noPath, 'darwin', other).labSettings.submissionsPath).to.equal(other);
+        });
+        it('throws if the given submissions folder is missing or is a file', () => {
+            const filePath = writeRequirements({ settings: ['subs', 'subs', '1', 'Lab', 'true', 'true', 'true', 'false'] });
+            const missing = path.join(baseDir, 'nope');
+            expect(() => loadSettings(filePath, 'darwin', missing)).to.throw(`the submissions folder ${missing} is not a folder`);
+            expect(() => loadSettings(filePath, 'darwin', filePath)).to.throw('is not a folder');
         });
     });
 
@@ -213,6 +251,26 @@ describe('TestAnyLab', () => {
             expect(fs.existsSync(path.join(subs, 'Bob', 'Bob_report.txt'))).to.equal(true);
             expect(fs.existsSync(path.join(subs, 'Cy_onlinetext', 'Cy_onlinetext_report.txt'))).to.equal(false);
             expect(fs.existsSync(path.join(subs, '.hidden', '.hidden_report.txt'))).to.equal(false);
+        });
+
+        it('checks the folder given with --submissions instead of the one in the requirements file', async () => {
+            const { subs, requirements } = makeLab();
+            const other = path.join(baseDir, 'other');
+            fs.cpSync(subs, other, { recursive: true });
+            fs.rmSync(path.join(subs, 'Ann', 'Lab'), { recursive: true });  // the file's own folder would give a different report
+
+            await main([requirements, '--submissions', other]);
+
+            expect(fs.readFileSync(path.join(other, 'Ann', 'Ann_report.txt'), 'utf8')).to.include('All required elements found');
+            expect(fs.existsSync(path.join(subs, 'Ann', 'Ann_report.txt'))).to.equal(false);
+            expect(fs.readdirSync(other).some((name) => /^TestAnyLab_.*\.log$/.test(name))).to.equal(true);
+        });
+
+        it('reports a --submissions folder that does not exist and checks nothing', async () => {
+            const { subs, requirements } = makeLab();
+            await main([requirements, '--submissions', path.join(baseDir, 'nope')]);
+            expect(process.exitCode).to.equal(1);
+            expect(fs.existsSync(path.join(subs, 'Ann', 'Ann_report.txt'))).to.equal(false);
         });
 
         it('skips students who have a report unless --overwrite is given', async () => {

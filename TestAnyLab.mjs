@@ -42,10 +42,10 @@ if (process.argv[1] && import.meta.url === pathToFileURL(fs.realpathSync(process
 /** main function
  * Check all the student submissions for a lab and write a report in each student's folder.
  * @param {Array<string>} args - Command line arguments after the program name:
- *   the requirements file path, then an optional option
+ *   the requirements file path, then optional options (--overwrite, --submissions folder)
  */
 export async function main(args) {
-    const { requirementsFilePath, overwrite, message, quitProgram } = parseArguments(args);
+    const { requirementsFilePath, overwrite, submissionsPath, message, quitProgram } = parseArguments(args);
     console.log(`param = ${requirementsFilePath}`);
     if (message) {
         console.log(message);
@@ -56,7 +56,7 @@ export async function main(args) {
 
     let settings;
     try {
-        settings = loadSettings(requirementsFilePath);
+        settings = loadSettings(requirementsFilePath, process.platform, submissionsPath);
     } catch (error) {
         console.error(error.message);
         process.exitCode = 1;
@@ -197,38 +197,58 @@ function formatTimestamp(date) {
 
 /** parseArguments function
  * Interpret the command line arguments.
- * The option is optional. Without one, existing report files are not overwritten.
+ * The options are optional and can be in any order after the requirements file path. Without them,
+ * existing report files are not overwritten and the submissions folder comes from the requirements file.
  * A missing requirements file path, or --help in its place, shows the help message.
  * @param {Array<string>} args - Command line arguments after the program name
- * @returns {{requirementsFilePath: (string|undefined), overwrite: boolean,
- *   message: (string|undefined), quitProgram: boolean}} message is text to display, if any.
+ * @returns {{requirementsFilePath: (string|undefined), overwrite: boolean, submissionsPath: (string|undefined),
+ *   message: (string|undefined), quitProgram: boolean}} submissionsPath is the folder given with
+ *   --submissions, if any. message is text to display, if any.
  *   quitProgram is true if the program should not check any submissions.
  */
 export function parseArguments(args) {
     const requirementsFilePath = args[0];  // absolute path including the file name
-    const result = { requirementsFilePath, overwrite: false, message: undefined, quitProgram: false };
-    switch (requirementsFilePath === undefined || requirementsFilePath === '--help'
-        ? '--help' : args[1]) {
-        case '--help':
-            result.message = [
-                "Usage: node TestAnyLab.mjs requirementsFilePath.csv [options]",
-                "options:",
-                "--help\t\tDisplay this help message",
-                "--overwrite\tOverwrite existing report files",
-            ].join("\n");
-            result.quitProgram = true;  // exit the program after displaying the help message
-            break;
-        case undefined:  // no option given, run with the defaults
-            break;
-        case '--overwrite':
-            result.overwrite = true;
-            result.message = "Overwriting report files";
-            break;
-        default:
-            result.message = `Unknown option: ${args[1]}`;
-            result.quitProgram = true;
-            break;
+    const result = { requirementsFilePath, overwrite: false, submissionsPath: undefined, message: undefined, quitProgram: false };
+    const showHelp = () => {
+        result.message = [
+            "Usage: node TestAnyLab.mjs requirementsFilePath.csv [options]",
+            "options:",
+            "--help\t\t\t\tDisplay this help message",
+            "--overwrite\t\t\tOverwrite existing report files",
+            "--submissions <folder>\t\tCheck the submissions in this folder instead of the folder in the requirements file",
+        ].join("\n");
+        result.quitProgram = true;  // exit the program after displaying the help message
+    };
+    if (requirementsFilePath === undefined || requirementsFilePath === '--help') {
+        showHelp();
+        return result;
     }
+    const messages = [];
+    for (let i = 1; i < args.length; i++) {
+        const option = args[i];
+        if (option === '--help') {
+            showHelp();
+            return result;
+        } else if (option === '--overwrite') {
+            result.overwrite = true;
+            messages.push("Overwriting report files");
+        } else if (option === '--submissions' || option.startsWith('--submissions=')) {
+            // The folder follows as the next argument, or after an equals sign
+            const folder = option === '--submissions' ? args[++i] : option.slice('--submissions='.length);
+            if (!folder) {
+                result.message = "Missing folder after --submissions";
+                result.quitProgram = true;
+                return result;
+            }
+            result.submissionsPath = folder;
+            messages.push(`Using the submissions folder ${folder}`);
+        } else {
+            result.message = `Unknown option: ${option}`;
+            result.quitProgram = true;
+            return result;
+        }
+    }
+    result.message = messages.length > 0 ? messages.join("\n") : undefined;
     return result;
 }
 
@@ -287,11 +307,14 @@ async function checkStudent(studentDir, { labSettings, htmlAndCssChecker, jsChec
 * HTML, CSS, JS, etc. files. Warnings about the file are displayed.
 * @param {string} requirementsFilePath - The csv requirements file name
 * @param {string} [platform] - The operating system, like process.platform. Chooses which submissions path to use.
+* @param {string} [submissionsFolder] - A submissions folder to use instead of the one in the requirements file
+*   (a relative path is relative to the current folder). The requirements file then needs no submissions path.
 * @returns {{labSettings: LabSettings, htmlAndCssChecker: HtmlAndCssChecker, jsChecker: (JsChecker|null)}}
 *   jsChecker is null unless this is a JavaScript lab.
-* @throws {Error} If the file can't be read or has no submissions path for this platform
+* @throws {Error} If the file can't be read, has no submissions path for this platform,
+*   or submissionsFolder is not a folder
 */
-export function loadSettings(requirementsFilePath, platform = process.platform) {
+export function loadSettings(requirementsFilePath, platform = process.platform, submissionsFolder = undefined) {
     let requirements;
     try {
         requirements = readRequirementsFile(requirementsFilePath);
@@ -304,9 +327,18 @@ export function loadSettings(requirementsFilePath, platform = process.platform) 
     }
 
     const { settings } = requirements;
+    let submissionsPath;
+    if (submissionsFolder !== undefined) {
+        submissionsPath = path.resolve(submissionsFolder);
+        if (!fs.existsSync(submissionsPath) || !fs.statSync(submissionsPath).isDirectory()) {
+            throw new Error(`Error: the submissions folder ${submissionsPath} is not a folder.`);
+        }
+    } else {
+        submissionsPath = getSubmissionsPath(settings, requirementsFilePath, platform);
+    }
     /** @type {LabSettings} */
     const labSettings = {
-        submissionsPath: getSubmissionsPath(settings, requirementsFilePath, platform),
+        submissionsPath,
         numberOfParts: settings.numberOfParts,
         areAllInOneDir: settings.areAllInOneDir,
         isHTML: settings.checkHtml,  // Currenty for HTML & CSS
