@@ -73,7 +73,7 @@ async function runMenu() {
 }
 
 /** checkLab function
- * Ask for a requirements file, the overwrite option and optionally a different submissions folder, then run TestAnyLab.
+ * Ask for a requirements file, optionally a different submissions folder, and the overwrite option, then run TestAnyLab.
  * @param {MenuConfig} config
  */
 async function checkLab(config) {
@@ -92,8 +92,6 @@ async function checkLab(config) {
     if (requirementsFile === null) {
         return;
     }
-    const overwrite = await confirm({ message: "Overwrite existing report files?", default: config.overwriteReports });
-
     // Usually the requirements file says where the submissions are
     let submissionsFolder;
     if (await confirm({ message: "Check a different submissions folder than the one in the requirements file?", default: false })) {
@@ -113,6 +111,7 @@ async function checkLab(config) {
         }
         config.recentCheckedFolders = addRecent(config.recentCheckedFolders, submissionsFolder);
     }
+    const overwrite = await confirm({ message: "Overwrite existing report files?", default: config.overwriteReports });
 
     config.recentRequirementsFiles = addRecent(config.recentRequirementsFiles, requirementsFile);
     config.overwriteReports = overwrite;
