@@ -19,7 +19,7 @@ let submissionsPath = "/Volumes/GoogleDrive/My Drive/Courses/CS133JS/23F/Labs";
 //   Moodle: a file with a name like "CS 133JS Sp23 (Bird 41334)-Lab 6 Production Version-3803210.zip"
 //       that contains a folder for each student (Ty Titan_123_assignsubmission_file_), each holding
 //       one or more .zip archives. UnzipFiles renames the folders like TyTitan_file.
-// The students' .zip archives are then unzipped in their folders.
+// The students' .zip, .7z and .rar archives are then unzipped in their folders (and deleted if that worked).
 
 
 /****************/
@@ -110,7 +110,7 @@ function unzipFiles(submissionsPath)
                 const studentFolderPath = path.join(allSubmissionsFolderPath, dirent.name);
                 for (const studentFileName of fs.readdirSync(studentFolderPath))
                 {
-                    if (studentFileName.toLowerCase().endsWith('.zip'))
+                    if (isStudentArchive(studentFileName))
                     {
                         const studentZipPath = path.join(studentFolderPath, studentFileName);
                         // Keep the zip file if it couldn't be unzipped, so the student's work isn't lost
@@ -183,15 +183,26 @@ export function makeWritable(dirPath)
     }
 }
 
+/** isStudentArchive function
+ * @param {string} fileName
+ * @returns {boolean} true for the kinds of archive students turn in: .zip, .7z or .rar
+ */
+export function isStudentArchive(fileName)
+{
+    return /\.(zip|7z|rar)$/i.test(fileName);
+}
+
 /** unzip function
- * Unzip a file into a folder with 7-Zip on Windows or unzip on other systems.
+ * Unzip a file into a folder with 7-Zip on Windows. On other systems use unzip for .zip files
+ * and tar for .7z and .rar files (macOS tar is bsdtar, which reads them; GNU tar on Linux does not,
+ * so there the archive is reported and kept).
  * The program is run directly, not through a shell, so student file names can't run commands.
  * @param {string} zipPath
  * @param {string} destination - Folder to unzip into
  * @param {boolean} overwriteExisting - Replace existing files, or skip them
  * @returns {boolean} true if it worked. A problem is reported, not thrown.
  */
-function unzip(zipPath, destination, overwriteExisting)
+export function unzip(zipPath, destination, overwriteExisting)
 {
     try
     {
@@ -199,6 +210,11 @@ function unzip(zipPath, destination, overwriteExisting)
         {
             // 7Zip switches: x = extract with full paths, o = output dir, aoa = overwrite all, aos = skip existing
             execFileSync("7z", ["x", zipPath, `-o${destination}`, overwriteExisting ? "-aoa" : "-aos"], { stdio: "pipe" });
+        }
+        else if (!/\.zip$/i.test(zipPath))
+        {
+            // -x = extract, -k = keep existing files (skip them), -f = archive, -C = destination
+            execFileSync("tar", [overwriteExisting ? "-xf" : "-xkf", zipPath, "-C", destination], { stdio: "pipe" });
         }
         else
         {

@@ -1,10 +1,75 @@
-import { makeWritable, parseCanvasFileName, hasCanvasFiles, organizeCanvasDownload } from '../UnzipFiles.mjs';
+import { makeWritable, parseCanvasFileName, hasCanvasFiles, organizeCanvasDownload, isStudentArchive, unzip } from '../UnzipFiles.mjs';
 import { expect } from 'chai';
+import { execFileSync } from 'child_process';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
 describe('UnzipFiles', () => {
+    describe('#isStudentArchive()', () => {
+        it('accepts .zip, .7z and .rar in any case, and nothing else', () => {
+            for (const name of ['Lab1.zip', 'Lab 1.ZIP', 'a.7z', 'b.rar', 'C.Rar'])
+            {
+                expect(isStudentArchive(name), name).to.equal(true);
+            }
+            for (const name of ['index.html', 'notes.zip.txt', 'zip', 'a.tar', 'a.gz'])
+            {
+                expect(isStudentArchive(name), name).to.equal(false);
+            }
+        });
+    });
+
+    describe('#unzip()', function () {
+        let dir;
+        beforeEach(function () {
+            // Unzipping a .7z needs bsdtar (macOS) or 7z (Windows), which can't be counted on everywhere
+            if (process.platform !== 'darwin')
+            {
+                this.skip();
+            }
+            dir = fs.mkdtempSync(path.join(os.tmpdir(), 'unzip-'));
+        });
+        afterEach(() => {
+            if (dir)
+            {
+                fs.rmSync(dir, { recursive: true, force: true });
+            }
+        });
+
+        it('unzips a .7z file, keeping an existing file unless overwriting', () => {
+            const source = path.join(dir, 'source');
+            fs.mkdirSync(source);
+            fs.writeFileSync(path.join(source, 'index.html'), 'original');
+            const archive = path.join(dir, 'student.7z');
+            execFileSync('tar', ['--format', '7zip', '-cf', archive, '-C', source, 'index.html']);
+            const out = path.join(dir, 'out');
+            fs.mkdirSync(out);
+            fs.writeFileSync(path.join(out, 'index.html'), 'edited');
+
+            expect(unzip(archive, out, false)).to.equal(true);
+            expect(fs.readFileSync(path.join(out, 'index.html'), 'utf8')).to.equal('edited');
+            expect(unzip(archive, out, true)).to.equal(true);
+            expect(fs.readFileSync(path.join(out, 'index.html'), 'utf8')).to.equal('original');
+        });
+
+        it('reports an archive that is not valid instead of throwing', () => {
+            const archive = path.join(dir, 'bad.rar');
+            fs.writeFileSync(archive, 'not an archive');
+            const messages = [];
+            const realLog = console.log;
+            console.log = (message) => messages.push(message);
+            try
+            {
+                expect(unzip(archive, dir, false)).to.equal(false);
+            }
+            finally
+            {
+                console.log = realLog;
+            }
+            expect(messages.join('\n')).to.include('Error unzipping bad.rar');
+        });
+    });
+
     describe('#makeWritable()', function () {
         let baseDir;
         beforeEach(function () {
