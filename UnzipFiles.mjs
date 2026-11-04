@@ -53,7 +53,7 @@ if (!isMainProgram)
     // Unzip any submissions downloaded from the LMS into a new folder
     if (unzipFiles(submissionsPath))
     {
-      console.log("Unzip completed succssfully.");   
+      console.log("Unzip completed successfully.");   
     }
     else
     {
@@ -81,9 +81,14 @@ function unzipFiles(submissionsPath)
                 fs.mkdirSync(allSubmissionsFolderPath);
                 console.log("Created folder " + allSubmissionsFolderPath);
             }
+            else
+            {
+                // Only say what happens to existing files when there could be some
+                console.log(`The folder ${allSubmissionsFolderPath} already exists. ` +
+                    (overwrite ? "Files in it with the same names are being replaced." : "Files in it with the same names are being kept."));
+            }
 
             // Unzip the file to the allSubmissionsFolderPath directory
-            console.log((overwrite ? "Overwriting files on path " : "Skipping existing files on path ") + allSubmissionsFolderPath);
             unzip(filePath, allSubmissionsFolderPath, overwrite);
 
             // Some zip files store folders as read-only, which would stop the renaming below,
