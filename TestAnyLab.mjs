@@ -2,7 +2,6 @@ import fs from "fs";
 import path from "path";
 import { pathToFileURL } from "url";
 import { HtmlAndCssChecker } from './HtmlAndCssChecker.mjs';
-import { JsChecker } from './JsChecker.mjs';
 import { checkSubmission } from "./SubmissionChecker.mjs";
 import { getPartDirs } from "./SubmissionFolders.mjs";
 import { readRequirementsFile, parseBoolean } from "./Requirements.mjs";
@@ -27,7 +26,6 @@ export { parseBoolean };
  * @property {boolean} areAllInOneDir - true if all lab parts are in one folder
  * @property {boolean} isHTML - true if this is an HTML and CSS lab
  * @property {boolean} isCSS - true if this is a CSS lab (not used yet)
- * @property {boolean} isJavaScript - true if this is a JavaScript lab
  */
 
 /****************/
@@ -257,11 +255,11 @@ export function parseArguments(args) {
  * A problem with one student's files must not stop the checks of the other students,
  * so an error is written into that student's report instead of being thrown.
  * @param {string} studentDir - Name of the student's folder in the submissions folder
- * @param {{labSettings: LabSettings, htmlAndCssChecker: HtmlAndCssChecker, jsChecker: (JsChecker|null)}} settings
+ * @param {{labSettings: LabSettings, htmlAndCssChecker: HtmlAndCssChecker}} settings
  *   Returned by loadSettings
  * @returns {Promise<string>} The report
  */
-async function checkStudent(studentDir, { labSettings, htmlAndCssChecker, jsChecker }) {
+async function checkStudent(studentDir, { labSettings, htmlAndCssChecker }) {
     let report = `Checking the ${studentDir} directory\n`; // Report of the checks of the files for this student
     const studentDirPath = path.join(labSettings.submissionsPath, studentDir);
 
@@ -289,10 +287,6 @@ async function checkStudent(studentDir, { labSettings, htmlAndCssChecker, jsChec
                 // We're still using the old checkSubmission function that also finds the right dirs and files
                 report += await checkSubmission(partDirPath, part, htmlAndCssChecker.requirements);
             }
-            if(labSettings.isJavaScript)
-            {
-                report +=  await jsChecker.checkSubmission(partDirPath, part)
-            }
         }
     } catch (error) {
         const errorMessage = `Error checking ${studentDir}: ${error.message}`;
@@ -304,13 +298,12 @@ async function checkStudent(studentDir, { labSettings, htmlAndCssChecker, jsChec
 
 /** loadSettings function
 * Load a csv requirements file: the general settings, and the checkers for the
-* HTML, CSS, JS, etc. files. Warnings about the file are displayed.
+* HTML and CSS files. Warnings about the file are displayed.
 * @param {string} requirementsFilePath - The csv requirements file name
 * @param {string} [platform] - The operating system, like process.platform. Chooses which submissions path to use.
 * @param {string} [submissionsFolder] - A submissions folder to use instead of the one in the requirements file
 *   (a relative path is relative to the current folder). The requirements file then needs no submissions path.
-* @returns {{labSettings: LabSettings, htmlAndCssChecker: HtmlAndCssChecker, jsChecker: (JsChecker|null)}}
-*   jsChecker is null unless this is a JavaScript lab.
+* @returns {{labSettings: LabSettings, htmlAndCssChecker: HtmlAndCssChecker}}
 * @throws {Error} If the file can't be read, has no submissions path for this platform,
 *   or submissionsFolder is not a folder
 */
@@ -343,14 +336,9 @@ export function loadSettings(requirementsFilePath, platform = process.platform, 
         areAllInOneDir: settings.areAllInOneDir,
         isHTML: settings.checkHtml,  // Currenty for HTML & CSS
         isCSS: settings.checkCss,  // Currently not used 3/10/24
-        isJavaScript: settings.checkJavaScript,
     };
     const htmlAndCssChecker = new HtmlAndCssChecker(requirements);
-    // The JavaScript checker is deprecated, so only load it for a JavaScript lab. It reads its own columns.
-    const jsChecker = labSettings.isJavaScript
-        ? new JsChecker(fs.readFileSync(requirementsFilePath), path.dirname(requirementsFilePath))
-        : null;
-    return { labSettings, htmlAndCssChecker, jsChecker };
+    return { labSettings, htmlAndCssChecker };
 } // End of loadSettings function
 
 /** getSubmissionsPath function

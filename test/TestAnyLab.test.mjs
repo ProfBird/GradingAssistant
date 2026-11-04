@@ -104,18 +104,16 @@ describe('TestAnyLab', () => {
 
     describe('#loadSettings()', () => {
         it('reads all the settings, including the last row when there is no trailing newline', () => {
-            const filePath = writeRequirements({ settings: ['subs', 'winsubs', '2', 'Lab 3', 'false', 'true', 'true', 'false'] });
-            const { labSettings, htmlAndCssChecker, jsChecker } = loadSettings(filePath, 'darwin');
+            const filePath = writeRequirements({ settings: ['subs', 'winsubs', '2', 'Lab 3', 'false', 'true', 'true'] });
+            const { labSettings, htmlAndCssChecker } = loadSettings(filePath, 'darwin');
             expect(labSettings).to.deep.equal({
                 submissionsPath: path.join(baseDir, 'subs'),
                 numberOfParts: 2,
                 areAllInOneDir: false,
                 isHTML: true,
                 isCSS: true,
-                isJavaScript: false,
             });
             expect(htmlAndCssChecker.requirements).to.be.an('object');
-            expect(jsChecker).to.equal(null);
         });
         it('uses defaults for missing values', () => {
             const filePath = writeRequirements({ settings: ['subs'] });
@@ -124,15 +122,11 @@ describe('TestAnyLab', () => {
             console.warn = (message) => { warning += message; };
             try {
                 const { labSettings } = loadSettings(filePath, 'darwin');
-                expect(labSettings).to.include({ numberOfParts: 1, areAllInOneDir: true, isHTML: false, isCSS: false, isJavaScript: false });
+                expect(labSettings).to.include({ numberOfParts: 1, areAllInOneDir: true, isHTML: false, isCSS: false });
             } finally {
                 console.warn = warn;
             }
-            expect(warning).to.include('1 of the 8 expected values');
-        });
-        it('only creates the JavaScript checker for a JavaScript lab', () => {
-            const filePath = writeRequirements({ settings: ['subs', 'subs', '1', 'Lab', 'true', 'false', 'false', 'true'] });
-            expect(loadSettings(filePath, 'darwin').jsChecker).to.not.equal(null);
+            expect(warning).to.include('1 of the 7 expected values');
         });
         it('throws a message naming the file if it cannot be read', () => {
             const missing = path.join(baseDir, 'missing.csv');

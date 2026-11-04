@@ -5,8 +5,8 @@ import os from 'os';
 import path from 'path';
 
 describe('Requirements', () => {
-    // A requirements file in the current layout, with all 8 settings values
-    const settingsRows = ['/subs', 'C:/subs', '2', 'Lab 3', 'false', 'true', 'true', 'false'];
+    // A requirements file in the current layout, with all 7 settings values
+    const settingsRows = ['/subs', 'C:/subs', '2', 'Lab 3', 'false', 'true', 'true'];
     function csvWith(columns) {
         const names = ['settings', ...Object.keys(columns)];
         const all = { settings: settingsRows, ...columns };
@@ -29,7 +29,6 @@ describe('Requirements', () => {
                 areAllInOneDir: false,
                 checkHtml: true,
                 checkCss: true,
-                checkJavaScript: false,
             });
             expect(warnings).to.deep.equal([]);
         });
@@ -37,8 +36,8 @@ describe('Requirements', () => {
         it('uses defaults and warns when settings values are missing', () => {
             const { settings, warnings } = parseRequirements('settings\n/subs', 'lab.csv');
             expect(settings).to.include({ macSubmissionsPath: '/subs', numberOfParts: 1, areAllInOneDir: true,
-                checkHtml: false, checkCss: false, checkJavaScript: false });
-            expect(warnings).to.deep.equal(['Warning: lab.csv has 1 of the 8 expected values in its settings column. Defaults will be used for the missing ones.']);
+                checkHtml: false, checkCss: false });
+            expect(warnings).to.deep.equal(['Warning: lab.csv has 1 of the 7 expected values in its settings column. Defaults will be used for the missing ones.']);
         });
 
         it('reads the moreRequirements column by position into named fields', () => {
@@ -154,9 +153,9 @@ describe('Requirements', () => {
                 ]);
             });
 
-            it('does not warn about note columns, description columns, blank headers or the JavaScript columns', () => {
-                const text = 'line,settings,settingsDescription,moreReqsDescription,Description,Notes,,unitTests,filesToTest\n' +
-                    settingsRows.map((value, i) => `${i},${value},,,,,,,`).join('\n');
+            it('does not warn about note columns, description columns, or blank headers', () => {
+                const text = 'line,settings,settingsDescription,moreReqsDescription,Description,Notes,\n' +
+                    settingsRows.map((value, i) => `${i},${value},,,,,`).join('\n');
                 expect(parseRequirements(text).warnings).to.deep.equal([]);
             });
         });

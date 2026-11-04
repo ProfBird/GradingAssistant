@@ -1,6 +1,6 @@
 # GradingAssistant
 
-Node.js (ES modules, `.mjs`) tools that help grade student web-development labs. `TestAnyLab.mjs` checks each student's unzipped submission against a requirements `.csv` file and writes a `<studentDir>_report.txt` into each student's folder. It checks HTML and CSS now. JavaScript checking with Mocha is in progress. The user is an instructor (CIS 195 Web Authoring at Lane CC) and works solo, directly on `main`.
+Node.js (ES modules, `.mjs`) tools that help grade student web-development labs. `TestAnyLab.mjs` checks each student's unzipped submission against a requirements `.csv` file and writes a `<studentDir>_report.txt` into each student's folder. It checks HTML and CSS now. JavaScript checking was dropped and is not planned. The user is an instructor (CIS 195 Web Authoring at Lane CC) and works solo, directly on `main`.
 
 ## Commands
 
@@ -20,14 +20,14 @@ npm run docs                               # JSDoc into docs/
 | File | Role |
 |---|---|
 | `TestAnyLab.mjs` | Main program. `main()` runs only when the file is started with node (tests import it). `parseArguments()`, `loadSettings()` (reads the requirements file and makes the checkers) and `getSubmissionsPath()` are exported. Loops over student folders. Writes reports. |
-| `Requirements.mjs` | **The only reader of the requirements csv** (except the deprecated `JsChecker`). `parseRequirements()` / `readRequirementsFile()` return named fields (`settings`, `moreRequirements`, `requiredElements1` as `{selector, minimum}`, `htmlRegExps` as `{pattern, description}`, ...) plus `warnings` (unknown columns, too few settings, non-numeric counts, unknown validator). `makeRequirements()` builds requirements for tests. |
+| `Requirements.mjs` | **The only reader of the requirements csv**. `parseRequirements()` / `readRequirementsFile()` return named fields (`settings`, `moreRequirements`, `requiredElements1` as `{selector, minimum}`, `htmlRegExps` as `{pattern, description}`, ...) plus `warnings` (unknown columns, too few settings, non-numeric counts, unknown validator). `makeRequirements()` builds requirements for tests. |
 | `SubmissionFolders.mjs` | Finds the folder that holds a submission (skips wrapper folders and junk) and splits it into parts. |
 | `SubmissionChecker.mjs` | `checkSubmission(labDir, part, requirements)` returns the report text. `runChecks()` reads each HTML/CSS file once (contents, JSDOM, parsed CSS), passes it to every check, and returns structured results (`{files, sections}`); `formatReport()` is the only place report text is laid out. |
 | `HtmlAndCssChecks.mjs` | The checks. Each `make...Check()` returns `{name, checkFile(file), summarize()}` with its own state; results are `{check, passed, message}` (`passed` is `null` for information like validator output). |
 | `CssParser.mjs` | The only CSS reader. `parseStylesheet()` (external files, `<style>`) and `parseInlineStyle()` return `{rules, declarations}` tagged with their source. `findRequiredSelectors()` and `findRequiredProperties()` hold the matching rules. |
 | `HtmlAndCssChecker.mjs` | Holds the parsed requirements for the HTML/CSS checks. `validateCSS` is here. |
 | `HtmlValidators.mjs` | Pluggable HTML validators: `html-validate` (default), `w3c`, `vnu`. |
-| `JsChecker.mjs`, `Checker.mjs` | JS checker (runs Mocha tests on student JS) and the base class. In progress. |
+| `Checker.mjs` | The base class of the checkers. |
 | `UnzipFiles.mjs` | Unzips LMS bulk downloads. Canvas (top-level files named `name_[LATE_]userid_submissionid_file`, see `parseCanvasFileName()`): `organizeCanvasDownload()` moves them into `name/` (`name_LATE`, `name_userid` for duplicate names). Moodle (a folder per student, `..._assignsubmission_file_`): `renameMoodleFolders()` strips digits, spaces and underscores, and merges into an existing folder on a rerun. Students' own archives (`isStudentArchive()`: `.zip`, `.7z`, `.rar`) are unzipped in their folders and deleted if that worked. `unzip()` runs `7z` on Windows, `unzip` for `.zip` and `tar` for `.7z`/`.rar` elsewhere (macOS `tar` is bsdtar, which reads them; GNU tar on Linux does not, so the archive is reported and kept), with `execFileSync` and an argument list, never a shell string, because file names come from students. `makeWritable()` adds owner write permission to everything it unzips (some zips store read-only folders, which blocked unzipping and saving reports). The main program runs only when started with node, so tests can import it. |
 | `Menu.mjs` | `npm start`. Arrow-key menu (`@inquirer/prompts`, `inquirer-file-selector`) that builds and runs the TestAnyLab/UnzipFiles command lines as child processes. Recent choices (requirements files, download folders, and submissions folders chosen to override the requirements file) are in `.gradingassistant.json` (gitignored); `loadConfig()` falls back to defaults for a missing or bad file. If a program gets a new option, add a prompt for it here. |
 
@@ -35,7 +35,7 @@ npm run docs                               # JSDoc into docs/
 
 Each `.csv` row is one line, and each column holds a list of values. Empty cells are ignored.
 
-- `settings` column, **by position**: 0 Mac submissions path, 1 Windows path, 2 number of parts, 3 lab name, 4 all parts in one folder?, 5 check HTML, 6 check CSS, 7 check JS. Missing values get defaults (`loadSettings`), and a file with fewer than 8 values prints a warning.
+- `settings` column, **by position**: 0 Mac submissions path, 1 Windows path, 2 number of parts, 3 lab name, 4 all parts in one folder?, 5 check HTML, 6 check CSS. Missing values get defaults (`loadSettings`), and a file with fewer than 7 values (an extra 8th value in older files is ignored) prints a warning.
 - `moreRequirements` column, **by position**: 0 special file name (e.g. `index`), 1 number of HTML files, 2 number of CSS files, 3 validate HTML (`false`, `true`, or `html-validate`/`w3c`/`vnu`), 4 validate CSS, 5 minimum number of CSS rules, 6 minimum number of distinct CSS properties (5 and 6 count external and embedded CSS, not inline styles; both optional; to set only 6, put 0 in 5 because empty cells are skipped).
 - `number1` / `number2` columns: minimum number of each `requiredElements1` / `requiredElements2` element, summed across all of a student's files. Each number is read from the same row as its element; blank means 1.
 - Regex checks use the `regExpForHTML1`, `regExpForHTML1Description`, `regExpForCSS1` and `regExpForCSS1Description` columns. Each description is read from the same row as its pattern. A pattern that isn't a valid regular expression gets a warning in `parseRequirements` and is left out; `makeRegExpCheck` compiles each pattern once and reports an invalid one as failed (only possible for requirements not made by the loader).
@@ -51,7 +51,7 @@ Each `.csv` row is one line, and each column holds a list of values. Empty cells
 
 ## Gotchas
 
-- **`csv-parser` modifies the buffer you give it** (when it un-escapes `""`), and it keeps a leading byte order mark in the first column name. `parseCsv()` in `Requirements.mjs` handles both; only it and the deprecated `JsChecker` use `csv-parser`.
+- **`csv-parser` modifies the buffer you give it** (when it un-escapes `""`), and it keeps a leading byte order mark in the first column name. `parseCsv()` in `Requirements.mjs` handles both; only it uses `csv-parser`.
 - A student folder can be read-only (from the zip, or copied from Drive). TestAnyLab prints that student's report, keeps going, and lists the folders it couldn't save at the end with exit code 1.
 - The special file name check is strict on purpose. `index` accepts only `index.html` or `index.htm`; a name with an extension (`styles.css`) must match exactly. Names that merely contain it (`reindex.html`, `index.html.html`) fail. The case must match (`Index.html` fails), and a wrong-case name is reported separately from a missing file.
 - The W3C validator service rejects bulk requests (HTTP errors with an HTML body). That is why `html-validate` is the default. `vnu-jar` 26.x needs Java 17 or newer, and the user's machine has Java 11. `vnu-jar@23.4.11` works on Java 11.

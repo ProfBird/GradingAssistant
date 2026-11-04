@@ -6,7 +6,7 @@
 
 Software that automates some of the more tedious aspects of grading web-development homework. It checks each student's submission against a requirements file and writes a text report into the student's folder. It does not assign grades; it handles the repetitive checks so the instructor can concentrate on the parts that need judgement.
 
-It currently checks **HTML and CSS**. A **JavaScript** checker, which runs Mocha unit tests against a student's `.js` file, is still in the code but is deprecated and will be removed. The checks include:
+It currently checks **HTML and CSS**. The checks include:
 
 - Syntax
 - Presence of required features, and how many of them there are
@@ -16,7 +16,7 @@ It currently checks **HTML and CSS**. A **JavaScript** checker, which runs Mocha
 
 I initially wrote this software to check web pages containing HTML and CSS for my [CIS 195 Web Authoring](https://github.com/LCC-CIT/CIS195-CourseMaterials) course at Lane Community College (LCC). This is my first Node.js project and I'm still learning.
 
-I started expanding the software to check JavaScript code for my [CS 133JS Beginning JavaScript Programming](https://github.com/LCC-CIT/CS133JS-CourseMaterials) course, and refactored it to be more modular with ES6 classes. That work has been merged into `main`; the older `HtmlCssAndJsCheckers` branch is no longer where development happens. The JavaScript checker is now deprecated and will be removed.
+I started expanding the software to check JavaScript code for my [CS 133JS Beginning JavaScript Programming](https://github.com/LCC-CIT/CS133JS-CourseMaterials) course, and refactored it to be more modular with ES6 classes. That work has been merged into `main`; the older `HtmlCssAndJsCheckers` branch is no longer where development happens. I have dropped the JavaScript checker, and the program checks only HTML and CSS.
 
 There are two programs in this repository:
 
@@ -148,7 +148,7 @@ Elements, regular expression and selector results are combined across all of a s
 
 ##### Requirements file
 
-A requirements file configures the program for a particular lab assignment. It can be written in a spreadsheet and then saved in .csv format. In the file, each row is one line and each column holds a list of values. Empty cells are ignored. When the program loads the file it prints a warning for anything it can't use, such as a column name it doesn't know (often from an older layout), fewer than 8 settings values, or a count that isn't a number. Columns named `line`, `Notes`, or ending in `Description` are notes for the reader and are not warned about.
+A requirements file configures the program for a particular lab assignment. It can be written in a spreadsheet and then saved in .csv format. In the file, each row is one line and each column holds a list of values. Empty cells are ignored. When the program loads the file it prints a warning for anything it can't use, such as a column name it doesn't know (often from an older layout), fewer than 7 settings values, or a count that isn't a number. Columns named `line`, `Notes`, or ending in `Description` are notes for the reader and are not warned about.
 
 Some of the columns are read **by position**:
 
@@ -163,9 +163,8 @@ Some of the columns are read **by position**:
 | 4 | Are all parts in one folder? |
 | 5 | Check HTML |
 | 6 | Check CSS |
-| 7 | Check JavaScript |
 
-Missing values get defaults, and a file with fewer than 8 settings values prints a warning. Values are not case sensitive, so `TRUE` and `true` are the same.
+Missing values get defaults, and a file with fewer than 7 settings values prints a warning. Values are not case sensitive, so `TRUE` and `true` are the same.
 
 `moreRequirements` column:
 
@@ -188,15 +187,13 @@ Other columns used for HTML and CSS checks are:
   - A required property name on its own, like `border`, is found when that property or a longer property starting with it (`border-top`, `border-collapse`) is declared. So `text` is found by `text-align`, but `color` is not found by `background-color`.
 - `regExpForHTML1` / `regExpForHTML1Description` and `regExpForCSS1` / `regExpForCSS1Description`. Each description goes on the same row as its regular expression; a regular expression with no description is shown as the pattern itself. The CSS expressions are matched against the CSS exactly as the student wrote it, including white space.
 
-The deprecated JavaScript checker uses the `unitTests` and `filesToTest` columns.
-
 Older requirements files use earlier layouts and are not compatible. The files in the `docs` folder use the layout described above and are kept up to date by a unit test, so you can copy one and edit it:
 
 - [ExampleLab1Requirements.csv](docs/ExampleLab1Requirements.csv): an HTML-only lab with minimum element counts, regular expression searches and HTML validation.
 - [CIS195Lab06GradeAssist.csv](docs/CIS195Lab06GradeAssist.csv): an HTML and CSS lab with required CSS selectors and properties, CSS validation, and minimum numbers of CSS rules and properties.
 - [CIS195TermProjectGradeAssist.csv](docs/CIS195TermProjectGradeAssist.csv): a larger HTML and CSS example.
 
-In these examples the `...Description` columns are just notes for the reader; the program ignores them. [ExampleJsRequirementsTable.md](docs/ExampleJsRequirementsTable.md) describes an older layout for the deprecated JavaScript checker.
+In these examples the `...Description` columns are just notes for the reader; the program ignores them.
 
 ### HTML validators
 
@@ -267,7 +264,7 @@ Missing Comment in head in files
 | `Requirements.mjs` | Reads the requirements csv file into named fields, and warns about problems such as column names the program doesn't use. All other code uses these fields instead of reading the csv. |
 | `HtmlAndCssChecker.mjs` | Holds the requirements for the HTML and CSS checks. CSS validation (`validateCSS`) is here. |
 | `HtmlValidators.mjs` | Pluggable HTML validators: `html-validate`, `w3c`, `vnu`. |
-| `JsChecker.mjs`, `Checker.mjs` | The deprecated JavaScript checker (runs Mocha tests on student JS), which will be removed, and the base class. |
+| `Checker.mjs` | The base class of the checkers. |
 | `UnzipFiles.mjs` | Unzips Canvas and Moodle bulk downloads into a folder for each student. |
 | `Menu.mjs` | The arrow-key menu (`npm start`) that runs TestAnyLab and UnzipFiles and remembers recent choices. |
 
@@ -295,7 +292,6 @@ Since 1/5/2024 I have used [JSDoc](https://jsdoc.app) mainly to keep track of ty
 
 ### ES6 classes
 
-Since 1/5/2024 I have been refactoring the code to use ES6 classes, to make it more modular. The goal is a separate class for each type of testing: HTML+CSS, JavaScript, C#, etc. There are currently these classes, both extending `Checker`:
+Since 1/5/2024 I have been refactoring the code to use ES6 classes, to make it more modular. The goal is a separate class for each type of testing: HTML+CSS, C#, etc. There is currently this class, extending `Checker`:
 
 - `HtmlAndCssChecker`: I'm in the process of moving the code specific to checking HTML and CSS out of `SubmissionChecker` into this class.
-- `JsChecker`: checks JavaScript in `.js` files by running Mocha unit tests. It is deprecated and will be removed.

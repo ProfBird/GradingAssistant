@@ -27,10 +27,10 @@ describe('Example requirements files in docs', () => {
                 }
             });
 
-            it('has no warnings, all 8 settings values, and a submissions path relative to the file', () => {
+            it('has no warnings, all the settings values, and a submissions path relative to the file', () => {
                 expect(warnings).to.deep.equal([]);
                 expect(loaded.labSettings.submissionsPath.startsWith(docsDir + path.sep)).to.equal(true);
-                expect(loaded.labSettings).to.include({ numberOfParts: 1, isHTML: true, isJavaScript: false });
+                expect(loaded.labSettings).to.include({ numberOfParts: 1, isHTML: true });
             });
 
             it('has the moreRequirements values in the current positions', () => {

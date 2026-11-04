@@ -4,8 +4,7 @@ import { resolveHtmlValidatorSetting, htmlValidatorNames } from "./HtmlValidator
 
 /* Reads a requirements .csv file into one object with named fields.
    This is the only place that knows the names of the csv columns and the positions
-   of the values in the settings and moreRequirements columns.
-   (The deprecated JsChecker still reads its own two columns.) */
+   of the values in the settings and moreRequirements columns. */
 
 /** @typedef {{selector: string, minimum: number}} RequiredElement
  * A required element (a CSS selector, like "a[href]") and the minimum number of matches
@@ -22,7 +21,6 @@ import { resolveHtmlValidatorSetting, htmlValidatorNames } from "./HtmlValidator
  * @property {boolean} areAllInOneDir - 4: Are all lab parts in one folder? (default true)
  * @property {boolean} checkHtml - 5: Check the HTML and CSS files (default false)
  * @property {boolean} checkCss - 6: Check CSS files (default false, not used yet)
- * @property {boolean} checkJavaScript - 7: Check JavaScript files (default false)
  */
 
 /** @typedef {Object} MoreRequirements - From the moreRequirements column, by position
@@ -56,7 +54,6 @@ const knownColumns = [
     "requiredElements1", "number1", "requiredElements2", "number2",
     "requiredCssSelectors", "requiredCssProperties",
     "regExpForHTML1", "regExpForHTML1Description", "regExpForCSS1", "regExpForCSS1Description",
-    "unitTests", "filesToTest",  // read by the deprecated JsChecker
 ];
 
 /** Notes for the person reading the file. Columns ending in Description are notes too. */
@@ -130,8 +127,8 @@ export function parseRequirements(contents, fileName = "the requirements file") 
         }
     }
 
-    if (settingValues.length < 8) {
-        warnings.push(`Warning: ${fileName} has ${settingValues.length} of the 8 expected values in its settings column. Defaults will be used for the missing ones.`);
+    if (settingValues.length < 7) {
+        warnings.push(`Warning: ${fileName} has ${settingValues.length} of the 7 expected values in its settings column. Defaults will be used for the missing ones.`);
     }
     const parts = parseInt(settingValues[2], 10);
     requirements.settings = {
@@ -142,7 +139,6 @@ export function parseRequirements(contents, fileName = "the requirements file") 
         areAllInOneDir: parseBoolean(settingValues[4], true),
         checkHtml: parseBoolean(settingValues[5], false),
         checkCss: parseBoolean(settingValues[6], false),
-        checkJavaScript: parseBoolean(settingValues[7], false),
     };
 
     // "" in the first position is a placeholder for no special file name
@@ -197,7 +193,6 @@ export function makeRequirements(changes = {}) {
             areAllInOneDir: true,
             checkHtml: false,
             checkCss: false,
-            checkJavaScript: false,
             ...settings,
         },
         moreRequirements: {
