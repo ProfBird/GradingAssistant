@@ -104,6 +104,18 @@ describe('Requirements', () => {
             expect(requirements.cssRegExps).to.deep.equal([{ pattern: 'margin', description: 'a margin' }]);
         });
 
+        it('warns about an invalid regular expression once and leaves it out', () => {
+            const requirements = parseRequirements(csvWith({
+                regExpForHTML1: ['(unclosed', '<b>'],
+                regExpForCSS1: ['[a-'],
+            }), 'lab.csv');
+            expect(requirements.htmlRegExps.map((search) => search.pattern)).to.deep.equal(['<b>']);
+            expect(requirements.cssRegExps).to.deep.equal([]);
+            const invalid = requirements.warnings.filter((warning) => warning.includes('invalid regular expression'));
+            expect(invalid).to.have.length(2);
+            expect(invalid[0]).to.include('lab.csv').and.to.include('(unclosed');
+        });
+
         it('reads the css selectors, and the css properties with the whitespace removed', () => {
             const requirements = parseRequirements(csvWith({
                 requiredCssSelectors: ['.nav', '', '#main'],

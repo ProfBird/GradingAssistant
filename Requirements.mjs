@@ -115,11 +115,18 @@ export function parseRequirements(contents, fileName = "the requirements file") 
         if (row.requiredCssProperties) {
             requirements.requiredCssProperties.push(row.requiredCssProperties.replace(/\s/g, ""));
         }
-        if (row.regExpForHTML1) {
-            requirements.htmlRegExps.push(makeRegExpSearch(row.regExpForHTML1, row.regExpForHTML1Description));
-        }
-        if (row.regExpForCSS1) {
-            requirements.cssRegExps.push(makeRegExpSearch(row.regExpForCSS1, row.regExpForCSS1Description));
+        // A pattern that isn't a valid regular expression is reported once here and left out,
+        // instead of failing for every file of every student
+        for (const [column, searches] of [["regExpForHTML1", requirements.htmlRegExps], ["regExpForCSS1", requirements.cssRegExps]]) {
+            if (!row[column]) {
+                continue;
+            }
+            try {
+                new RegExp(row[column], regExpFlags);
+                searches.push(makeRegExpSearch(row[column], row[`${column}Description`]));
+            } catch (error) {
+                warnings.push(`Warning: ${fileName} has an invalid regular expression in "${column}": ${row[column]} (${error.message}). It is ignored.`);
+            }
         }
     }
 
@@ -229,6 +236,9 @@ export function parseMinimum(value) {
     const minimum = parseInt(value, 10);
     return Number.isNaN(minimum) ? 1 : minimum;
 }
+
+/** The flags used for every regular expression search: global, ignore case, multiline */
+export const regExpFlags = "gim";
 
 /** makeRegExpSearch function
  * @param {string} pattern

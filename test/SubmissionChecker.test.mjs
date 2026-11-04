@@ -400,6 +400,22 @@ describe('SubmissionChecker', () => {
 
                 expect(report).to.include('All regular expression searches passed');
             });
+
+            it('reports an invalid pattern as a failed search instead of throwing', async () => {
+                const student = makeStudentDir('m', []);
+                fs.writeFileSync(path.join(student, 'index.html'), page('<h1>Welcome</h1>'));
+                const requirements = makeRequirements({
+                    moreRequirements: { htmlFileCount: 0, cssFileCount: 0, valueCount: 5 },
+                    htmlRegExps: [{ pattern: "(unclosed", description: "a broken pattern" },
+                        { pattern: "<h1>", description: "an h1" }],
+                });
+
+                const report = await checkSubmission(student, 1, requirements);
+
+                expect(report).to.include('Could not search for a broken pattern: it is not a valid regular expression');
+                expect(report).to.not.include('Missing an h1');
+                expect(report).to.not.include('Error checking');
+            });
         });
 
         describe('counting css rules and properties', () => {

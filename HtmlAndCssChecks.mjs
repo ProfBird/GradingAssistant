@@ -2,6 +2,7 @@ import path from "path";
 import { HtmlAndCssChecker } from "./HtmlAndCssChecker.mjs";
 import { validateHtml } from "./HtmlValidators.mjs";
 import { findRequiredSelectors, findRequiredProperties } from "./CssParser.mjs";
+import { regExpFlags } from "./Requirements.mjs";
 
 /* The checks done on the HTML and CSS files of one part of a student's lab.
    Each check is an object made fresh for each part of each student (so nothing carries
@@ -303,12 +304,24 @@ export function summarizeAdditionalRequirements(
  */
 export function makeRegExpCheck(name, kind, searches, heading) {
     const matched = searches.map(() => false);
+    // Compile each pattern once. The csv loader already leaves out invalid patterns, but searches
+    // made some other way (tests) could have one, and it must not throw for every file.
+    const regExps = searches.map(({ pattern }) => {
+        try {
+            return new RegExp(pattern, regExpFlags);
+        } catch {
+            return null;
+        }
+    });
     return {
         name,
         checkFile(file) {
             if (file.kind === kind) {
-                searches.forEach(({ pattern }, i) => {
-                    matched[i] ||= new RegExp(pattern, "gim").test(file.contents);
+                regExps.forEach((regExp, i) => {
+                    if (regExp !== null) {
+                        regExp.lastIndex = 0;  // the g flag makes test() remember where it stopped
+                        matched[i] ||= regExp.test(file.contents);
+                    }
                 });
             }
             return [];
@@ -320,7 +333,9 @@ export function makeRegExpCheck(name, kind, searches, heading) {
             const results = searches.map(({ description }, i) => ({
                 check: name,
                 passed: matched[i],
-                message: `${matched[i] ? "Found" : "Missing"} ${description} in files`,
+                message: regExps[i] === null
+                    ? `Could not search for ${description}: it is not a valid regular expression`
+                    : `${matched[i] ? "Found" : "Missing"} ${description} in files`,
             }));
             return { check: name, heading, results, failureCountLabel: null,
                 allPassedMessage: "All regular expression searches passed" };
